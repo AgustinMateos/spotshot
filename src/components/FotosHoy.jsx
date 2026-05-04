@@ -1,0 +1,34 @@
+import React from 'react';
+
+const FotosHoy = () => {
+  return (
+    <div className="w-[90%]  mx-auto px-4  py-8">
+      <div className="relative rounded-3xl overflow-hidden h-[448px] shadow-2xl">
+        
+        <img
+          src="/fotosHoy/fotoola.png"
+          alt="Surfista en ola grande"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+
+        {/* Gradiente más suave */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+          <h2 className="text-white text-3xl   leading-tight max-w-2xl mb-8 drop-shadow-md">
+            ¿Todavía no tenés tus fotos de hoy?
+          </h2>
+
+          <button 
+            className="bg-[#C8A24D] hover:bg-[#c8a14dc8] active:scale-95 transition-all flex justify-center items-center 
+                       text-white font-medium px-12 h-[48px] w-[220px] py-4 rounded-2xl text-lg shadow-lg"
+          >
+            Buscar sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FotosHoy;
