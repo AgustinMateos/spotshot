@@ -5,10 +5,12 @@ import Marquesina from "@/components/Marquesina";
 import Encontrar from "@/components/Encontrar";
 import Fotografo from "@/components/Fotografo";
 import FotosHoy from "@/components/FotosHoy";
+import Navbar from "@/components/Navbar";
 export default function Home() {
   return (
     <>
       {/* Hero Section */}
+      <Navbar />
       <div className="relative w-full h-screen overflow-hidden">
        
 

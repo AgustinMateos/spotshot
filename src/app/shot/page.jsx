@@ -1,6 +1,21 @@
-import Link from 'next/link';
+'use client';   // ←←← ESTA LÍNEA ES OBLIGATORIA
+
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ShotPage() {
+  const { user, loading } = useAuth();
+
+  // Mientras carga el contexto
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Cargando...</p>
+      </div>
+    );
+  }
+
+  const alias = user?.alias || 'Fotógrafo';
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -10,7 +25,7 @@ export default function ShotPage() {
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-3xl font-semibold text-gray-900 mb-1">
-                Hola Nick! Comencemos
+                Hola {alias}! 👋
               </h2>
               <p className="text-[#71717A]">
                 Completa estos dos pasos para comenzar a vender tus fotos
@@ -34,7 +49,7 @@ export default function ShotPage() {
             {/* Paso 1 */}
             <div className="border border-gray-200 bg-white rounded-xl p-6">
               <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Paso 1</div>
-              <h3 className="text-xl  font-semibold mb-2">Conecta tu cuenta de cobro</h3>
+              <h3 className="text-xl font-semibold mb-2">Conecta tu cuenta de cobro</h3>
               <p className="text-gray-600 mb-6">
                 Vinculá Stripe para poder publicar tus sesiones y recibir pagos automáticamente.
               </p>
@@ -64,7 +79,7 @@ export default function ShotPage() {
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
             <div className="mb-6">
               <img 
-                src="/images/empty-state.svg" 
+                src="/crearPrimerAlbum.svg" 
                 alt="Sin sesiones" 
                 className="w-24 h-24 opacity-75"
               />

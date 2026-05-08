@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';   // ← Agregado
 
-export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register' | 'forgot'
+export default function AuthForm({ mode = 'login' }) {
   const router = useRouter();
+  const { login } = useAuth();   // ← Para el login
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Estados
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [alias, setAlias] = useState('');
@@ -31,13 +33,14 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
       let body = {};
 
       if (isLogin) {
-        endpoint = '/auth/login';
+        endpoint = '/api/v1/photographers/auth/login';
         body = { email, password };
       } else if (isRegister) {
-        endpoint = '/auth/register';
+        endpoint = '/api/v1/photographers/auth/register';
         body = { alias, email, password };
       } else if (isForgot) {
-        endpoint = '/auth/forgot-password';
+        // ← NUEVO ENDPOINT
+        endpoint = '/api/v1/photographers/auth/forgot-password';
         body = { email };
       }
 
@@ -50,16 +53,30 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
       const data = await response.json();
 
       if (response.ok) {
-        if (isForgot) {
-          setSuccess('Te enviamos un enlace para restablecer tu contraseña');
-        } else {
-          if (data.token) localStorage.setItem('token', data.token);
-          router.push('/');
+        if (isRegister) {
+          setSuccess(data.message || 'Cuenta creada. Revisa tu email para activarla.');
+          setAlias(''); setEmail(''); setPassword('');
+        } 
+        else if (isLogin) {
+          if (data.access_token) {
+            login(data.access_token, data.photographer);
+          }
+          setSuccess(data.message || 'Inicio de sesión exitoso');
+          
+          setTimeout(() => {
+            router.push('/shot');
+          }, 1000);
+        } 
+        else if (isForgot) {
+          // Mensaje genérico (el backend siempre devuelve 200)
+          setSuccess(data.message || 'Si el email está registrado, te enviamos instrucciones para restablecer tu contraseña.');
+          setEmail(''); // Limpiar campo
         }
       } else {
         setError(data.message || 'Ocurrió un error');
       }
     } catch (err) {
+      console.error(err);
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
@@ -70,14 +87,14 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
     <>
       <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
         {isLogin && 'Inicia sesión en Spotshot'}
-        {isRegister && 'Crea una cuenta'}
+        {isRegister && 'Crea tu cuenta de fotógrafo'}
         {isForgot && '¿Olvidaste tu contraseña?'}
       </h2>
 
       <p className="text-gray-600 text-center mb-8">
         {isLogin && 'Bienvenido de nuevo'}
-        {isRegister && 'Ingresa tu correo electrónico a continuación para crear tu cuenta'}
-        {isForgot && 'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña'}
+        {isRegister && 'Ingresa tus datos para crear tu cuenta de fotógrafo'}
+        {isForgot && 'Ingresa tu correo electrónico y te enviaremos un enlace'}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -89,8 +106,10 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
               value={alias}
               onChange={(e) => setAlias(e.target.value)}
               className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
-              placeholder="Introduce un alias"
+              placeholder="Tu alias único"
               required
+              minLength={3}
+              maxLength={30}
             />
           </div>
         )}
@@ -107,7 +126,7 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
           />
         </div>
 
-               {(isLogin || isRegister) && (
+        {(isLogin || isRegister) && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
             <input
@@ -116,15 +135,12 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
               required
+              minLength={8}
             />
 
-            {/* ←←← LINK "Olvidaste tu contraseña?" ←←← */}
             {isLogin && (
               <p className="text-right mt-2">
-                <a 
-                  href="/forgot-password" 
-                  className="text-sm text-blue-600 hover:underline"
-                >
+                <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
                   ¿Olvidaste tu contraseña?
                 </a>
               </p>
@@ -140,9 +156,10 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
           disabled={loading}
           className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition disabled:opacity-70"
         >
-          {loading 
-            ? 'Procesando...' 
-            : isForgot ? 'Enviar enlace' : 'Continuar'}
+          {loading ? 'Procesando...' 
+            : isRegister ? 'Crear cuenta' 
+            : isForgot ? 'Enviar enlace' 
+            : 'Iniciar sesión'}
         </button>
       </form>
 
@@ -157,10 +174,6 @@ export default function AuthForm({ mode = 'login' }) {   // 'login' | 'register'
         {isForgot && (
           <>¿Recordaste tu contraseña? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>
         )}
-      </p>
-
-      <p className="text-center text-xs text-gray-500 mt-8">
-        Al continuar aceptas los Términos y Condiciones
       </p>
     </>
   );
