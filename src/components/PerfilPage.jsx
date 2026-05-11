@@ -207,9 +207,41 @@ export default function PerfilPage() {
     }
   };
 
-  // ====================== STRIPE ======================
-  const handleConnectStripe = async () => { /* tu función */ };
-  const handleRefreshOnboarding = async () => { /* tu función */ };
+  // Iniciar / Reanudar Onboarding de Stripe
+  const handleConnectStripe = async () => {
+    setLoadingStripe(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/photographers/me/stripe/onboarding`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      setError('Error al conectar con Stripe');
+    } finally {
+      setLoadingStripe(false);
+    }
+  };
+
+  // Reiniciar proceso (Refresh)
+  const handleRefreshOnboarding = async () => {
+    setLoadingStripe(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/photographers/me/stripe/onboarding/refresh`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      setError('Error al refrescar el proceso');
+    } finally {
+      setLoadingStripe(false);
+    }
+  };
 
   const initials = (alias || 'F')
     .trim()
