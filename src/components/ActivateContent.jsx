@@ -22,8 +22,9 @@ export default function ActivateContent() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+        // ✅ GET + token en query string
         const res = await fetch(`${API_URL}/api/v1/photographers/auth/activate?token=${token}`, {
-          method: 'POST',
+          method: 'GET',
         });
 
         const data = await res.json();
@@ -51,6 +52,7 @@ export default function ActivateContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-10 text-center">
+        
         {status === 'loading' && (
           <>
             <div className="animate-spin w-16 h-16 border-4 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-6"></div>
@@ -62,7 +64,7 @@ export default function ActivateContent() {
           <>
             <div className="text-6xl mb-6">🎉</div>
             <h2 className="text-3xl font-bold text-green-600 mb-4">{message}</h2>
-            <p className="text-gray-600 mb-8">Serás redirigido al login en unos segundos...</p>
+            <p className="text-gray-600">Serás redirigido al login en unos segundos...</p>
           </>
         )}
 
