@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
+import Image from 'next/image';
 export default function ShotPage() {
   const { user, token, loading: authLoading } = useAuth();
   
@@ -48,28 +48,25 @@ export default function ShotPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-full mx-auto px-6 py-8">
 
         {/* Header de bienvenida */}
         <div className="bg-[#F1F7FE] rounded-2xl shadow-sm p-8 mb-10">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-3xl font-semibold text-gray-900 mb-1">
-                Hola {alias}! 👋
+                Hola {alias}!  Empecemos
               </h2>
               <p className="text-[#71717A]">
                 Completa estos dos pasos para comenzar a vender tus fotos
               </p>
             </div>
 
-            <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">📸</div>
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">📊</div>
-            </div>
+            
           </div>
 
           {/* Dos pasos */}
-          <div className="grid md:grid-cols-2 gap-8 mt-10">
+          <div className="grid md:grid-cols-3 gap-8 mt-10">
 
             {/* Paso 1 - Stripe */}
             <div className="border border-gray-200 bg-white rounded-xl p-6">
@@ -89,6 +86,7 @@ export default function ShotPage() {
               >
                 {isStripeReady ? ' Stripe Conectado' : 'Conectar Stripe'}
               </Link>
+              
             </div>
 
             {/* Paso 2 - Crear Sesión */}
@@ -117,6 +115,7 @@ export default function ShotPage() {
                 </p>
               )}
             </div>
+            <div><Image height={183} width={280} alt='img' src={'/icons/stripeSteps.svg'}/></div>
           </div>
         </div>
 

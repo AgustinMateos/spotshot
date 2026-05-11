@@ -47,7 +47,7 @@ export default function NavbarFotografo() {
 
   return (
     <nav className="bg-[#103457] shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+      <div className="max-w-full mx-auto px-6 py-5 flex justify-between items-center">
         
         {/* Logo */}
         <div className="flex items-center">

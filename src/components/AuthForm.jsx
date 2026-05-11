@@ -106,7 +106,7 @@ export default function AuthForm({ mode = 'login' }) {
               type="text"
               value={alias}
               onChange={(e) => setAlias(e.target.value)}
-              className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
+              className="w-full px-5 py-4 border text-[#71717A] border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
               placeholder="Tu alias único"
               required
               minLength={3}
@@ -121,8 +121,8 @@ export default function AuthForm({ mode = 'login' }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
-            placeholder="m@ejemplo.com"
+            className="w-full px-5 py-4 border text-[#71717A] border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
+            placeholder="spotshot@ejemplo.com"
             required
           />
         </div>
@@ -134,7 +134,7 @@ export default function AuthForm({ mode = 'login' }) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
+              className="w-full px-5 py-4 border border-gray-300 text-[#71717A] rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
               required
               minLength={8}
             />
