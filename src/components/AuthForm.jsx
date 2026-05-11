@@ -15,7 +15,7 @@ export default function AuthForm({ mode = 'login' }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [alias, setAlias] = useState('');
-  const [showPassword, setShowPassword] = useState(false);   // ← Nuevo estado
+  const [showPassword, setShowPassword] = useState(false);
 
   const isLogin = mode === 'login';
   const isRegister = mode === 'register';
@@ -99,34 +99,21 @@ export default function AuthForm({ mode = 'login' }) {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Alias */}
         {isRegister && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Alias</label>
-            <input
-              type="text"
-              value={alias}
-              onChange={(e) => setAlias(e.target.value)}
-              className="w-full px-5 py-4 border text-[#71717A] border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
-              placeholder="Tu alias único"
-              required
-              minLength={3}
-              maxLength={30}
-            />
+            <input type="text" value={alias} onChange={(e) => setAlias(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" placeholder="Tu alias único" required />
           </div>
         )}
 
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-5 py-4 border text-[#71717A] border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
-            placeholder="spotshot@ejemplo.com"
-            required
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" placeholder="m@ejemplo.com" required />
         </div>
 
+        {/* Contraseña */}
         {(isLogin || isRegister) && (
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
@@ -134,57 +121,38 @@ export default function AuthForm({ mode = 'login' }) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 border border-gray-300 text-[#71717A] rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
+              className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
               required
               minLength={8}
             />
-            
-            {/* Ojo Profesional */}
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-5 top-11 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5 16.477 5 20.268 7.943 21.542 12 20.268 16.057 16.477 19 12 19 7.523 19 3.732 16.057 2.458 12z" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908l3.42 3.42M3 3l18 18" />
-                </svg>
-              )}
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-11 text-gray-400 hover:text-gray-600">
+              {showPassword ? '🙈' : '👁️'}
             </button>
+          </div>
+        )}
+
+        {/* Link "¿Olvidaste tu contraseña?" - Mejorado */}
+        {isLogin && (
+          <div className="text-right">
+            <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium">
+              ¿Olvidaste tu contraseña?
+            </a>
           </div>
         )}
 
         {error && <p className="text-red-600 text-center bg-red-50 py-3 rounded-xl">{error}</p>}
         {success && <p className="text-green-600 text-center bg-green-50 py-3 rounded-xl">{success}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition disabled:opacity-70"
-        >
-          {loading ? 'Procesando...' 
-            : isRegister ? 'Crear cuenta' 
-            : isForgot ? 'Enviar enlace' 
-            : 'Iniciar sesión'}
+        <button type="submit" disabled={loading} className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition disabled:opacity-70">
+          {loading ? 'Procesando...' : isRegister ? 'Crear cuenta' : isForgot ? 'Enviar enlace' : 'Iniciar sesión'}
         </button>
       </form>
 
       {/* Links inferiores */}
       <p className="text-center mt-8 text-gray-600">
-        {isLogin && (
-          <>¿No tienes cuenta? <a href="/register" className="text-blue-600 font-medium hover:underline">Creá una cuenta</a></>
-        )}
-        {isRegister && (
-          <>¿Ya tienes una cuenta? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>
-        )}
-        {isForgot && (
-          <>¿Recordaste tu contraseña? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>
-        )}
+        {isLogin && <>¿No tienes cuenta? <a href="/register" className="text-blue-600 font-medium hover:underline">Creá una cuenta</a></>}
+        {isRegister && <>¿Ya tienes una cuenta? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
+        {isForgot && <>¿Recordaste tu contraseña? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
       </p>
     </>
   );
