@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-
+import Link from 'next/link';
+import Image from 'next/image';
 export default function NavbarFotografo() {
   const { user, token, logout } = useAuth();   // ← agregamos 'token'
   const router = useRouter();
@@ -50,16 +51,28 @@ export default function NavbarFotografo() {
         
         {/* Logo */}
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+           <a href="/shot"  className="flex items-center gap-2">
+          <div className="w-7 h-7  flex items-center justify-center">
+            <Image 
+             src={'/icons/logo.svg'}
+                    alt="Surf"
+                    width={400}
+                    height={220}
+                    className="w-full h-full object-cover"
+                  />
+          </div>
+          <span className="text-white text-2xl font-semibold tracking-tighter">
             SpotShot
-          </h1>
+          </span>
+        </a>
         </div>
 
-        {/* Menú de navegación */}
+      <div className='flex'>
+          {/* Menú de navegación */}
         <div className="flex items-center gap-10 text-sm font-medium text-gray-300">
           <a href="/shot" className="hover:text-white transition-colors">Explorar sesiones</a>
           <a href="/shot/mis-sesiones" className="hover:text-white transition-colors">Mis sesiones</a>
-          <a href="/shot/mis-ventas" className="hover:text-white transition-colors">Mis ventas</a>
+          <a href="/shot/mis-ventas" className="hover:text-white transition-colors pr-[50px]">Mis ventas</a>
         </div>
 
         {/* Perfil con Dropdown */}
@@ -106,6 +119,7 @@ export default function NavbarFotografo() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </nav>
   );

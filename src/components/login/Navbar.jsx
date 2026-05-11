@@ -1,19 +1,27 @@
 import React from 'react';
-
+import Image from 'next/image';
 const Navbar = () => {
   return (
     <div className="absolute top-0 left-0 right-0 z-30 bg-[#103457]  ">
       <div className="max-w-full  px-6 py-5 flex items-center justify-between">
         
         {/* Logo SpotShot */}
-        <a href="/"  className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center">
-            <span className="text-black font-bold text-lg">S</span>
-          </div>
-          <span className="text-white text-2xl font-semibold tracking-tighter">
-            SpotShot
-          </span>
-        </a>
+        <div className="flex items-center">
+                   <a href="/"  className="flex items-center gap-2">
+                  <div className="w-7 h-7  flex items-center justify-center">
+                    <Image 
+                     src={'/icons/logo.svg'}
+                            alt="Surf"
+                            width={400}
+                            height={220}
+                            className="w-full h-full object-cover"
+                          />
+                  </div>
+                  <span className="text-white text-2xl font-semibold tracking-tighter">
+                    SpotShot
+                  </span>
+                </a>
+                </div>
 
         {/* Links + Botón Sign in - Todo junto a la derecha */}
         <div className="flex items-center gap-8 text-[#FFFFFF]">

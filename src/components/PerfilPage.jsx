@@ -16,6 +16,10 @@ export default function PerfilPage() {
   const [lastName, setLastName] = useState('');
   const [alias, setAlias] = useState('');
 
+  // Avatar
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
+
   // Estados del modal de contraseña
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -30,18 +34,40 @@ export default function PerfilPage() {
   const [passwordError, setPasswordError] = useState('');
 
   // Stripe
+  const [stripeConnect, setStripeConnect] = useState(null);
   const [loadingStripe, setLoadingStripe] = useState(false);
 
-  // Cargar datos iniciales
+  // Cargar datos básicos
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || '');
       setLastName(user.lastName || '');
       setAlias(user.alias || '');
+      setAvatarPreview(user.avatarUrl);
     }
   }, [user]);
 
-  // Guardar cambios del perfil
+  // Cargar Stripe
+  useEffect(() => {
+    const loadFullProfile = async () => {
+      if (!token) return;
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${API_URL}/api/v1/photographers/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setStripeConnect(data.stripeConnect);
+      } catch (err) {
+        console.error('Error cargando perfil completo:', err);
+      }
+    };
+    loadFullProfile();
+  }, [token]);
+
+  const avatarUrl = avatarPreview || user?.avatarUrl;
+
+  // ====================== GUARDAR PERFIL ======================
   const handleSaveProfile = async () => {
     setLoadingSave(true);
     setError('');
@@ -78,7 +104,64 @@ export default function PerfilPage() {
     }
   };
 
-  // Cambiar contraseña
+  // ====================== SUBIR AVATAR ======================
+  const handleUploadAvatar = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoadingAvatar(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/photographers/me/avatar`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage('✅ Avatar actualizado correctamente');
+        setAvatarPreview(data.photographer.avatarUrl);
+      } else {
+        setError(data.message || 'Error al subir el avatar');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    } finally {
+      setLoadingAvatar(false);
+    }
+  };
+
+  // ====================== ELIMINAR AVATAR ======================
+  const handleDeleteAvatar = async () => {
+    if (!confirm('¿Estás seguro de eliminar tu foto de perfil?')) return;
+
+    setLoadingAvatar(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/photographers/me/avatar`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        setMessage('✅ Avatar eliminado correctamente');
+        setAvatarPreview(null);
+      } else {
+        setError('Error al eliminar el avatar');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    } finally {
+      setLoadingAvatar(false);
+    }
+  };
+
+  // ====================== CAMBIAR CONTRASEÑA ======================
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordError('');
@@ -97,7 +180,6 @@ export default function PerfilPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
       const res = await fetch(`${API_URL}/api/v1/photographers/auth/change-password`, {
         method: 'POST',
         headers: {
@@ -125,35 +207,9 @@ export default function PerfilPage() {
     }
   };
 
-  // Conectar Stripe
-  const handleConnectStripe = async () => {
-    setLoadingStripe(true);
-    setError('');
-
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-      const res = await fetch(`${API_URL}/api/v1/photographers/me/stripe/onboarding`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.message || 'Error al conectar con Stripe');
-      }
-    } catch (err) {
-      setError('Error de conexión con el servidor');
-    } finally {
-      setLoadingStripe(false);
-    }
-  };
+  // ====================== STRIPE ======================
+  const handleConnectStripe = async () => { /* tu función */ };
+  const handleRefreshOnboarding = async () => { /* tu función */ };
 
   const initials = (alias || 'F')
     .trim()
@@ -172,10 +228,7 @@ export default function PerfilPage() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-semibold">Datos personales</h2>
           <button
-            onClick={() => {
-              if (isEditing) handleSaveProfile();
-              else setIsEditing(true);
-            }}
+            onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
             disabled={loadingSave}
             className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-2xl hover:bg-black transition disabled:opacity-70"
           >
@@ -183,60 +236,70 @@ export default function PerfilPage() {
           </button>
         </div>
 
-        <div className="flex items-center gap-6 mb-10">
-          <div className="w-24 h-24 bg-amber-400 rounded-2xl flex items-center justify-center text-4xl font-bold text-gray-800 border-4 border-white shadow">
-            {initials}
-          </div>
-          <div>
-            <p className="text-2xl font-semibold">{alias || 'Sin alias'}</p>
-            <p className="text-gray-500">{user?.email}</p>
-          </div>
-        </div>
+       {/* ====================== AVATAR ====================== */}
+<div className="flex items-center gap-6 mb-10">
+  <div className="relative group">
+    {avatarUrl ? (
+      <img
+        src={avatarUrl}
+        alt="Avatar"
+        className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md"
+      />
+    ) : (
+      <div className="w-24 h-24 bg-amber-400 rounded-2xl flex items-center justify-center text-4xl font-bold text-gray-800 border-4 border-white shadow-md">
+        {initials}
+      </div>
+    )}
+
+    {/* Botones flotantes */}
+    <div className="absolute -bottom-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+      {/* Subir nueva foto */}
+      <label className="cursor-pointer bg-white hover:bg-gray-100 rounded-full p-2 shadow-md transition">
+        <input 
+          type="file" 
+          accept="image/jpeg,image/png,image/webp" 
+          onChange={handleUploadAvatar} 
+          className="hidden" 
+        />
+        📷
+      </label>
+
+      {/* Eliminar foto */}
+      {avatarUrl && (
+        <button
+          onClick={handleDeleteAvatar}
+          disabled={loadingAvatar}
+          className="bg-white hover:bg-red-50 text-red-600 rounded-full p-2 shadow-md transition"
+        >
+          🗑️
+        </button>
+      )}
+    </div>
+  </div>
+
+  <div>
+    <p className="text-2xl font-semibold">{alias || 'Sin alias'}</p>
+    <p className="text-gray-500">{user?.email}</p>
+    <p className="text-xs text-gray-400 mt-1">Haz clic en el icono de la cámara para cambiar tu foto</p>
+  </div>
+</div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Apodo</label>
-            <input
-              type="text"
-              value={alias}
-              onChange={(e) => setAlias(e.target.value)}
-              disabled={!isEditing}
-              className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50"
-            />
+            <input type="text" value={alias} onChange={(e) => setAlias(e.target.value)} disabled={!isEditing} className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50" />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Correo electrónico</label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              disabled
-              className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50"
-            />
+            <input type="email" value={user?.email || ''} disabled className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Nombre</label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              disabled={!isEditing}
-              className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50"
-              placeholder="Ingresa tu nombre"
-            />
+            <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled={!isEditing} className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50" placeholder="Ingresa tu nombre" />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Apellido</label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              disabled={!isEditing}
-              className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50"
-              placeholder="Ingresa tu apellido"
-            />
+            <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} disabled={!isEditing} className="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-900 disabled:bg-gray-50" placeholder="Ingresa tu apellido" />
           </div>
         </div>
 
@@ -244,7 +307,7 @@ export default function PerfilPage() {
         {error && <p className="text-red-600 mt-6 text-center">{error}</p>}
       </div>
 
-      {/* Método de Cobro */}
+      {/* ====================== MÉTODO DE COBRO ====================== */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
         <h2 className="text-2xl font-semibold mb-6">Método de cobro</h2>
         <div className="flex items-center justify-between bg-gray-50 rounded-2xl p-6">
@@ -252,17 +315,35 @@ export default function PerfilPage() {
             <div className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded">stripe</div>
             <div>
               <p className="font-medium">Stripe Connect</p>
-              <p className="text-sm text-red-600">• No conectado</p>
-              <p className="text-xs text-gray-500">Tus sesiones no pueden publicarse</p>
+              {stripeConnect?.isReady ? (
+                <p className="text-green-600 text-sm flex items-center gap-1">✅ Conectado </p>
+              ) : stripeConnect?.hasStartedOnboarding ? (
+                <p className="text-amber-600 text-sm flex items-center gap-1">⏳ Proceso iniciado</p>
+              ) : (
+                <p className="text-red-600 text-sm">• No conectado</p>
+              )}
             </div>
           </div>
-          <button 
-            onClick={handleConnectStripe}
-            disabled={loadingStripe}
-            className="bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-black transition disabled:opacity-70"
-          >
-            {loadingStripe ? 'Conectando...' : 'Conectar cuenta →'}
-          </button>
+
+          <div className="flex gap-3">
+            {stripeConnect?.hasStartedOnboarding && !stripeConnect?.isReady && (
+              <button
+                onClick={handleRefreshOnboarding}
+                disabled={loadingStripe}
+                className="px-5 py-3 border border-gray-300 rounded-2xl hover:bg-gray-100 transition"
+              >
+                Reiniciar proceso
+              </button>
+            )}
+
+            <button
+              onClick={handleConnectStripe}
+              disabled={loadingStripe || stripeConnect?.isReady}
+              className="bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-black transition disabled:opacity-70"
+            >
+              {loadingStripe ? 'Conectando...' : stripeConnect?.isReady ? '✅ Conectado' : 'Conectar cuenta →'}
+            </button>
+          </div>
         </div>
       </div>
 

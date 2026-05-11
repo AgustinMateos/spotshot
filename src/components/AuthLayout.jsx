@@ -10,37 +10,69 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen bg-white flex">
       {/* LADO IZQUIERDO - Marketing (igual en ambas pantallas) */}
-      <div className="hidden lg:flex w-1/2 bg-[#f8fafc] flex-col justify-center p-12 relative">
-        <div className="max-w-lg">
-          <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-            Convierte tus fotos de surf<br />en ingresos reales.
+      <div className="hidden w-[70%] lg:flex top-[-65px]   flex-col justify-center p-12 relative">
+        <div className="max-w-[800px]">
+          <h1 className="text-5xl w-full font-bold text-gray-900 leading-tight">
+            Convierte tus fotos de surf en <br />ingresos reales.
           </h1>
           <p className="mt-6 text-xl text-gray-600">
             Únete a una plataforma curada diseñada para fotógrafos de surf que desean monetizar su trabajo.
           </p>
 
-          <ul className="mt-10 space-y-4 text-gray-700">
-            <li className="flex items-center gap-3">
-              <span className="text-green-500 text-2xl">✓</span>
-              Mantené el control de tus precios
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="text-green-500 text-2xl">✓</span>
-              Llegá a surfistas que buscan activamente tus fotos
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="text-green-500 text-2xl">✓</span>
-              Sin costos iniciales
-            </li>
-          </ul>
+          <ul className="mt-10 space-y-5">
+  <li className="flex items-start gap-4 text-gray-700">
+    <img 
+      src="/icons/check.svg" 
+      alt="check" 
+      className="w-6 h-6 mt-1 flex-shrink-0" 
+    />
+    <span>Mantené el control de tus precios</span>
+  </li>
+
+  <li className="flex items-start gap-4 text-gray-700">
+    <img 
+      src="/icons/check.svg" 
+      alt="check" 
+      className="w-6 h-6 mt-1 flex-shrink-0" 
+    />
+    <span>Llegá a surfistas que buscan activamente tus fotos</span>
+  </li>
+
+  <li className="flex items-start gap-4 text-gray-700">
+    <img 
+      src="/icons/check.svg" 
+      alt="check" 
+      className="w-6 h-6 mt-1 flex-shrink-0" 
+    />
+    <span>Sin costos iniciales</span>
+  </li>
+</ul>
         </div>
 
         {/* Imágenes decorativas */}
-        <div className="absolute bottom-12 left-12 flex gap-4 opacity-75">
-          <img src="/surf1.jpg" alt="surf" className="w-36 rounded-2xl shadow-xl" />
-          <img src="/surf2.jpg" alt="surf" className="w-36 rounded-2xl shadow-xl mt-10" />
-          <img src="/surf3.jpg" alt="surf" className="w-36 rounded-2xl shadow-xl" />
-        </div>
+       <div className="absolute bottom-[-110px] left-0 flex gap-5 opacity-35">
+   <img 
+    src="/loginbg.svg" 
+    alt="surf" 
+    className="w-[240px] h-[265px] rounded-t-[17px] shadow-xl object-cover -mt-4" 
+  />
+  <img 
+    src="/loginbg.svg" 
+    alt="surf" 
+    className="w-[240px] h-[210px] rounded-t-[17px] shadow-xl object-cover mt-14" 
+  />
+ 
+ <img 
+    src="/loginbg.svg" 
+    alt="surf" 
+    className="w-[240px] h-[265px] rounded-t-[17px] shadow-xl object-cover -mt-4" 
+  />
+  <img 
+    src="/loginbg.svg" 
+    alt="surf" 
+    className="w-[240px] h-[240px] rounded-t-[17px] shadow-xl object-cover mt-4" 
+  />
+</div>
       </div>
 
       {/* LADO DERECHO - Formulario (cambia según login o register) */}
