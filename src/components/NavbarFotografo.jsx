@@ -71,7 +71,7 @@ export default function NavbarFotografo() {
                         </div>
 
         {/* Menú Desktop */}
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium text-gray-300">
+        <div className='flex '><div className="hidden pr-[80px] md:flex items-center gap-10 text-sm font-medium text-gray-300">
           <a href="/shot" className="hover:text-white transition-colors">Explorar sesiones</a>
           <a href="/shot/mis-sesiones" className="hover:text-white transition-colors">Mis sesiones</a>
           <a href="/shot/mis-ventas" className="hover:text-white transition-colors">Mis ventas</a>
@@ -128,31 +128,30 @@ export default function NavbarFotografo() {
               </button>
             </div>
           )}
-        </div>
+        </div></div>
 
         {/* Botón Hamburguesa Mobile */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white p-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+  onClick={() => setIsOpen(!isOpen)}
+  className="md:hidden text-white p-2 focus:outline-none"
+>
+  <div className={`w-7 h-7 relative transition-all duration-300 ${isOpen ? 'rotate-45' : ''}`}>
+    {/* Línea superior */}
+    <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'rotate-45 top-3' : 'top-1'}`} />
+    {/* Línea media */}
+    <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : 'top-3'}`} />
+    {/* Línea inferior */}
+    <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? '-rotate-45 top-3' : 'top-5'}`} />
+  </div>
+</button>
       </div>
 
       {/* Menú Mobile */}
       {isOpen && (
         <div className="md:hidden bg-[#103457] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white">
-            <a href="/shot" className="text-lg" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
-            <a href="/shot/mis-sesiones" className="text-lg" onClick={() => setIsOpen(false)}>Mis sesiones</a>
-            <a href="/shot/mis-ventas" className="text-lg" onClick={() => setIsOpen(false)}>Mis ventas</a>
-
-            <hr className="border-white/10" />
-
-            {/* Info del usuario en móvil */}
-            <div className="flex items-center gap-4">
+             {/* Info del usuario en móvil */}
+            <div className="flex items-center gap-4 pb-[20px]" >
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -172,6 +171,13 @@ export default function NavbarFotografo() {
                 <p className="text-sm text-gray-400">{user?.email}</p>
               </div>
             </div>
+            <a href="/shot" className="text-lg" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
+            <a href="/shot/mis-sesiones" className="text-lg" onClick={() => setIsOpen(false)}>Mis sesiones</a>
+            <a href="/shot/mis-ventas" className="text-lg" onClick={() => setIsOpen(false)}>Mis ventas</a>
+
+            <hr className="border-white/10" />
+
+           
 
             <a href="/shot/perfil" className="flex items-center gap-3 text-lg" onClick={() => setIsOpen(false)}>
               <img src="/icons/miCuenta.svg" alt="" className="w-6 h-6" />
