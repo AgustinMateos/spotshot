@@ -2,30 +2,27 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
-
+import { useRouter } from 'next/navigation';
 export default function PerfilPage() {
-  const { user, token } = useAuth();
-  
+const { user, token, updateUser, updateToken, loading, logout } = useAuth();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Estados para editar perfil
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [alias, setAlias] = useState('');
 
-  // Avatar
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loadingAvatar, setLoadingAvatar] = useState(false);
 
-  // Estados del modal de contraseña
+  // Modal contraseña
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -36,8 +33,12 @@ export default function PerfilPage() {
   // Stripe
   const [stripeConnect, setStripeConnect] = useState(null);
   const [loadingStripe, setLoadingStripe] = useState(false);
-
-  // Cargar datos básicos
+useEffect(() => {
+  if (!token && !loading) {
+    router.push('/login');
+  }
+}, [token, loading]);
+  // Cargar datos
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || '');
@@ -46,10 +47,9 @@ export default function PerfilPage() {
       setAvatarPreview(user.avatarUrl);
     }
   }, [user]);
-
   // Cargar Stripe
   useEffect(() => {
-    const loadFullProfile = async () => {
+    const loadProfile = async () => {
       if (!token) return;
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -59,15 +59,15 @@ export default function PerfilPage() {
         const data = await res.json();
         if (res.ok) setStripeConnect(data.stripeConnect);
       } catch (err) {
-        console.error('Error cargando perfil completo:', err);
+        console.error(err);
       }
     };
-    loadFullProfile();
+    loadProfile();
   }, [token]);
 
   const avatarUrl = avatarPreview || user?.avatarUrl;
 
-  // ====================== GUARDAR PERFIL ======================
+  // ====================== ACTUALIZAR PERFIL ======================
   const handleSaveProfile = async () => {
     setLoadingSave(true);
     setError('');
@@ -75,7 +75,6 @@ export default function PerfilPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
       const res = await fetch(`${API_URL}/api/v1/photographers/me`, {
         method: 'PATCH',
         headers: {
@@ -92,13 +91,14 @@ export default function PerfilPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('✅ Perfil actualizado correctamente');
-        setIsEditing(false);
-      } else {
-        setError(data.message || 'Error al actualizar el perfil');
+    setMessage('✅ Perfil actualizado correctamente');
+    updateUser(data.photographer);   // ← Actualiza navbar y todo
+    setIsEditing(false);
+} else {
+        setError(data.message || 'Error al actualizar');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      setError('Error de conexión');
     } finally {
       setLoadingSave(false);
     }
@@ -124,10 +124,11 @@ export default function PerfilPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('✅ Avatar actualizado correctamente');
-        setAvatarPreview(data.photographer.avatarUrl);
-      } else {
-        setError(data.message || 'Error al subir el avatar');
+    setMessage('✅ Avatar actualizado correctamente');
+    setAvatarPreview(data.photographer.avatarUrl);
+    updateUser(data.photographer);   // ← Actualiza navbar
+} else {
+        setError(data.message || 'Error al subir avatar');
       }
     } catch (err) {
       setError('Error de conexión');
@@ -138,7 +139,7 @@ export default function PerfilPage() {
 
   // ====================== ELIMINAR AVATAR ======================
   const handleDeleteAvatar = async () => {
-    if (!confirm('¿Estás seguro de eliminar tu foto de perfil?')) return;
+    if (!confirm('¿Eliminar foto de perfil?')) return;
 
     setLoadingAvatar(true);
     try {
@@ -149,63 +150,64 @@ export default function PerfilPage() {
       });
 
       if (res.ok) {
-        setMessage('✅ Avatar eliminado correctamente');
-        setAvatarPreview(null);
-      } else {
-        setError('Error al eliminar el avatar');
-      }
+    setMessage('✅ Avatar eliminado correctamente');
+    setAvatarPreview(null);
+    updateUser({ ...user, avatarUrl: null });
+}
     } catch (err) {
-      setError('Error de conexión');
+      setError('Error al eliminar');
     } finally {
       setLoadingAvatar(false);
     }
   };
 
   // ====================== CAMBIAR CONTRASEÑA ======================
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setPasswordError('');
-    setPasswordMessage('');
+// ====================== CAMBIAR CONTRASEÑA ======================
+const handleChangePassword = async (e) => {
+  e.preventDefault();
+  setPasswordError('');
+  setPasswordMessage('');
 
-    if (newPassword !== confirmNewPassword) {
-      setPasswordError('Las nuevas contraseñas no coinciden');
-      return;
+  if (newPassword !== confirmNewPassword) {
+    setPasswordError('Las nuevas contraseñas no coinciden');
+    return;
+  }
+  if (newPassword.length < 8) {
+    setPasswordError('La nueva contraseña debe tener al menos 8 caracteres');
+    return;
+  }
+
+  setLoadingPassword(true);
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const res = await fetch(`${API_URL}/api/v1/photographers/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setPasswordMessage('✅ Contraseña actualizada correctamente. Vuelve a iniciar sesión.');
+
+      setTimeout(() => {
+        logout();           // ← Ahora sí está definido
+        router.push('/login');
+      }, 1800);
+    } else {
+      setPasswordError(data.message || 'Error al cambiar la contraseña');
     }
-    if (newPassword.length < 8) {
-      setPasswordError('La nueva contraseña debe tener al menos 8 caracteres');
-      return;
-    }
-
-    setLoadingPassword(true);
-
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${API_URL}/api/v1/photographers/auth/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ oldPassword, newPassword }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setPasswordMessage('✅ Contraseña actualizada correctamente');
-        setTimeout(() => {
-          setShowPasswordModal(false);
-          setOldPassword(''); setNewPassword(''); setConfirmNewPassword('');
-        }, 2000);
-      } else {
-        setPasswordError(data.message || 'Error al cambiar la contraseña');
-      }
-    } catch (err) {
-      setPasswordError('Error de conexión con el servidor');
-    } finally {
-      setLoadingPassword(false);
-    }
-  };
+  } catch (err) {
+    setPasswordError('Error de conexión con el servidor');
+  } finally {
+    setLoadingPassword(false);
+  }
+};
 
   // Iniciar / Reanudar Onboarding de Stripe
   const handleConnectStripe = async () => {
@@ -382,6 +384,7 @@ export default function PerfilPage() {
       {/* Seguridad */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
         <h2 className="text-2xl font-semibold mb-6">Seguridad</h2>
+        <p className="text-xs text-gray-400 mt-1">*Al cambiar la contraseña se redijirá nuevamente al login.</p>
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Contraseña</p>

@@ -70,22 +70,35 @@ export default function ShotPage() {
 
             {/* Paso 1 - Stripe */}
             <div className="border border-gray-200 bg-white rounded-xl p-6">
-              <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Paso 1</div>
-              <h3 className="text-xl font-semibold mb-2">Conecta tu cuenta de cobro</h3>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <div className="text-xs uppercase tracking-widest text-gray-500 mb-1">Paso 1</div>
+                  <h3 className="text-2xl font-semibold">Conecta tu cuenta de pagos</h3>
+                </div>
+                
+                {isStripeReady && (
+                  <div className="bg-[#059669] text-white text-sm font-medium px-5 py-1.5 rounded-full">
+                    Completo
+                  </div>
+                )}
+              </div>
               <p className="text-gray-600 mb-6">
                 Vinculá Stripe para poder publicar tus sesiones y recibir pagos automáticamente.
               </p>
 
-              <Link
-                href="/shot/perfil"
-                className={`px-6 py-3 rounded-xl font-medium transition inline-block ${
-                  isStripeReady 
-                    ? 'bg-green-600 text-white cursor-default' 
-                    : 'bg-gray-900 text-white hover:bg-black'
-                }`}
-              >
-                {isStripeReady ? ' Stripe Conectado' : 'Conectar Stripe'}
-              </Link>
+             {isStripeReady ? (
+    <div className="flex items-center gap-2 text-[#71717A] font-medium">
+      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+      Stripe Conectado
+    </div>
+  ) : (
+    <Link
+      href="/shot/perfil"
+      className="inline-block bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-black transition"
+    >
+      Conectar Stripe →
+    </Link>
+  )}
               
             </div>
 
@@ -97,17 +110,18 @@ export default function ShotPage() {
                 Sube tus fotos, configurá precios y publica para que los surfistas te encuentren.
               </p>
 
-              <button 
+              <Link
+              href='/shot/newAlbum' 
                 disabled={!isStripeReady}
-                className={`px-8 py-3.5 rounded-2xl flex items-center gap-3 transition font-medium ${
+                className={`px-6 py-3 rounded-xl  font-medium transition inline-block  items-center gap-3  ${
                   isStripeReady 
                     ? 'bg-gray-900 text-white hover:bg-black' 
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                <span className="text-xl">+</span>
+                <span className="text-xl px-2  ">+</span>
                 Crear sesión
-              </button>
+              </Link>
 
               {!isStripeReady && (
                 <p className="text-xs text-amber-600 mt-3">

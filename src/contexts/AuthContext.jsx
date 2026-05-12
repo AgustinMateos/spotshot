@@ -9,17 +9,12 @@ export function AuthProvider({ children }) {
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Cargar datos al iniciar la app
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
         const savedUser = localStorage.getItem('photographer');
 
-        if (savedToken) {
-            setToken(savedToken);
-        }
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
+        if (savedToken) setToken(savedToken);
+        if (savedUser) setUser(JSON.parse(savedUser));
 
         setLoading(false);
     }, []);
@@ -33,6 +28,17 @@ export function AuthProvider({ children }) {
         setToken(access_token);
     };
 
+    const updateUser = (newUserData) => {
+        if (!newUserData) return;
+        setUser(newUserData);
+        localStorage.setItem('photographer', JSON.stringify(newUserData));
+    };
+
+    const updateToken = (newToken) => {
+        localStorage.setItem('token', newToken);
+        setToken(newToken);
+    };
+
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('photographer');
@@ -41,11 +47,18 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            token, 
+            login, 
+            logout, 
+            updateUser,
+            updateToken,     // ← Nuevo
+            loading 
+        }}>
             {children}
         </AuthContext.Provider>
     );
 }
-
 
 export const useAuth = () => useContext(AuthContext);
