@@ -315,6 +315,10 @@ const handleChangePassword = async (e) => {
     <p className="text-2xl font-semibold">{alias || 'Sin alias'}</p>
     <p className="text-gray-500">{user?.email}</p>
     <p className="text-xs text-gray-400 mt-1">Haz clic en el icono de la cámara para cambiar tu foto</p>
+ <p className="text-xs text-gray-400 mt-1">*Restricciones:
+
+Tipos permitidos: image/jpeg, image/png, image/webp.
+Tamaño máximo: 5 MB.</p>
   </div>
 </div>
 
