@@ -131,8 +131,9 @@ export default function ShotPage() {
             <p className="text-gray-500 text-center max-w-sm mb-8">
               Sube tu primera sesión para empezar a vender tus mejores capturas
             </p>
-            <button 
+            <a 
               disabled={!isStripeReady}
+              href="shot/newAlbum"
               className={`px-8 py-3.5 rounded-2xl flex items-center gap-3 transition font-medium ${
                 isStripeReady 
                   ? 'bg-gray-900 text-white hover:bg-black' 
@@ -141,7 +142,7 @@ export default function ShotPage() {
             >
               <span className="text-xl">+</span>
               Crear sesión
-            </button>
+            </a>
           </div>
         </div>
       </div>

@@ -252,7 +252,7 @@ export default function PerfilPage() {
     .slice(0, 2);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="max-w-full mx-auto px-6 py-10">
       <h1 className="text-4xl font-bold text-gray-900 mb-10">Mi cuenta</h1>
 
       {/* Datos Personales */}
