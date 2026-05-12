@@ -80,7 +80,7 @@ const Navbar = () => {
 
       {/* Menú Mobile */}
       {isOpen && (
-        <div className="md:hidden bg-[#103457] border-t border-white/10">
+        <div className="md:hidden bg-[#323435b2] backdrop-blur-[30px] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white text-lg">
             <a href="/shot" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
             <a href="/register" onClick={() => setIsOpen(false)}>Vender fotos</a>
