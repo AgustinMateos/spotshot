@@ -85,14 +85,14 @@ export default function AuthForm({ mode = 'login' }) {
   };
 
   return (
-    <>
-      <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+    <div className='border border-gray-200 p-6 rounded-[10px]'>
+      <h2 className="text-3xl font-bold text-gray-900  mb-2">
         {isLogin && 'Inicia sesión en Spotshot'}
         {isRegister && 'Crea tu cuenta de fotógrafo'}
         {isForgot && '¿Olvidaste tu contraseña?'}
       </h2>
 
-      <p className="text-gray-600 text-center mb-8">
+      <p className="text-gray-600  mb-8">
         {isLogin && 'Bienvenido de nuevo'}
         {isRegister && 'Ingresa tus datos para crear tu cuenta de fotógrafo'}
         {isForgot && 'Ingresa tu correo electrónico y te enviaremos un enlace'}
@@ -154,6 +154,6 @@ export default function AuthForm({ mode = 'login' }) {
         {isRegister && <>¿Ya tienes una cuenta? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
         {isForgot && <>¿Recordaste tu contraseña? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
       </p>
-    </>
+    </div>
   );
 }

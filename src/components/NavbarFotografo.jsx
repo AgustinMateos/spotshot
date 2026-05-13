@@ -74,7 +74,7 @@ export default function NavbarFotografo() {
         <div className='flex '><div className="hidden pr-[80px] md:flex items-center gap-10 text-sm font-medium text-gray-300">
           <a href="/shot" className="hover:text-white transition-colors">Explorar sesiones</a>
           <a href="/shot/mis-sesiones" className="hover:text-white transition-colors">Mis sesiones</a>
-          <a href="/shot/mis-ventas" className="hover:text-white transition-colors">Mis ventas</a>
+          <a href="/shot/misVentas" className="hover:text-white transition-colors">Mis ventas</a>
         </div>
 
         {/* Perfil Desktop + Dropdown */}
@@ -151,7 +151,7 @@ export default function NavbarFotografo() {
         <div className="md:hidden bg-[#103457] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white">
              {/* Info del usuario en móvil */}
-            <div className="flex items-center gap-4 pb-[20px]" >
+            <div className="flex items-center gap-4 pb-5" >
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}

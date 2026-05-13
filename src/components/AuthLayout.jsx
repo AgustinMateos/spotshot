@@ -2,16 +2,16 @@
 
 import Image from 'next/image';
 
-export default function AuthLayout({ 
-  title, 
-  subtitle, 
-  children 
+export default function AuthLayout({
+  title,
+  subtitle,
+  children
 }) {
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen  bg-white flex">
       {/* LADO IZQUIERDO - Marketing (igual en ambas pantallas) */}
-      <div className="hidden w-[70%] lg:flex top-[-65px]   flex-col justify-center p-12 relative">
-        <div className="max-w-[800px]">
+      <div className="w-full lg:w-[60%] flex-col flex justify-between   ">
+        <div className="w-full pl-20 pt-20 ">
           <h1 className="text-5xl w-full font-bold text-gray-900 leading-tight">
             Convierte tus fotos de surf en <br />ingresos reales.
           </h1>
@@ -20,63 +20,48 @@ export default function AuthLayout({
           </p>
 
           <ul className="mt-10 space-y-5">
-  <li className="flex items-start gap-4 text-gray-700">
-    <img 
-      src="/icons/check.svg" 
-      alt="check" 
-      className="w-6 h-6 mt-1 flex-shrink-0" 
-    />
-    <span>Mantené el control de tus precios</span>
-  </li>
+            <li className="flex items-start gap-4 text-gray-700">
+              <img
+                src="/icons/check.svg"
+                alt="check"
+                className="w-6 h-6 mt-1 flex-shrink-0"
+              />
+              <span>Mantené el control de tus precios</span>
+            </li>
 
-  <li className="flex items-start gap-4 text-gray-700">
-    <img 
-      src="/icons/check.svg" 
-      alt="check" 
-      className="w-6 h-6 mt-1 flex-shrink-0" 
-    />
-    <span>Llegá a surfistas que buscan activamente tus fotos</span>
-  </li>
+            <li className="flex items-start gap-4 text-gray-700">
+              <img
+                src="/icons/check.svg"
+                alt="check"
+                className="w-6 h-6 mt-1 flex-shrink-0"
+              />
+              <span>Llegá a surfistas que buscan activamente tus fotos</span>
+            </li>
 
-  <li className="flex items-start gap-4 text-gray-700">
-    <img 
-      src="/icons/check.svg" 
-      alt="check" 
-      className="w-6 h-6 mt-1 flex-shrink-0" 
-    />
-    <span>Sin costos iniciales</span>
-  </li>
-</ul>
+            <li className="flex items-start gap-4 text-gray-700">
+              <img
+                src="/icons/check.svg"
+                alt="check"
+                className="w-6 h-6 mt-1 flex-shrink-0"
+              />
+              <span>Sin costos iniciales</span>
+            </li>
+          </ul>
         </div>
 
         {/* Imágenes decorativas */}
-       <div className="absolute bottom-[-110px] left-0 flex gap-5 opacity-35">
-   <img 
-    src="/loginbg.svg" 
-    alt="surf" 
-    className="w-[240px] h-[265px] rounded-t-[17px] shadow-xl object-cover -mt-4" 
-  />
-  <img 
-    src="/loginbg.svg" 
-    alt="surf" 
-    className="w-[240px] h-[210px] rounded-t-[17px] shadow-xl object-cover mt-14" 
-  />
- 
- <img 
-    src="/loginbg.svg" 
-    alt="surf" 
-    className="w-[240px] h-[265px] rounded-t-[17px] shadow-xl object-cover -mt-4" 
-  />
-  <img 
-    src="/loginbg.svg" 
-    alt="surf" 
-    className="w-[240px] h-[240px] rounded-t-[17px] shadow-xl object-cover mt-4" 
-  />
-</div>
+        <div className=" w-full flex gap-5 ">
+          <img
+            src="/fondo.svg"
+            alt="surf"
+            className="w-full   object-cover -mt-4"
+          />
+         
+        </div>
       </div>
 
       {/* LADO DERECHO - Formulario (cambia según login o register) */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+      <div className="w-full lg:w-[40%] flex h-full items-center justify-center p-6 pt-20 lg:p-6">
         <div className="w-full max-w-md">
           {children}
         </div>
