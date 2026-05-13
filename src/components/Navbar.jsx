@@ -8,7 +8,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Detectar scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -21,7 +20,7 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled 
-        ? 'bg-[#103457]/95 backdrop-blur-md shadow-md' 
+        ? 'bg-[#0F172A] backdrop-blur-md shadow-md' 
         : 'bg-transparent'
     }`}>
       <div className="max-w-full px-6 py-5 flex items-center justify-between">
@@ -46,16 +45,10 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-white">
-          <a 
-            href="/shot" 
-            className="hover:text-white/80 transition-colors font-medium"
-          >
+          <a href="/shot" className="hover:text-white/80 transition-colors font-medium">
             Explorar sesiones
           </a>
-          <a 
-            href="/register" 
-            className="hover:text-white/80 transition-colors font-medium"
-          >
+          <a href="/register" className="hover:text-white/80 transition-colors font-medium">
             Vender fotos
           </a>
           
@@ -67,20 +60,25 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Hamburguesa Mobile */}
+        {/* Hamburguesa Animada (igual que en NavbarFotografo) */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white p-2"
+          className="md:hidden text-white p-2 focus:outline-none"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <div className={`w-7 h-7 relative transition-all duration-300 ${isOpen ? 'rotate-45' : ''}`}>
+            {/* Línea superior */}
+            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'rotate-45 top-3' : 'top-1'}`} />
+            {/* Línea media */}
+            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : 'top-3'}`} />
+            {/* Línea inferior */}
+            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? '-rotate-45 top-3' : 'top-5'}`} />
+          </div>
         </button>
       </div>
 
       {/* Menú Mobile */}
       {isOpen && (
-        <div className="md:hidden bg-[#323435b2] backdrop-blur-[30px] border-t border-white/10">
+        <div className="md:hidden bg-[#0F172A] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white text-lg">
             <a href="/shot" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
             <a href="/register" onClick={() => setIsOpen(false)}>Vender fotos</a>

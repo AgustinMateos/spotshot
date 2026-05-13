@@ -49,7 +49,7 @@ export default function NavbarFotografo() {
   };
 
   return (
-    <nav className="bg-[#103457] shadow-sm sticky top-0 z-50">
+    <nav className="bg-[#0F172A] shadow-sm sticky top-0 z-50">
       <div className="max-w-full mx-auto px-6 py-5 flex justify-between items-center">
         
         {/* Logo */}
