@@ -50,10 +50,10 @@ const Encontrar = () => {
               />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Descarga al instante
+              Elige tus mejores momentos.
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Compra segura y acceso inmediato a tus fotos.
+              Selecciona las que más te gusten y añádelas al carrito.
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-
+import Link from 'next/link';
 const Fotografo = () => {
   return (
     <div className="w-full bg-[#F1F7FE] py-16 px-6">
@@ -34,7 +34,7 @@ const Fotografo = () => {
           {/* Columna izquierda - Texto */}
           <div>
             <h1 className="text-5xl  text-gray-900 leading-tight mb-3">
-              ¿Sos fotógrafo?
+              ¿Eres fotógrafo?
             </h1>
             <p className="text-xl text-gray-600 mb-10">
               Vendé tus sesiones sin complicaciones.
@@ -62,17 +62,17 @@ const Fotografo = () => {
               </div>
             </div>
 
-            <button className="bg-[#C8A24D] hover:bg-[#c8a14dc8] transition-colors text-white font-medium px-8 py-3.5 rounded-2xl text-lg">
+            <Link href='/login' className="bg-[#C8A24D] hover:bg-[#c8a14dc8] transition-colors text-white font-medium px-8 py-3.5 rounded-2xl text-lg">
               Comenzar a vender
-            </button>
+            </Link>
           </div>
 
           {/* Columna derecha - Imagen completa del upload */}
-          <div className="relative flex justify-center">
+          <div className="relative  flex justify-center">
             <img 
               src="/fotografo/upload-panel.svg"   // ← Cambia esta ruta por tu imagen real
               alt="Panel de subida de archivos"
-              className="w-[412px] h-[391px] "
+              className="w-103 h-97.75 "
             />
           </div>
 

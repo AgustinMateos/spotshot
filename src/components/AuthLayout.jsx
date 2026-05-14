@@ -8,10 +8,10 @@ export default function AuthLayout({
   children
 }) {
   return (
-    <div className="min-h-screen  bg-white flex">
+    <div className="min-h-screen  flex-col p-5 md:p-0 md:flex-row bg-white flex">
       {/* LADO IZQUIERDO - Marketing (igual en ambas pantallas) */}
       <div className="w-full lg:w-[60%] flex-col flex justify-between   ">
-        <div className="w-full pl-20 pt-20 ">
+        <div className="w-full md:pl-20 md:pt-20 ">
           <h1 className="text-5xl w-full font-bold text-gray-900 leading-tight">
             Convierte tus fotos de surf en <br />ingresos reales.
           </h1>

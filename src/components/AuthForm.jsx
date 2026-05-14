@@ -133,8 +133,8 @@ export default function AuthForm({ mode = 'login' }) {
 
         {/* Link "¿Olvidaste tu contraseña?" - Mejorado */}
         {isLogin && (
-          <div className="text-right">
-            <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium">
+          <div >
+            <a href="/forgot-password" className="text-sm text-[#0D2744] hover:text-[#0D2744] hover:underline font-medium">
               ¿Olvidaste tu contraseña?
             </a>
           </div>

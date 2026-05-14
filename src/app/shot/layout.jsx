@@ -13,7 +13,7 @@ export default function ShotLayout({ children }) {
         {children}
       </main>
 
-      
+      <Footer isShotSection={true} />
     </div>
   );
 }

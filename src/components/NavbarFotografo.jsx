@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
+import Link from 'next/link';
 export default function NavbarFotografo() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
@@ -148,11 +148,11 @@ export default function NavbarFotografo() {
 
       {/* Menú Mobile */}
       {isOpen && (
-        <div className="md:hidden bg-[#103457] border-t border-white/10">
+        <div className="md:hidden bg-[#0F172A] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white">
              {/* Info del usuario en móvil */}
-            <div className="flex items-center gap-4 pb-5" >
-              {avatarUrl ? (
+            <Link href={'/shot/perfil'} className="flex items-center gap-4 pb-5" >
+              <div>{avatarUrl ? (
                 <Image
                   src={avatarUrl}
                   alt={alias}
@@ -165,15 +165,15 @@ export default function NavbarFotografo() {
                 <div className="w-14 h-14 bg-amber-400 rounded-full flex items-center justify-center text-2xl font-bold text-gray-800">
                   {initials}
                 </div>
-              )}
+              )}</div>
               <div>
                 <p className="font-semibold text-lg">{alias}</p>
                 <p className="text-sm text-gray-400">{user?.email}</p>
               </div>
-            </div>
+            </Link>
             <a href="/shot" className="text-lg" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
             <a href="/shot/mis-sesiones" className="text-lg" onClick={() => setIsOpen(false)}>Mis sesiones</a>
-            <a href="/shot/mis-ventas" className="text-lg" onClick={() => setIsOpen(false)}>Mis ventas</a>
+            <a href="/shot/misVentas" className="text-lg" onClick={() => setIsOpen(false)}>Mis ventas</a>
 
             <hr className="border-white/10" />
 
