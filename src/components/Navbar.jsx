@@ -45,7 +45,7 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-white">
-          <a href="/shot" className="hover:text-white/80 transition-colors font-medium">
+          <a href="/sesiones" className="hover:text-white/80 transition-colors font-medium">
             Explorar sesiones
           </a>
           <a href="/register" className="hover:text-white/80 transition-colors font-medium">

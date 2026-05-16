@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-
+import Image from 'next/image';
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading } = useAuth();
 
-  const [step, setStep] = useState(1); // ← Cambiado a 1 para que empiece en Detalles
-const [uploadedImages, setUploadedImages] = useState([]); // ← Para saber si ya se subieron
+  const [step, setStep] = useState(1);
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [formData, setFormData] = useState({
     type: 'free-surfers',
     school: '',
@@ -18,17 +18,20 @@ const [uploadedImages, setUploadedImages] = useState([]); // ← Para saber si y
     startTime: '10:30',
     endTime: '11:30',
     basePrice: 5,
-  selectedPacks: [],
+    selectedPacks: [],
   });
-const [packsCatalog, setPacksCatalog] = useState([]);
-const [isLoadingPacks, setIsLoadingPacks] = useState(false);
+
+  const [packsCatalog, setPacksCatalog] = useState([]);
+  const [isLoadingPacks, setIsLoadingPacks] = useState(false);
   const [photos, setPhotos] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
-const [uploading, setUploading] = useState(false);
-const [sessionId, setSessionId] = useState(null);
-const [creatingSession, setCreatingSession] = useState(false);
-
-const [publishing, setPublishing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [creatingSession, setCreatingSession] = useState(false);
+  
+  // ← ESTADOS IMPORTANTES
+  const [updatingPrice, setUpdatingPrice] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 // Cargar catálogo de packs
 useEffect(() => {
   const loadPacks = async () => {
@@ -84,7 +87,7 @@ const handlePublishSession = async () => {
 
     if (res.ok) {
       alert('🎉 ¡Sesión publicada con éxito!');
-      router.push('/shot/mis-sesiones');
+      router.push('/shot/misSesiones');
     } else {
       alert(data.message || 'Error al publicar la sesión');
     }
@@ -143,7 +146,7 @@ const handleCreateSession = async () => {
 
     if (res.ok) {
       setSessionId(data.id);
-      alert('✅ Sesión creada correctamente');
+    
       setStep(2);
     } else {
       alert(data.message || 'Error al crear la sesión');
@@ -248,7 +251,7 @@ const handleUploadPhotos = async () => {
     console.log("→ Respuesta del servidor:", data);
 
    if (res.ok) {
-  alert('✅ Fotos subidas correctamente');
+ 
   setUploadedImages(data.images || []);
   setPhotos([]);           // Limpiamos las pendientes
 } else {
@@ -259,6 +262,65 @@ const handleUploadPhotos = async () => {
     alert(`Error de conexión.\n\nRevisa la consola (F12) y dime qué ves.`);
   } finally {
     setUploading(false);
+  }
+};
+// ====================== ACTUALIZAR PRECIO + PACKS ======================
+const handleUpdatePricing = async () => {
+  if (!sessionId) {
+    alert("Sesión no encontrada");
+    return;
+  }
+
+  if (formData.basePrice < 1) {
+    alert("El precio debe ser mayor a 1 €");
+    return;
+  }
+
+  setUpdatingPrice(true);
+
+  const packsPayload = formData.selectedPacks.map(id => ({
+    packId: id,
+    enabled: true
+  }));
+
+  const payload = {
+    unitPricePhotographerEur: formData.basePrice,   // ← ESTE ES EL CAMBIO CLAVE
+    packs: packsPayload
+  };
+
+  console.log("📤 Enviando PATCH:", payload);
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    console.log("📥 Respuesta del servidor:", data);
+
+    if (res.ok) {
+      // Actualizamos el precio local con lo que devuelve el backend
+      const serverPrice = data?.pricing?.unitPricePhotographerEur;
+      if (serverPrice) {
+        setFormData(prev => ({ ...prev, basePrice: serverPrice }));
+      }
+
+      
+      setStep(4);
+    } else {
+      alert(data.message || 'Error al guardar precio');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error de conexión');
+  } finally {
+    setUpdatingPrice(false);
   }
 };
 // ====================== ACTUALIZAR PACKS ======================
@@ -325,9 +387,23 @@ const handleUpdatePacks = async () => {
 
   const handleFileSelect = (e) => handleFiles(e.target.files);
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
-  };
+const handleNext = async () => {
+  if (step === 1) {
+    await handleCreateSession();
+  } 
+  else if (step === 2) {
+    if (photos.length > 0) {
+      await handleUploadPhotos();
+    }
+    setStep(3);
+  } 
+  else if (step === 3) {
+    await handleUpdatePricing();
+  } 
+  else if (step === 4) {
+    await handlePublishSession();   // ← Ahora publica aquí
+  }
+};
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
@@ -421,33 +497,37 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         {/* ====================== PASO 1: DETALLES ====================== */}
         {/* ====================== PASO 1: DETALLES ====================== */}
 {step === 1 && (
-  <div className="bg-white border border-blue-200 rounded-3xl p-8 shadow-sm">
+  <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
     <h2 className="text-2xl font-semibold mb-6">Completa los detalles de tu sesión</h2>
 
     {/* Tipo de sesión */}
-    <div className="flex gap-2 mb-8">
-  <button
-    onClick={() => updateForm('type', 'free-surfers')}
-    className={`px-6 py-3 rounded-2xl font-medium transition flex-1 ${
-      formData.type === 'free-surfers' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-    }`}
-  >
-    Free Surfers
-  </button>
-  <button
-    onClick={() => updateForm('type', 'escuelas')}
-    className={`px-6 py-3 rounded-2xl font-medium transition flex-1 ${
-      formData.type === 'escuelas' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-    }`}
-  >
-    Escuelas
-  </button>
-</div>
+    <div className="flex gap-1 bg-gray-100 p-1.5 rounded-3xl w-fit mb-8">
+      <button
+        onClick={() => updateForm('type', 'free-surfers')}
+        className={`px-8 py-3.5 rounded-2xl font-medium transition-all ${
+          formData.type === 'free-surfers'
+            ? 'bg-white text-gray-900 shadow-sm'
+            : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        Free surfers
+      </button>
+      <button
+        onClick={() => updateForm('type', 'escuelas')}
+        className={`px-8 py-3.5 rounded-2xl font-medium transition-all ${
+          formData.type === 'escuelas'
+            ? 'bg-white text-gray-900 shadow-sm'
+            : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        Escuelas
+      </button>
+    </div>
 
     {/* Escuela o Ubicación */}
     {formData.type === 'escuelas' ? (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium">🏫 Nombre de la Escuela</label>
+        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/school.svg'}/>  Nombre de la Escuela</label>
         <input
           type="text"
           value={formData.school}
@@ -458,13 +538,13 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       </div>
     ) : (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium">📍 Playa / Ubicación</label>
+        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> Playa / Ubicación</label>
         <input
           type="text"
           value={formData.location}
           onChange={(e) => updateForm('location', e.target.value)}
           className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-          placeholder="Ej: Playa de la Barceloneta"
+          placeholder="Ej: Somo"
         />
       </div>
     )}
@@ -472,7 +552,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Fecha y Hora */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
-        <label className="block text-gray-700 mb-2 font-medium">📅 Fecha</label>
+        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
         <input
           type="date"
           value={formData.date}
@@ -481,53 +561,44 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         />
       </div>
       <div>
-        <label className="block text-gray-700 mb-2 font-medium">🕒 Hora Inicio</label>
-        <input
+        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
+        <div className='flex gap-4'><input
           type="time"
           value={formData.startTime}
           onChange={(e) => updateForm('startTime', e.target.value)}
           className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-        />
-      </div>
-      <div>
-        <label className="block text-gray-700 mb-2 font-medium">🕒 Hora Fin</label>
-        <input
+        /><input
           type="time"
           value={formData.endTime}
           onChange={(e) => updateForm('endTime', e.target.value)}
           className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-        />
+        /></div>
+      </div>
+      <div>
+       
+        
       </div>
     </div>
 
-    {/* Botón Crear Sesión */}
-    <button
-      onClick={handleCreateSession}
-      disabled={creatingSession}
-      className="mt-10 w-full bg-gray-900 text-white py-4 rounded-2xl font-medium hover:bg-black transition disabled:opacity-70"
-    >
-      {creatingSession ? 'Creando sesión...' : 'Crear Sesión y Continuar'}
-    </button>
+    
+   
   </div>
 )}
 
 {/* ====================== PASO 2: FOTOS ====================== */}
 {step === 2 && (
   <div className="space-y-6">
-    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3">
-      <span className="text-amber-600 text-2xl mt-0.5">🔒</span>
-      <div>
-        <p className="font-medium text-amber-800">Protección activada</p>
-        <p className="text-sm text-amber-700">
-          Todas las fotos se subirán con marca de agua hasta que el cliente pague.
-        </p>
-      </div>
+    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+      <p className="text-blue-800 text-sm">
+        Los álbumes permanecen disponibles durante <strong>30 días</strong> después de su publicación.
+      </p>
     </div>
 
     <div className="bg-white border border-gray-200 rounded-3xl p-8">
       <h2 className="text-2xl font-semibold mb-6">Carga tus fotos</h2>
+      <p className="text-gray-600 mb-6">La <strong>primera foto</strong> que selecciones será la portada del álbum.</p>
 
-      {/* Drag & Drop Area */}
+      {/* Drag & Drop */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -552,7 +623,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         <p className="text-gray-500 text-sm mt-1">JPG, PNG, WEBP • Máx 15MB por foto</p>
       </div>
 
-      {/* Previsualización + Botón Subir */}
+      {/* Previsualización */}
       {photos.length > 0 && (
         <div className="mt-8">
           <p className="text-sm text-gray-600 mb-4 font-medium">
@@ -567,19 +638,11 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
                   alt={`preview-${index}`} 
                   className="w-full aspect-square object-cover" 
                 />
-
-                {/* MARCA DE AGUA */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <p className="text-white/90 text-[26px] font-bold tracking-[4px] opacity-75 select-none">
-                      SPOTSHOT
-                    </p>
-                    <p className="text-white/60 text-xs tracking-widest -mt-1">
-                      PREVIEW • NO VENDER
-                    </p>
+                {index === 0 && (
+                  <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-3 py-1 rounded font-medium">
+                    Portada
                   </div>
-                </div>
-
+                )}
                 <button
                   onClick={(e) => { e.stopPropagation(); removePhoto(index); }}
                   className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-md opacity-0 group-hover:opacity-100 transition-all"
@@ -589,34 +652,19 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
               </div>
             ))}
           </div>
-
-          {/* ==================== BOTÓN SUBIR FOTOS ==================== */}
-          <button
-            onClick={handleUploadPhotos}
-            disabled={uploading || photos.length === 0}
-            className="mt-8 w-full bg-gray-900 hover:bg-black text-white py-4 rounded-2xl font-medium transition disabled:opacity-70 flex items-center justify-center gap-2"
-          >
-            {uploading ? (
-              <>Subiendo fotos... <span className="animate-spin">⟳</span></>
-            ) : (
-              `Subir ${photos.length} foto${photos.length !== 1 ? 's' : ''} al servidor`
-            )}
-          </button>
         </div>
       )}
 
       {/* Fotos ya subidas */}
       {uploadedImages.length > 0 && (
         <div className="mt-10">
-          <p className="text-sm text-green-600 font-medium mb-4">✅ Fotos ya subidas ({uploadedImages.length})</p>
+          <p className="text-sm text-green-600 font-medium mb-4">
+            ✅ Fotos ya subidas ({uploadedImages.length})
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {uploadedImages.map((img, index) => (
               <div key={index} className="relative rounded-2xl overflow-hidden border border-green-300">
-                <img 
-                  src={img.publicUrl} 
-                  alt={`uploaded-${index}`} 
-                  className="w-full aspect-square object-cover" 
-                />
+                <img src={img.publicUrl} alt={`uploaded-${index}`} className="w-full aspect-square object-cover" />
                 <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">Subida</div>
               </div>
             ))}
@@ -626,6 +674,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     </div>
   </div>
 )}
+{/* ====================== PASO 3: PRECIOS ====================== */}
 {/* ====================== PASO 3: PRECIOS ====================== */}
 {step === 3 && (
   <div className="bg-white border border-gray-200 rounded-3xl p-8">
@@ -648,12 +697,10 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       <p className="text-sm text-gray-500 mt-2">Precio recomendado: 3€ - 8€ por foto</p>
     </div>
 
-    {/* Comisión Spotshot */}
+    {/* Comisión */}
     <div className="bg-blue-50 rounded-2xl p-5 mb-8">
       <div className="flex justify-between items-center">
-        <div>
-          <p className="font-medium">Comisión Spotshot (25%)</p>
-        </div>
+        <p className="font-medium">Comisión Spotshot (25%)</p>
         <div className="text-right">
           <p className="font-medium">Precio final para el cliente</p>
           <p className="text-2xl font-semibold text-emerald-600">€{finalPrice}</p>
@@ -663,51 +710,55 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
 
     {/* Packs por volumen */}
     <div>
-      <div className="flex items-center gap-3 mb-4">
-        <h3 className="font-semibold text-lg">Packs por volumen (opcional)</h3>
-        <span className="bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-medium">Recomendado</span>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-lg">Packs por volumen</h3>
+        <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">
+          {uploadedImages.length} fotos subidas
+        </span>
       </div>
-      <p className="text-sm text-gray-600 mb-6">Ofrece descuentos cuando los clientes compren múltiples fotos.</p>
 
-      {isLoadingPacks ? (
-        <p className="text-center py-8 text-gray-500">Cargando packs disponibles...</p>
+      {uploadedImages.length < 5 ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
+          <p className="text-amber-800 font-medium">
+            Necesitas al menos <strong>5 fotos</strong> para activar packs
+          </p>
+          <p className="text-amber-700 text-sm mt-2">
+            Actualmente tienes {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       ) : (
         <div className="space-y-3">
-          {packsCatalog.map((pack) => (
-            <div key={pack.id} className="flex items-center justify-between bg-gray-50 rounded-2xl p-5 border border-gray-100">
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">⚡</span>
-                <div>
-                  <p className="font-semibold text-lg">{pack.label}</p>
-                  <p className="text-sm text-gray-500">
-                    {pack.discountPercent}% OFF • {pack.photoQuantity} fotos
-                  </p>
+          {packsCatalog
+            .filter(pack => pack.photoQuantity <= uploadedImages.length)
+            .map((pack) => (
+              <div key={pack.id} className="flex items-center justify-between bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl">📦</span>
+                  <div>
+                    <p className="font-semibold text-lg">{pack.label}</p>
+                    <p className="text-sm text-gray-500">
+                      {pack.discountPercent}% OFF • {pack.photoQuantity} fotos
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.selectedPacks.includes(pack.id)}
-                  onChange={() => togglePack(pack.id)}
-                  className="sr-only peer"
-                />
-                <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition"></div>
-                <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
-              </label>
-            </div>
-          ))}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.selectedPacks.includes(pack.id)}
+                    onChange={() => togglePack(pack.id)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+                  <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
+                </label>
+              </div>
+            ))}
         </div>
       )}
-
-      {/* Botón Guardar Packs */}
-      <button
-        onClick={handleUpdatePacks}
-        className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-medium transition"
-      >
-        Guardar Packs Seleccionados
-      </button>
     </div>
+
+    
   </div>
 )}
       {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
@@ -737,7 +788,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
 
     {/* Banner */}
     <div className="relative rounded-3xl overflow-hidden h-80">
-      <img src="/banner-surf.jpg" alt="Sesión" className="w-full h-full object-cover" />
+      <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
       <div className="absolute bottom-8 left-8 text-white">
         <p className="text-4xl font-bold">Domingo 01 de Febrero del 2024</p>
@@ -792,56 +843,48 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       )}
     </div>
 
-    {/* Botones finales */}
-    <div className="flex justify-between items-center pt-6 border-t">
-      <button 
-        onClick={() => setStep(3)}
-        className="px-8 py-3.5 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium flex items-center gap-2"
-      >
-        ← Atrás
-      </button>
-
-      <div className="flex gap-4">
-        <button className="px-8 py-3.5 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium">
-          Guardar borrador
-        </button>
-
-        <button
-          onClick={handlePublishSession}
-          disabled={publishing || uploadedImages.length === 0}
-          className="px-10 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center gap-2 transition disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          {publishing ? 'Publicando...' : '✓ Finalizar y Publicar'}
-        </button>
-      </div>
-    </div>
+  
+    
   </div>
 )}
 
         {/* Botones */}
-        <div className="flex justify-between items-center mt-8">
-          <button className="px-6 py-3 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium text-gray-700">
-            Guardar borrador
-          </button>
+{/* ====================== BOTONES INFERIORES ====================== */}
+<div className="flex justify-between items-center mt-8">
+  {step > 1 && (
+    <button className="px-6 py-3 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium text-gray-700">
+      Guardar borrador
+    </button>
+  )}
 
-          <div className="flex gap-4">
-            {step > 1 && (
-              <button
-                onClick={handleBack}
-                className="px-8 py-3.5 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium flex items-center gap-2"
-              >
-                ← Atrás
-              </button>
-            )}
+  <div className="flex gap-4">
+    {step > 1 && (
+      <button
+        onClick={handleBack}
+        className="px-8 py-3.5 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium flex items-center gap-2"
+      >
+        ← Atrás
+      </button>
+    )}
 
-            <button
-              onClick={handleNext}
-              className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium"
-            >
-              {step === 4 ? 'Crear Sesión' : 'Siguiente →'}
-            </button>
-          </div>
-        </div>
+    <button
+      onClick={handleNext}
+      disabled={
+        (step === 1 && creatingSession) || 
+        (step === 2 && uploading) || 
+        (step === 3 && updatingPrice) ||
+        (step === 4 && publishing)
+      }
+      className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+    >
+      {step === 1 && creatingSession ? 'Creando sesión...' :
+       step === 2 && uploading ? 'Subiendo fotos...' :
+       step === 3 && updatingPrice ? 'Guardando precio...' :
+       step === 4 && publishing ? 'Publicando...' :
+       step === 4 ? 'Publicar Sesión' : 'Siguiente →'}
+    </button>
+  </div>
+</div>
       </div>
     </div>
   );

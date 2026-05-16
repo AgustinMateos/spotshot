@@ -32,7 +32,7 @@ const Navbar = () => {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-white">
           <a 
-            href="/shot" 
+            href="/sesiones" 
             className="hover:text-white/80 transition-colors font-medium"
           >
             Explorar sesiones

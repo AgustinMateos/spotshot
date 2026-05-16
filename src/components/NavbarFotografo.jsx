@@ -72,8 +72,8 @@ export default function NavbarFotografo() {
 
         {/* Menú Desktop */}
         <div className='flex '><div className="hidden pr-[80px] md:flex items-center gap-10 text-sm font-medium text-gray-300">
-          <a href="/shot" className="hover:text-white transition-colors">Explorar sesiones</a>
-          <a href="/shot/mis-sesiones" className="hover:text-white transition-colors">Mis sesiones</a>
+          <a href="/sesiones" className="hover:text-white transition-colors">Explorar sesiones</a>
+          <a href="/shot/misSesiones" className="hover:text-white transition-colors">Mis sesiones</a>
           <a href="/shot/misVentas" className="hover:text-white transition-colors">Mis ventas</a>
         </div>
 
@@ -172,7 +172,7 @@ export default function NavbarFotografo() {
               </div>
             </Link>
             <a href="/shot" className="text-lg" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
-            <a href="/shot/mis-sesiones" className="text-lg" onClick={() => setIsOpen(false)}>Mis sesiones</a>
+            <a href="/shot/misSesiones" className="text-lg" onClick={() => setIsOpen(false)}>Mis sesiones</a>
             <a href="/shot/misVentas" className="text-lg" onClick={() => setIsOpen(false)}>Mis ventas</a>
 
             <hr className="border-white/10" />
