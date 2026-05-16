@@ -54,9 +54,9 @@ export default function SesionesPage() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${API_URL}/api/v1/public/photo-sessions?${params.toString()}`);
-        
+
         const data = await res.json();
-        
+
         if (res.ok) {
           setSessions(data.items || []);
           setPagination({
@@ -153,23 +153,23 @@ export default function SesionesPage() {
                     <div className="absolute top-4 right-4 flex  gap-2 z-10">
                       {daysLeft && (
                         <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                          <Image src={'/icons/hour.svg'} width={16} height={16} alt='camara'/>  {daysLeft}
+                          <Image src={'/icons/hour.svg'} width={16} height={16} alt='camara' />  {daysLeft}
                         </div>
                       )}
                       <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                        <Image src={'/icons/camara.svg'} width={16} height={16} alt='camara'/> 
+                        <Image src={'/icons/camara.svg'} width={16} height={16} alt='camara' />
                         {session.photoCount} fotos
                       </div>
 
-                      
+
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
                       <p className="text-sm opacity-90">
-  by {session.photographer?.firstName && session.photographer?.lastName 
-    ? `${session.photographer.firstName} ${session.photographer.lastName}` 
-    : session.photographer?.alias || 'Fotógrafo'}
-</p>
+                        by {session.photographer?.firstName && session.photographer?.lastName
+                          ? `${session.photographer.firstName} ${session.photographer.lastName}`
+                          : session.photographer?.alias || 'Fotógrafo'}
+                      </p>
                       <p className="font-semibold text-lg">{session.title}</p>
                       <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                       <p className="text-xs opacity-75 mt-1">
