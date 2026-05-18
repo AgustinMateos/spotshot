@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function SesionDetail() {
   const { id } = useParams();
@@ -9,6 +10,8 @@ export default function SesionDetail() {
 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -32,6 +35,23 @@ export default function SesionDetail() {
 
     if (id) fetchSession();
   }, [id, router]);
+
+  const openLightbox = (index) => {
+    setCurrentIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? session.images.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev === session.images.length - 1 ? 0 : prev + 1));
+  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Cargando sesión...</div>;
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
@@ -70,9 +90,7 @@ export default function SesionDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Precio y Packs */}
-        {/* Precio y Packs Mejorado */}
-<div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
+       <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
     <div>
       <p className="text-sm text-[#0D2744]">Precio por foto</p>
@@ -138,7 +156,7 @@ export default function SesionDetail() {
   )}
 </div>
 
-        {/* Galería Protegida */}
+        {/* Galería con Lightbox */}
         <div>
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-semibold">Selecciona tus fotos</h2>
@@ -149,21 +167,20 @@ export default function SesionDetail() {
             {session.images.map((img, index) => (
               <div 
                 key={img.id}
-                className="relative aspect-square rounded-3xl overflow-hidden shadow-sm select-none"
                 onContextMenu={(e) => e.preventDefault()}
                 onDragStart={(e) => e.preventDefault()}
+                onClick={() => openLightbox(index)}
+                className="relative aspect-square rounded-3xl overflow-hidden shadow-sm cursor-pointer hover:scale-105 transition-transform duration-300"
               >
                 <img
                   src={img.publicUrl}
                   alt={`Foto ${index + 1}`}
-                  className="w-full h-full object-cover pointer-events-none"
-                  draggable="false"
+                  className="w-full h-full object-cover"
+                  
                 />
 
-                {/* Overlay sutil */}
+                {/* Overlay sutil + Marca de agua */}
                 <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-
-                {/* Marca de agua */}
                 <div className="absolute flex-col inset-0 flex items-center justify-center pointer-events-none">
                   <span className="text-white/30 text-5xl md:text-4xl font-bold rotate-[-12deg] tracking-widest select-none">
                     SPOTSHOT
@@ -180,6 +197,70 @@ export default function SesionDetail() {
           </div>
         </div>
       </div>
+
+      {/* ==================== LIGHTBOX / SLIDER ==================== */}
+            {/* ==================== LIGHTBOX MODAL ==================== */}
+      {isLightboxOpen && session && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center">
+          <div className="relative w-full max-w-5xl px-4">
+            
+            {/* Botón Cerrar */}
+            <button
+              onClick={closeLightbox}
+              className="absolute -top-4 -right-4 bg-white text-black rounded-full p-3 shadow-lg z-10 hover:bg-gray-100 transition"
+            >
+              <X size={28} />
+            </button>
+
+            {/* Imagen Principal */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-2xl relative">
+              <img
+                src={session.images[currentIndex].publicUrl}
+                alt={`Foto ${currentIndex + 1}`}
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+                className="w-full max-h-[75vh] object-contain mx-auto"
+              />
+
+              {/* Marca de agua repetida (como en el diseño) */}
+              <div className="absolute flex-col inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-white/30 text-5xl md:text-4xl font-bold rotate-[-12deg] tracking-widest select-none">
+                    SPOTSHOT
+                    
+                     
+                  </span> <img alt='logo' width={40} height={40} src='/icons/logo.svg'/>
+                </div>
+
+              {/* Flechas de navegación */}
+              <button
+                onClick={goToPrevious}
+                className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black p-4 rounded-full shadow-lg transition"
+              >
+                <ChevronLeft size={36} />
+              </button>
+
+              <button
+                onClick={goToNext}
+                className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black p-4 rounded-full shadow-lg transition"
+              >
+                <ChevronRight size={36} />
+              </button>
+
+              {/* Botón Agregar al Carrito */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <button className="bg-[#1F2937] hover:bg-black text-white font-medium px-10 py-4 rounded-2xl text-lg shadow-xl transition">
+                  Agregar al carrito
+                </button>
+              </div>
+            </div>
+
+            {/* Contador */}
+            <div className="text-center text-white mt-4 text-sm">
+              {currentIndex + 1} / {session.images.length}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
