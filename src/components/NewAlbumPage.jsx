@@ -28,7 +28,7 @@ const NewAlbumPage = () => {
   const [uploading, setUploading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [creatingSession, setCreatingSession] = useState(false);
-  
+  const [showPublishModal, setShowPublishModal] = useState(false);
   // ← ESTADOS IMPORTANTES
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -55,16 +55,12 @@ useEffect(() => {
 }, [token]);
 // ====================== PUBLICAR SESIÓN ======================
 const handlePublishSession = async () => {
-  console.log("📊 === VALIDACIÓN FINAL ===");
-  console.log("→ basePrice actual:", formData.basePrice);
-  console.log("→ Tipo de dato:", typeof formData.basePrice);
-
   if (!sessionId) {
     alert("No se encontró el ID de la sesión");
     return;
   }
   if (formData.basePrice <= 0) {
-    alert(`Configurá un precio por foto mayor a cero\n\nPrecio actual: €${formData.basePrice}`);
+    alert("Configurá un precio por foto mayor a cero");
     setStep(3);
     return;
   }
@@ -74,6 +70,11 @@ const handlePublishSession = async () => {
     return;
   }
 
+  setShowPublishModal(true);   // ← Abre el modal en vez de publicar directamente
+};
+
+const confirmPublish = async () => {
+  setShowPublishModal(false);
   setPublishing(true);
 
   try {
@@ -83,16 +84,14 @@ const handlePublishSession = async () => {
       headers: { 'Authorization': `Bearer ${token}` },
     });
 
-    const data = await res.json();
-
     if (res.ok) {
       alert('🎉 ¡Sesión publicada con éxito!');
       router.push('/shot/misSesiones');
     } else {
-      alert(data.message || 'Error al publicar la sesión');
+      const data = await res.json();
+      alert(data.message || 'Error al publicar');
     }
   } catch (err) {
-    console.error(err);
     alert('Error de conexión');
   } finally {
     setPublishing(false);
@@ -453,11 +452,11 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         <React.Fragment key={index}>
           <div className="flex flex-col items-center">
             <div
-              className={`w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
                 isCompleted
-                  ? 'bg-blue-600 border-blue-600'     // Círculo azul completo
+                  ? 'bg-[#106BB9] border-[#106BB9]'     // Círculo azul completo
                   : isCurrent
-                  ? 'border-blue-600 bg-white'        // Paso actual
+                  ? 'border-[#106BB9] bg-white'        // Paso actual
                   : 'border-gray-300 bg-white'        // Paso futuro
               }`}
             >
@@ -465,7 +464,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
                 <img
                   src="/icons/tic.svg"          // ← Aquí pon tu imagen del tick
                   alt="Completado"
-                  className="w-full h-full object-contain"
+                  className="w-6 h-6 object-contain"
                 />
               ) : (
                 <img
@@ -604,7 +603,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => document.getElementById('fileInput').click()}
-        className={`border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all ${
+        className={`border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all bg-[#F1F7FE] ${
           isDragging ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
         }`}
       >
@@ -616,8 +615,8 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
           onChange={handleFileSelect} 
           className="hidden" 
         />
-        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-          <span className="text-4xl">📸</span>
+        <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
+          <span className="text-4xl"><img src='/icons/descargar.svg' alt='img descargar' width={24} height={24}/></span>
         </div>
         <p className="font-medium text-lg">Arrastra tus fotos aquí o haz clic</p>
         <p className="text-gray-500 text-sm mt-1">JPG, PNG, WEBP • Máx 15MB por foto</p>
@@ -763,36 +762,26 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
 )}
       {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
 {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
+{/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
 {step === 4 && (
   <div className="space-y-8">
-    <div className="flex justify-center mb-8">
-      <div className="flex items-center">
-        {[
-          { label: 'Detalles' },
-          { label: 'Fotos' },
-          { label: 'Precios' },
-          { label: 'Confirmación' },
-        ].map((s, i) => (
-          <React.Fragment key={i}>
-            <div className="flex flex-col items-center">
-              <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xl">✓</span>
-              </div>
-              <span className="text-xs mt-2 text-blue-600 font-medium">{s.label}</span>
-            </div>
-            {i < 3 && <div className="w-12 h-0.5 bg-blue-600 mt-4" />}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
 
-    {/* Banner */}
+    {/* Banner de confirmación */}
     <div className="relative rounded-3xl overflow-hidden h-80">
       <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
       <div className="absolute bottom-8 left-8 text-white">
-        <p className="text-4xl font-bold">Domingo 01 de Febrero del 2024</p>
-        <p className="text-2xl mt-1">{formData.location || formData.school}</p>
+        <p className="text-4xl font-bold">
+          {formData.date ? new Intl.DateTimeFormat('es-ES', { 
+            weekday: 'long', 
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric' 
+          }).format(new Date(formData.date)) : 'Tu Sesión'}
+        </p>
+        <p className="text-2xl mt-1">
+          {formData.location || formData.school || 'Ubicación'}
+        </p>
       </div>
     </div>
 
@@ -842,9 +831,6 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         </p>
       )}
     </div>
-
-  
-    
   </div>
 )}
 
@@ -885,6 +871,34 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     </button>
   </div>
 </div>
+{/* ==================== MODAL PUBLICAR ==================== */}
+{showPublishModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+      <h3 className="text-2xl font-semibold mb-4">¿Publicar la sesión?</h3>
+      <p className="text-gray-600 mb-8">
+        Una vez publicada, será visible para todos los usuarios<br />
+        y estará disponible durante 30 días. ¿Deseas continuar?
+      </p>
+
+      <div className="flex gap-4">
+        <button
+          onClick={() => setShowPublishModal(false)}
+          className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={confirmPublish}
+          disabled={publishing}
+          className="flex-1 py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
+        >
+          {publishing ? 'Publicando...' : 'Publicar'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

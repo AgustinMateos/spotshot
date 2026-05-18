@@ -139,6 +139,8 @@ export default function SesionesPage() {
                   <div className="relative rounded-3xl overflow-hidden bg-black shadow-md hover:shadow-xl transition-all">
                     {session.images?.[0]?.publicUrl ? (
                       <img
+                      onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
                         src={session.images[0].publicUrl}
                         alt={session.title}
                         className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform"

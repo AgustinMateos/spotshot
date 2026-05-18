@@ -14,10 +14,22 @@ export default function MisSesionDetail() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+const [errorMessage, setErrorMessage] = useState('');
+  // Form data para editar
+  const [formData, setFormData] = useState({
+    audience: '',
+    location: '',
+    schoolName: '',
+    startTime: '',
+    endTime: '',
+    unitPricePhotographerEur: 0,
+  });
 
-  // Cargar detalle de la sesión
+  // Cargar detalle
   useEffect(() => {
     if (!id || !token) return;
 
@@ -31,6 +43,16 @@ export default function MisSesionDetail() {
         const data = await res.json();
         if (res.ok) {
           setSession(data);
+          // Inicializar form
+          // Inicializar form (corregido)
+setFormData({
+  audience: data.audience || 'FREE_SURFERS',
+  location: data.location || '',
+  schoolName: data.schoolName || '',
+  startTime: data.startTime ? data.startTime.slice(0, 5) : '',   // ← CORREGIDO
+  endTime: data.endTime ? data.endTime.slice(0, 5) : '',         // ← CORREGIDO
+  unitPricePhotographerEur: data.pricing?.unitPricePhotographerEur || 5,
+});
         } else {
           router.push('/shot/misSesiones');
         }
@@ -72,6 +94,46 @@ export default function MisSesionDetail() {
       setDeleting(false);
     }
   };
+  const handleUpdate = async () => {
+  setUpdating(true);
+  setErrorMessage('');   // si ya tienes errorMessage
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const payload = {
+      audience: formData.audience,
+      location: formData.location || null,
+      schoolName: formData.schoolName || null,
+      startTime: formData.startTime,           // ya está en HH:mm
+      endTime: formData.endTime,               // ya está en HH:mm
+      unitPricePhotographerEur: Number(formData.unitPricePhotographerEur),
+    };
+
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      setShowEditModal(false);
+      setShowSuccess(true);
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      setErrorMessage(errorData.message || 'Error al actualizar la sesión');
+    }
+  } catch (err) {
+    console.error(err);
+    setErrorMessage('Error de conexión');
+  } finally {
+    setUpdating(false);
+  }
+};
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Cargando sesión...</div>;
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
@@ -79,7 +141,6 @@ export default function MisSesionDetail() {
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
     ? `${session.photographer.firstName} ${session.photographer.lastName}`
     : session.photographer?.alias || 'Fotógrafo';
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -90,11 +151,45 @@ export default function MisSesionDetail() {
           <span>›</span>
           <span className="text-gray-900">{session.title}</span>
         </div>
+<div className='w-full flex justify-between'> 
+  <div><p className='text-center'>Detalle de la Sesión</p></div>
+   {/* Botones de acción */}
+        <div className="flex justify-end gap-3 mb-8">
+          <button 
+    onClick={() => {
+      const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        
+      });
+    }}
+    className="flex items-center gap-2 border border-gray-300 px-5 py-2.5 rounded-xl hover:bg-gray-50 transition"
+  > <img src='/icons/copiar.svg'/>Copiar link
+          </button>
+          
+          <button 
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700"
+          >
+           <img src='/icons/eliminar.svg'/> Eliminar
+          </button>
 
+          <button 
+            onClick={() => setShowEditModal(true)}
+            className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black"
+          >
+            <img src='/icons/editar.svg'/>Editar
+          </button>
+        </div></div>
         {/* Banner grande */}
         <div className="relative h-[420px] rounded-3xl overflow-hidden mb-10">
-          <img
+          {/* <img
             src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
+            alt={session.title}
+            fill
+            className="object-cover"
+          /> */}
+           <img
+            src={'/banner-surf.png' || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
             className="object-cover"
@@ -104,39 +199,23 @@ export default function MisSesionDetail() {
           <div className="absolute bottom-10 left-10 text-white">
             <h1 className="text-5xl font-bold mb-2">{session.title}</h1>
             <p className="text-2xl opacity-90">{session.location || session.schoolName}</p>
-            <p className="text-sm opacity-75 mt-1">by {photographerName}</p>
+            
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div className="flex justify-end gap-3 mb-8">
-          <button className="flex items-center gap-2 border border-gray-300 px-5 py-2.5 rounded-xl hover:bg-gray-50">
-            Copiar link
-          </button>
-          
-          <button 
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700"
-          >
-            Eliminar
-          </button>
-
-          <button className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black">
-            Editar
-          </button>
-        </div>
+      
 
         {/* Info publicación y expiración */}
-        <div className="flex gap-8 mb-10 text-sm">
+        <div className="flex justify-between gap-8 mb-10 text-sm w-full">
           <p className="text-gray-600">Publicado hace 12 días</p>
-          <div className="flex items-center gap-2 text-amber-600">
-            <span>⏰</span>
-            <span>Expira en 17 días</span>
+          <div className="flex items-center gap-2 ">
+            <span><img height={16} width={16} alt='hour' src='/icons/timeout.svg'/></span>
+            <span className='text-[#EF4444]'>Expira en 17 días</span>
           </div>
         </div>
 
         {/* Precio y Packs */}
-        <div className="bg-white rounded-3xl p-8 mb-12">
+        <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
           <div className="flex justify-between items-start mb-8">
             <div>
               <p className="text-gray-500">Precio por foto</p>
@@ -216,7 +295,94 @@ export default function MisSesionDetail() {
           </div>
         </div>
       )}
+{showEditModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-lg w-full mx-4">
+      <h3 className="text-2xl font-semibold mb-6">Editar Sesión</h3>
 
+      {/* Mensaje de error */}
+      {errorMessage && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 text-sm">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="space-y-5">
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Tipo</label>
+          <select 
+            value={formData.audience} 
+            onChange={(e) => setFormData({...formData, audience: e.target.value})}
+            className="w-full border border-gray-300 rounded-xl p-3"
+          >
+            <option value="FREE_SURFERS">Free Surfers</option>
+            <option value="SCHOOLS">Escuelas</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Ubicación / Escuela</label>
+          <input 
+            type="text" 
+            value={formData.location || formData.schoolName} 
+            onChange={(e) => setFormData({...formData, location: e.target.value, schoolName: e.target.value})}
+            className="w-full border border-gray-300 rounded-xl p-3"
+            placeholder="Ej: Bristol o Surf School"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Hora Inicio</label>
+            <input 
+              type="time" 
+              value={formData.startTime} 
+              onChange={(e) => setFormData({...formData, startTime: e.target.value})}
+              className="w-full border border-gray-300 rounded-xl p-3"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Hora Fin</label>
+            <input 
+              type="time" 
+              value={formData.endTime} 
+              onChange={(e) => setFormData({...formData, endTime: e.target.value})}
+              className="w-full border border-gray-300 rounded-xl p-3"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
+          <input 
+            type="number" 
+            step="0.5"
+            min="1"
+            value={formData.unitPricePhotographerEur} 
+            onChange={(e) => setFormData({...formData, unitPricePhotographerEur: e.target.value})}
+            className="w-full border border-gray-300 rounded-xl p-3"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-4 mt-8">
+        <button
+          onClick={() => { setShowEditModal(false); setErrorMessage(''); }}
+          className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleUpdate}
+          disabled={updating}
+          className="flex-1 py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
+        >
+          {updating ? 'Guardando...' : 'Guardar cambios'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* ==================== MENSAJE DE ÉXITO ==================== */}
       {showSuccess && (
         <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">

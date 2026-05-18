@@ -268,8 +268,8 @@ export default function ShotPage() {
                       <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
                     )}
 
-                    <div className="absolute top-3 right-3 bg-black/70 px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
-                      📸 {session.photoCount}
+                    <div className="absolute top-3 right-3 bg-[#0F172A] px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
+                         <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora'/>{session.photoCount}
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
