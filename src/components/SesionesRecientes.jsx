@@ -50,7 +50,7 @@ export default function SesionesRecientes() {
   }
 
   return (
-    <div className="py-16 pt-40" style={{ background: "#F1F7FE" }}>
+    <div className="py-16  pt-40" style={{ background: "#F1F7FE" }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-10">
           <div>

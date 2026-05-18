@@ -732,7 +732,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
             .map((pack) => (
               <div key={pack.id} className="flex items-center justify-between bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <div className="flex items-center gap-4">
-                  <span className="text-3xl">📦</span>
+                  <span className="text-3xl"><img src='/icons/packs.svg' width={20} height={20} alt='foto'/></span>
                   <div>
                     <p className="font-semibold text-lg">{pack.label}</p>
                     <p className="text-sm text-gray-500">
@@ -748,7 +748,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
                     onChange={() => togglePack(pack.id)}
                     className="sr-only peer"
                   />
-                  <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+                  <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-[#0D2744] transition"></div>
                   <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
                 </label>
               </div>

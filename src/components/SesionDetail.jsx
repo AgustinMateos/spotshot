@@ -71,32 +71,72 @@ export default function SesionDetail() {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Precio y Packs */}
-        <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <p className="text-sm text-[#0D2744]">Precio por foto</p>
-              <p className="text-5xl text-[#0D2744] font-bold">€{session.pricing?.unitPriceCustomer || '8'}</p>
-            </div>
+        {/* Precio y Packs Mejorado */}
+<div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+    <div>
+      <p className="text-sm text-[#0D2744]">Precio por foto</p>
+      <p className="text-5xl font-bold text-[#0D2744]">
+        €{session.pricing?.unitPriceCustomer || '8'}
+      </p>
+    </div>
 
-            <div>
-              <p className="text-sm text-[#0D2744] mb-3">Comprá más, paga menos</p>
-              <div className="flex flex-wrap gap-3">
-                {session.pricing?.packs?.map((pack) => (
-                  <div 
-                    key={pack.packId} 
-                    className="bg-white px-5 py-3 rounded-2xl border border-gray-100 flex flex-col items-center min-w-[140px]"
-                  >
-                    <p className="font-medium text-sm">{pack.label}</p>
-                    <p className="text-xs text-gray-500">{pack.photoQuantity} fotos</p>
-                    <p className="text-green-600 font-semibold text-sm mt-1">
-                      -{pack.discountPercent}% OFF
-                    </p>
-                  </div>
-                ))}
+    {/* <div className="text-right">
+      <p className="text-sm text-gray-500">Commission SpotShot (25%)</p>
+      <p className="text-sm text-gray-600">
+        Tú recibes €{session.pricing?.unitPricePhotographerEur || '5'}
+      </p>
+    </div> */}
+  </div>
+
+  {/* Packs */}
+  {session.pricing?.packs && session.pricing.packs.length > 0 && (
+    <div>
+      <p className="text-sm text-[#0D2744] mb-4 font-medium">Comprá más, paga menos</p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {session.pricing.packs
+          .filter(pack => pack.enabledByPhotographer === true)  // Solo packs activados
+          .map((pack) => (
+            <div 
+              key={pack.packId} 
+              className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-200 transition-all"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-lg">{pack.label}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {pack.photoQuantity} fotos • Ahorras {pack.discountPercent}%
+                  </p>
+                </div>
+                
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-emerald-600">
+                    €{pack.effectivePricePerPhoto?.toFixed(2) || 
+                       (pack.totalAfterDiscount / pack.photoQuantity).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-500">por foto</p>
+                </div>
               </div>
+
+              {pack.totalAfterDiscount && (
+                <p className="text-sm text-emerald-600 mt-3">
+                  Total pack: €{pack.totalAfterDiscount}
+                </p>
+              )}
             </div>
-          </div>
-        </div>
+          ))}
+      </div>
+    </div>
+  )}
+
+  {/* Mensaje si no hay packs activos */}
+  {session.pricing?.packs?.filter(p => p.enabledByPhotographer).length === 0 && (
+    <p className="text-gray-500 italic text-center py-6">
+      Este fotógrafo aún no ha activado packs promocionales.
+    </p>
+  )}
+</div>
 
         {/* Galería Protegida */}
         <div>
