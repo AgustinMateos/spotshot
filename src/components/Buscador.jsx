@@ -1,19 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { MapPin } from 'lucide-react'; // Instala con: npm install lucide-react
+import React, { useState } from 'react';
+import { MapPin } from 'lucide-react';
 
 export default function Buscador() {
   const [activeTab, setActiveTab] = useState('free');
 
   return (
-    <div className="relative -mt-12 z-10 px-6 pb-12 ">
+    <div className="relative -mt-12 z-10 px-6 pb-12">   {/* ← Reduje el padding inferior */}
       <div className="max-w-4xl mx-auto">
         
-        {/* Contenedor principal */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden ">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           
-          {/* Tabs redondeados */}
+          {/* Tabs */}
           <div className="flex p-2 border-b border-gray-100">
             <div className="inline-flex bg-gray-100 rounded-2xl p-1">
               <button
@@ -39,11 +38,9 @@ export default function Buscador() {
             </div>
           </div>
 
-          {/* Barra de búsqueda grande */}
+          {/* Barra de búsqueda */}
           <div className="p-6">
-            <div className="flex flex-col md:flex-row items-center gap-4  bg-white border border-gray-200 rounded-3xl p-2 shadow-sm">
-              
-              {/* Input Playa */}
+            <div className="flex flex-col md:flex-row items-center gap-4 bg-white border border-gray-200 rounded-3xl p-2 shadow-sm">
               <div className="flex-1 flex items-center gap-3 px-5 py-4">
                 <MapPin className="text-gray-400" size={22} />
                 <div className="flex-1">
@@ -56,8 +53,7 @@ export default function Buscador() {
                 </div>
               </div>
 
-              {/* Botón Buscar */}
-              <button className="w-full md:w-auto bg-[#DEB656] hover:bg-[#deb556c4] transition-all text-white font-semibold px-10 py-4 rounded-2xl whitespace-nowrap text-base active:scale-[0.97]">
+              <button className="w-full md:w-auto bg-[#DEB656] hover:bg-[#c99c3f] transition-all text-white font-semibold px-10 py-4 rounded-2xl whitespace-nowrap text-base active:scale-[0.97]">
                 Buscar fotos
               </button>
             </div>

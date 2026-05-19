@@ -198,19 +198,21 @@ export default function MisSesiones() {
                     <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
                   )}
 
-                  <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-                    📸 {session.photoCount} fotos
+                  <div className="absolute top-3 flex right-3 bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full">
+                       <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora'/> {session.photoCount} fotos
+                                   
                   </div>
 
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
+                    <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
+                      {session.status}
+                    </div>
                     <p className="font-semibold text-lg">{session.title}</p>
                     <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                     <p className="text-xs opacity-75 mt-1">
                       {session.startTime} - {session.endTime}
                     </p>
-                    <div className="text-xs mt-2 inline-block px-3 py-1 bg-white/20 rounded-full">
-                      {session.status}
-                    </div>
+                    
                   </div>
                 </div>
               </Link>

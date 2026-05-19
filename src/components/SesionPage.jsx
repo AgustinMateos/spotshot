@@ -141,6 +141,22 @@ setFormData({
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
     ? `${session.photographer.firstName} ${session.photographer.lastName}`
     : session.photographer?.alias || 'Fotógrafo';
+    // Funciones para calcular días
+const getDaysSincePublished = (publishedAt) => {
+  if (!publishedAt) return 0;
+  const published = new Date(publishedAt);
+  const now = new Date();
+  const diffTime = Math.abs(now - published);
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+const getDaysUntil = (activeUntil) => {
+  if (!activeUntil) return 0;
+  const until = new Date(activeUntil);
+  const now = new Date();
+  const diffTime = until - now;
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+};
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -206,13 +222,23 @@ setFormData({
       
 
         {/* Info publicación y expiración */}
-        <div className="flex justify-between gap-8 mb-10 text-sm w-full">
-          <p className="text-gray-600">Publicado hace 12 días</p>
-          <div className="flex items-center gap-2 ">
-            <span><img height={16} width={16} alt='hour' src='/icons/timeout.svg'/></span>
-            <span className='text-[#EF4444]'>Expira en 17 días</span>
-          </div>
-        </div>
+       {/* Info publicación y expiración */}
+<div className="flex justify-between gap-8 mb-10 text-sm w-full">
+  <p className="text-gray-600">
+    Publicado hace {getDaysSincePublished(session.publishedAt)} días
+  </p>
+  
+  {session.activeUntil && (
+    <div className="flex items-center gap-2">
+      <span>
+        <img height={16} width={16} alt='hour' src='/icons/timeout.svg' />
+      </span>
+      <span className="text-[#EF4444]">
+        Expira en {getDaysUntil(session.activeUntil)} días
+      </span>
+    </div>
+  )}
+</div>
 
         {/* Precio y Packs */}
         <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
@@ -225,22 +251,35 @@ setFormData({
 
           <div>
             <p className="font-medium mb-4">Packs activos</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {session.pricing?.packs?.map(pack => (
-                <div key={pack.packId} className="border border-gray-200 rounded-2xl p-5">
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-semibold">{pack.label}</p>
-                      <p className="text-sm text-gray-500">{pack.photoQuantity} fotos</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-green-600 font-medium">-{pack.discountPercent}% OFF</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {session.pricing?.packs
+    ?.filter(pack => pack.enabledByPhotographer === true) // Solo los que el fotógrafo activó
+    .map(pack => (
+      <div key={pack.packId} className="border border-gray-200 rounded-2xl p-5">
+        <div className="flex justify-between">
+          <div>
+            <p className="font-semibold">{pack.label}</p>
+            <p className="text-sm text-gray-500">{pack.photoQuantity} fotos</p>
           </div>
+          <div className="text-right">
+            <span className="text-green-600 font-medium">-{pack.discountPercent}% OFF</span>
+            <p className="text-xs text-gray-500 mt-1">
+              €{pack.effectivePricePerPhoto || '—'} / foto
+            </p>
+          </div>
+        </div>
+      </div>
+    ))}
+
+  {/* Mensaje si no hay packs activos */}
+  {(!session.pricing?.packs || 
+    session.pricing.packs.filter(p => p.enabledByPhotographer).length === 0) && (
+    <p className="text-gray-500 italic col-span-full py-4">
+      No tienes packs activos en esta sesión
+    </p>
+  )}
+</div>
+</div>
         </div>
 
         {/* Galería de fotos */}
