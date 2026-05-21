@@ -30,6 +30,7 @@ const OrderSuccessPage = () => {
     }
     setLoading(false);
   }, [searchParams]);
+  
 
   const maskedEmail = email 
     ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') 
