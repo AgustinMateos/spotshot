@@ -4,14 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const OrderSuccessPage = () => {
+const OrderSuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [orderId, setOrderId] = useState('');
   const [email, setEmail] = useState('');
   const [imageCount, setImageCount] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const orderIdParam = searchParams.get('orderId');
@@ -23,39 +22,25 @@ const OrderSuccessPage = () => {
       setEmail(emailParam || '');
       setImageCount(parseInt(countParam || '0'));
     } else {
-      // Fallback para pruebas
+      // Fallback temporal
       setOrderId('312dab89-09ff-4713-84c1-f1fa219ce13a');
       setEmail('agustinxx@gmail.com');
       setImageCount(8);
     }
-    setLoading(false);
   }, [searchParams]);
-  
 
   const maskedEmail = email 
     ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') 
     : 'tu@email.com';
 
   const handleDownload = () => {
-    if (orderId) {
-      alert(`Descargando ${imageCount} imágenes de la orden ${orderId}...`);
-      // Próximamente: window.location.href = `/api/orders/${orderId}/download`;
-    }
+    alert(`Descargando ${imageCount} imágenes de la orden ${orderId}...`);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl">
-        Cargando tu orden...
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
         
-        {/* Ilustración */}
         <div className="mb-10 flex justify-center">
           <img 
             src="/success-illustration.svg" 
@@ -98,4 +83,4 @@ const OrderSuccessPage = () => {
   );
 };
 
-export default OrderSuccessPage;
+export default OrderSuccessContent;
