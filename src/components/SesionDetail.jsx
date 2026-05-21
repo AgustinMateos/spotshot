@@ -15,7 +15,9 @@ export default function SesionDetail() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
-
+const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -80,6 +82,46 @@ export default function SesionDetail() {
 
   const firstImage = session.images?.[0]?.publicUrl || '/banner-surf.png';
 
+ 
+    // ✅ Función para finalizar compra
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+
+    setIsSubmitting(true);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const payload = {
+      imageIds: cart.map(item => item.id),
+      buyerEmail: buyerEmail.trim() || undefined,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/api/v1/orders/checkout/from-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || 'Error al crear el checkout');
+        return;
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert('No se recibió la URL de pago');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión con el servidor');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-white">
       {/* Banner grande */}
@@ -232,7 +274,11 @@ export default function SesionDetail() {
                 </div>
               </div>
 
-              <button className="w-full bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg">
+                            {/* Botón que abre el modal */}
+              <button 
+                onClick={() => setIsCheckoutModalOpen(true)}
+                className="w-full bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
+              >
                 Finalizar compra
               </button>
             </div>
@@ -276,9 +322,57 @@ export default function SesionDetail() {
                 </button>
               </div>
             </div>
-
+      
             <div className="text-center text-white mt-4 text-sm">
               {currentIndex + 1} / {session.images.length}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL DE EMAIL + CHECKOUT */}
+      {isCheckoutModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="flex justify-between items-center p-6 border-b">
+              <button 
+                onClick={() => setIsCheckoutModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1"
+              >
+                ← Volver a la selección de fotos
+              </button>
+              <button 
+                onClick={() => setIsCheckoutModalOpen(false)} 
+                className="text-gray-400 hover:text-black"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-8">
+              <h2 className="text-2xl font-semibold mb-2">Ingresa tu correo electrónico</h2>
+              <p className="text-gray-600 mb-6">
+                Te enviaremos por mail las imágenes en alta calidad
+              </p>
+
+              <input
+                type="email"
+                placeholder="Ejemplo@gmail.com"
+                value={buyerEmail}
+                onChange={(e) => setBuyerEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-8 text-base"
+              />
+
+              <button
+                onClick={handleCheckout}
+                disabled={isSubmitting}
+                className="w-full bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium transition"
+              >
+                {isSubmitting ? 'Procesando...' : 'Ir a pagar'}
+              </button>
+
+              <p className="text-center text-xs text-gray-500 mt-4">
+                Checkout rápido con Stripe
+              </p>
             </div>
           </div>
         </div>
