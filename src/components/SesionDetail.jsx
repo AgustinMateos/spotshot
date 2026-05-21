@@ -110,9 +110,16 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
         return;
       }
 
-      if (data.checkoutUrl) {
+            if (data.checkoutUrl) {
+        // Opcional: guardar temporalmente en localStorage por si Stripe no pasa los params
+        localStorage.setItem('lastOrder', JSON.stringify({
+          orderId: data.orderId,
+          email: buyerEmail,
+          imageCount: cart.length
+        }));
+
         window.location.href = data.checkoutUrl;
-      } else {
+      }else {
         alert('No se recibió la URL de pago');
       }
     } catch (err) {
