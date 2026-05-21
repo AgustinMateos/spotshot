@@ -6,7 +6,7 @@ const Footer = ({ isShotSection = false }) => {
   const logoHref = isShotSection ? '/shot' : '/';
 
   return (
-    <footer className="bg-[#0F172A] text-white py-12 z-10">
+    <footer className="bg-[#103457] text-white py-12 z-10">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Contenido principal */}

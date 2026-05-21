@@ -20,7 +20,7 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled 
-        ? 'bg-[#0F172A] backdrop-blur-md shadow-md' 
+        ? 'bg-[#103457] backdrop-blur-md shadow-md' 
         : 'bg-transparent'
     }`}>
       <div className="max-w-full px-6 py-5 flex items-center justify-between">
@@ -78,7 +78,7 @@ const Navbar = () => {
 
       {/* Menú Mobile */}
       {isOpen && (
-        <div className="md:hidden bg-[#0F172A] border-t border-white/10">
+        <div className="md:hidden bg-[#103457] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white text-lg">
             <a href="/shot" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
             <a href="/register" onClick={() => setIsOpen(false)}>Vender fotos</a>
