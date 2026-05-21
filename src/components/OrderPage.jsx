@@ -1,24 +1,54 @@
 'use client';
 
-import React from 'react';
-import { Download, ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const OrderSuccessPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Datos de ejemplo (después los vas a recibir por props o URL)
-  const orderId = "ORD-987654";
-  const email = "agustinxx@gmail.com";
-  const imageCount = 8;
+  const [orderId, setOrderId] = useState('');
+  const [email, setEmail] = useState('');
+  const [imageCount, setImageCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+  useEffect(() => {
+    const orderIdParam = searchParams.get('orderId');
+    const emailParam = searchParams.get('email');
+    const countParam = searchParams.get('count');
+
+    if (orderIdParam) {
+      setOrderId(orderIdParam);
+      setEmail(emailParam || '');
+      setImageCount(parseInt(countParam || '0'));
+    } else {
+      // Fallback para pruebas
+      setOrderId('312dab89-09ff-4713-84c1-f1fa219ce13a');
+      setEmail('agustinxx@gmail.com');
+      setImageCount(8);
+    }
+    setLoading(false);
+  }, [searchParams]);
+
+  const maskedEmail = email 
+    ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') 
+    : 'tu@email.com';
 
   const handleDownload = () => {
-    alert('✅ Descargando tus imágenes en alta calidad...');
-    // Aquí vas a poner la lógica real de descarga más adelante
-    // Ej: window.location.href = `/api/orders/${orderId}/download`;
+    if (orderId) {
+      alert(`Descargando ${imageCount} imágenes de la orden ${orderId}...`);
+      // Próximamente: window.location.href = `/api/orders/${orderId}/download`;
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl">
+        Cargando tu orden...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
@@ -33,7 +63,6 @@ const OrderSuccessPage = () => {
           />
         </div>
 
-        {/* Título y mensaje */}
         <h1 className="text-4xl font-bold text-[#0D2744] mb-4 leading-tight">
           ¡Felicitaciones! Tus imágenes ya están disponibles
         </h1>
@@ -43,7 +72,6 @@ const OrderSuccessPage = () => {
           o descárgalas aquí mismo
         </p>
 
-        {/* Botones */}
         <div className="space-y-4">
           <button
             onClick={handleDownload}
@@ -61,9 +89,8 @@ const OrderSuccessPage = () => {
           </button>
         </div>
 
-        {/* Orden ID */}
         <div className="mt-8 text-sm text-gray-500">
-          Orden: <span className="font-mono text-gray-400">{orderId}</span>
+          Orden: <span className="font-mono break-all">{orderId}</span>
         </div>
       </div>
     </div>
