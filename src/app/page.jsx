@@ -7,7 +7,7 @@ import Fotografo from "@/components/Fotografo";
 import FotosHoy from "@/components/FotosHoy";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Buscador from "@/components/Buscador";
+
 export default function Home() {
   return (
     <>
@@ -38,7 +38,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-<Buscador />
+
       {/* Sesiones Recientes */}
       <SesionesRecientes />
 

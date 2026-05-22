@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Buscador from './Buscador';
 
 export default function SesionesRecientes() {
   const [sessions, setSessions] = useState([]);
@@ -51,6 +52,7 @@ export default function SesionesRecientes() {
 
   return (
     <div className="py-16  pt-40" style={{ background: "#F1F7FE" }}>
+      <Buscador />
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-10">
           <div>

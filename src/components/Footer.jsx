@@ -35,7 +35,7 @@ const Footer = ({ isShotSection = false }) => {
 
           {/* Links */}
           <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm md:text-base">
-            <a href="/shot" className="hover:text-[#D4A373] transition-colors">
+            <a href="/sesiones" className="hover:text-[#D4A373] transition-colors">
               Buscar sesión
             </a>
             <a href="/register" className="hover:text-[#D4A373] transition-colors">

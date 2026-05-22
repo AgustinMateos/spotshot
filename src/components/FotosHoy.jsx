@@ -1,5 +1,5 @@
 import React from 'react';
-
+import Link from 'next/link';
 const FotosHoy = () => {
   return (
     <div className="w-[90%]  mx-auto px-4  py-8">
@@ -19,12 +19,13 @@ const FotosHoy = () => {
             ¿Todavía no tenés tus fotos de hoy?
           </h2>
 
-          <button 
-            className="bg-[#C8A24D] hover:bg-[#c8a14dc8] active:scale-95 transition-all flex justify-center items-center 
+         <Link 
+            href="/sesiones"
+            className="bg-[#C8A24D] hover:bg-[#b38f3f] active:scale-95 transition-all flex justify-center items-center 
                        text-white font-medium px-12 h-[48px] w-[220px] py-4 rounded-2xl text-lg shadow-lg"
           >
             Buscar sesión
-          </button>
+          </Link>
         </div>
       </div>
     </div>

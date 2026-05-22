@@ -12,7 +12,8 @@ export default function ShotPage() {
   const [allSessions, setAllSessions] = useState([]); // Todas las sesiones del backend
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingSessions, setLoadingSessions] = useState(true);
-
+  const [loadingInitial, setLoadingInitial] = useState(true);
+const [loadingFilters, setLoadingFilters] = useState(false);
   // Filtros
   const [filters, setFilters] = useState({
     search: '',           // Búsqueda instantánea (client-side)
@@ -51,44 +52,46 @@ export default function ShotPage() {
   }, [token]);
 
   // Cargar Mis Sesiones (solo cuando cambian filtros del backend)
-  useEffect(() => {
-    const loadMySessions = async () => {
-      if (!token) return;
-      setLoadingSessions(true);
+ useEffect(() => {
+  const loadMySessions = async () => {
+    if (!token) return;
+    
+    setLoadingFilters(true);        // ← solo loading de filtros
 
-      const params = new URLSearchParams();
-      if (filters.audience) params.append('audience', filters.audience);
-      if (filters.status) params.append('status', filters.status);
-      if (filters.location) params.append('location', filters.location);
-      if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
-      params.append('page', filters.page);
+    const params = new URLSearchParams();
+    if (filters.audience) params.append('audience', filters.audience);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.location) params.append('location', filters.location);
+    if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
+    params.append('page', filters.page);
 
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(
-          `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(
+        `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        const data = await res.json();
-        if (res.ok) {
-          setAllSessions(data.items || []);
-          setPagination({
-            total: data.total || 0,
-            totalPages: data.totalPages || 1,
-            hasPreviousPage: data.hasPreviousPage || false,
-            hasNextPage: data.hasNextPage || false,
-          });
-        }
-      } catch (err) {
-        console.error("Error cargando mis sesiones:", err);
-      } finally {
-        setLoadingSessions(false);
+      const data = await res.json();
+      if (res.ok) {
+        setAllSessions(data.items || []);
+        setPagination({
+          total: data.total || 0,
+          totalPages: data.totalPages || 1,
+          hasPreviousPage: data.hasPreviousPage || false,
+          hasNextPage: data.hasNextPage || false,
+        });
       }
-    };
-    loadMySessions();
-  }, [token, filters.audience, filters.status, filters.location, filters.sessionDate, filters.page]);
+    } catch (err) {
+      console.error("Error cargando mis sesiones:", err);
+    } finally {
+      setLoadingFilters(false);
+      if (loadingInitial) setLoadingInitial(false); // solo la primera vez
+    }
+  };
 
+  loadMySessions();
+}, [token, filters.audience, filters.status, filters.location, filters.sessionDate, filters.page]);
   // Filtrado instantáneo (client-side) - Sin loading al escribir
   const filteredSessions = useMemo(() => {
     if (!filters.search.trim()) return allSessions;
@@ -115,14 +118,13 @@ export default function ShotPage() {
 
   const isStripeReady = stripeConnect?.isReady === true;
   const alias = user?.alias || 'Fotógrafo';
-
-  if (authLoading || loadingProfile || loadingSessions) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
-      </div>
-    );
-  }
+if (authLoading || loadingProfile || loadingInitial) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-500">Cargando...</p>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-white">
