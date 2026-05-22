@@ -56,7 +56,7 @@ export default function SesionesRecientes() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Nuevas sesiones todos los días</p>
+            <p className="text-sm  mb-1 bg-white w-[220px] text-[#1E3A5F] p-1.5 text-center rounded-2xl">Nuevas sesiones todos los días</p>
             <h2 className="text-4xl font-semibold text-gray-900">Sesiones recientes</h2>
           </div>
           <Link href="/sesiones" className="flex items-center gap-2 text-gray-700 hover:text-black font-medium">

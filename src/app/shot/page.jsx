@@ -208,7 +208,7 @@ if (authLoading || loadingProfile || loadingInitial) {
             <>
                 <div>
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold">Mis sesiones ({filteredSessions.length})</h3>
+            <h3 className="text-xl text-[#10487C] font-semibold">Mis sesiones ({filteredSessions.length})</h3>
             <Link 
               href="/shot/newAlbum" 
               className="bg-gray-900 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-black"
