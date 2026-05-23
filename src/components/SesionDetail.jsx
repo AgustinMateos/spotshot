@@ -46,7 +46,10 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   const totalPhotos = cart.length;
   const subtotal = totalPhotos * unitPrice;
-
+// Función para verificar si una foto ya está en el carrito
+const isInCart = (imageId) => {
+  return cart.some(item => item.id === imageId);
+};
   let discount = 0;
   let packName = '';
   if (totalPhotos >= 10) {
@@ -335,15 +338,28 @@ const formatPrice = (price) => {
                 <ChevronRight size={36} />
               </button>
 
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                <button
-                  onClick={() => addToCart(session.images[currentIndex], session)}
-                  className="bg-[#1F2937] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
-                >
-                  <ShoppingCart size={24} />
-                  Agregar al carrito
-                </button>
-              </div>
+              {/* BOTÓN DENTRO DEL LIGHTBOX */}
+<div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+  {isInCart(session.images[currentIndex].id) ? (
+    <button
+      className="bg-emerald-600 text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl cursor-default"
+      disabled
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+      </svg>
+      Foto agregada
+    </button>
+  ) : (
+    <button
+      onClick={() => addToCart(session.images[currentIndex], session)}
+      className="bg-[#1F2937] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
+    >
+      <ShoppingCart size={24} />
+      Agregar al carrito
+    </button>
+  )}
+</div>
             </div>
       
             <div className="text-center text-white mt-4 text-sm">
