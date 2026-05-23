@@ -339,7 +339,7 @@ const formatPrice = (price) => {
               </button>
 
               {/* BOTÓN DENTRO DEL LIGHTBOX */}
-<div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+<div className="absolute bottom-1 md:bottom-8 left-1/2 -translate-x-1/2">
   {isInCart(session.images[currentIndex].id) ? (
     <button
       className="bg-emerald-600 text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl cursor-default"
@@ -353,7 +353,7 @@ const formatPrice = (price) => {
   ) : (
     <button
       onClick={() => addToCart(session.images[currentIndex], session)}
-      className="bg-[#1F2937] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
+      className="bg-[#1F2937] w-[255px] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
     >
       <ShoppingCart size={24} />
       Agregar al carrito
