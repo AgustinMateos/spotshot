@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
-import Link from 'next/link';
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading } = useAuth();
@@ -34,11 +33,6 @@ const NewAlbumPage = () => {
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [publishing, setPublishing] = useState(false);
 // Cargar catálogo de packs
-
-  // Estados para Pop-up
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState('');
-  const [popupType, setPopupType] = useState('error'); // 'error' o 'success'
 useEffect(() => {
   const loadPacks = async () => {
     if (!token) return;
@@ -103,22 +97,12 @@ const confirmPublish = async () => {
     setPublishing(false);
   }
 };
-  const showPopupMessage = (message, type = 'error') => {
-    setPopupMessage(message);
-    setPopupType(type);
-    setShowPopup(true);
-
-    // Se cierra automáticamente después de 4.5 segundos
-    setTimeout(() => {
-      setShowPopup(false);
-    }, 4500);
-  };
 // ====================== CREAR SESIÓN ======================
 const handleCreateSession = async () => {
   if (!formData.date || !formData.startTime || !formData.endTime) {
-  showPopupMessage("Por favor completa la fecha y los horarios");
-  return;
-}
+    alert("Por favor completa la fecha y horarios");
+    return;
+  }
 
   // === DEBUG TOKEN ===
   console.log("🔑 DEBUG TOKEN EN CREATE SESSION:");
@@ -161,7 +145,7 @@ const handleCreateSession = async () => {
 
     if (res.ok) {
       setSessionId(data.id);
-    
+
       setStep(2);
     } else {
       alert(data.message || 'Error al crear la sesión');
@@ -240,7 +224,11 @@ const handleUploadPhotos = async () => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const url = `${API_URL}/api/v1/photo-sessions/${sessionId}/images`;
 
-   
+    console.log("🔍 DEBUG UPLOAD:");
+    console.log("→ API_URL:", API_URL);
+    console.log("→ URL completa:", url);
+    console.log("→ Token existe:", !!token);
+    console.log("→ Cantidad de fotos:", photos.length);
 
     const res = await fetch(url, {
       method: 'POST',
@@ -262,7 +250,7 @@ const handleUploadPhotos = async () => {
     console.log("→ Respuesta del servidor:", data);
 
    if (res.ok) {
- 
+
   setUploadedImages(data.images || []);
   setPhotos([]);           // Limpiamos las pendientes
 } else {
@@ -322,7 +310,7 @@ const handleUpdatePricing = async () => {
         setFormData(prev => ({ ...prev, basePrice: serverPrice }));
       }
 
-      
+
       setStep(4);
     } else {
       alert(data.message || 'Error al guardar precio');
@@ -399,58 +387,20 @@ const handleUpdatePacks = async () => {
   const handleFileSelect = (e) => handleFiles(e.target.files);
 
 const handleNext = async () => {
-  // ==================== PASO 1 ====================
   if (step === 1) {
-  if (!formData.date || !formData.startTime || !formData.endTime) {
-    showPopupMessage("Por favor completa la fecha y los horarios");
-    return;
-  }
-  if (formData.type === 'free-surfers' && !formData.location?.trim()) {
-    showPopupMessage("Debes indicar la playa o ubicación");
-    return;
-  }
-  if (formData.type === 'escuelas' && !formData.school?.trim()) {
-    showPopupMessage("Debes indicar el nombre de la escuela");
-    return;
-  }
-  await handleCreateSession();
-}
-
-  // ==================== PASO 2 ====================
+    await handleCreateSession();
+  } 
   else if (step === 2) {
-    if (photos.length === 0 && uploadedImages.length === 0) {
-      alert("❌ Debes seleccionar al menos una foto para subir");
-      return; // ← NO avanza
-    }
-
     if (photos.length > 0) {
       await handleUploadPhotos();
-      // Solo avanzamos si la subida fue exitosa
-      // (handleUploadPhotos ya actualiza uploadedImages si todo va bien)
-    } else {
-      setStep(3); // Si ya tenía fotos subidas, avanza directamente
     }
+    setStep(3);
   } 
-
-  // ==================== PASO 3 ====================
   else if (step === 3) {
-    if (formData.basePrice < 1) {
-      alert("❌ El precio debe ser mayor o igual a 1€");
-      return;
-    }
-
-    if (uploadedImages.length === 0) {
-      alert("❌ Debes subir al menos una foto antes de configurar el precio");
-      setStep(2);
-      return;
-    }
-
-    await handleUpdatePricing(); // Solo avanza si todo está bien (dentro de handleUpdatePricing ya haces setStep(4))
+    await handleUpdatePricing();
   } 
-
-  // ==================== PASO 4 ====================
   else if (step === 4) {
-    await handlePublishSession();
+    await handlePublishSession();   // ← Ahora publica aquí
   }
 };
 
@@ -477,7 +427,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       {/* Header */}
       <div className="border-b bg-white">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-2 text-sm text-gray-600">
-          <Link href='/shot/misSesiones'>Mis sesiones</Link>
+          <span>Mis sesiones</span>
           <span>›</span>
           <span className="font-medium text-gray-900">Nueva sesión</span>
         </div>
@@ -576,7 +526,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Escuela o Ubicación */}
     {formData.type === 'escuelas' ? (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium  "><Image width={16} height={16} alt='playa' src={'/icons/school.svg'}/>  Nombre de la Escuela</label>
+        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/school.svg'}/>  Nombre de la Escuela</label>
         <input
           type="text"
           value={formData.school}
@@ -587,7 +537,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       </div>
     ) : (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium  "><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> Playa / Ubicación</label>
+        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> Playa / Ubicación</label>
         <input
           type="text"
           value={formData.location}
@@ -601,7 +551,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Fecha y Hora */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
-        <label className="block text-gray-700 mb-2 font-medium "><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
+        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
         <input
           type="date"
           value={formData.date}
@@ -610,7 +560,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         />
       </div>
       <div>
-        <label className="block text-gray-700 mb-2 font-medium "><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
+        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
         <div className='flex gap-4'><input
           type="time"
           value={formData.startTime}
@@ -624,13 +574,13 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         /></div>
       </div>
       <div>
-       
-        
+
+
       </div>
     </div>
 
-    
-   
+
+
   </div>
 )}
 
@@ -807,10 +757,11 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       )}
     </div>
 
-    
+
   </div>
 )}
-
+      {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
+{/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
 {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
 {step === 4 && (
   <div className="space-y-8">
@@ -818,7 +769,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Banner de confirmación */}
     <div className="relative rounded-3xl overflow-hidden h-80">
       <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
       <div className="absolute bottom-8 left-8 text-white">
         <p className="text-4xl font-bold">
           {formData.date ? new Intl.DateTimeFormat('es-ES', { 
@@ -949,30 +900,8 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
   </div>
 )}
       </div>
-              {/* ==================== POP-UP / TOAST ==================== */}
-        {showPopup && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border 
-              ${popupType === 'error' 
-                ? 'bg-red-50 border-red-300 text-red-800' 
-                : 'bg-green-50 border-green-300 text-green-800'}`}>
-              <div className="text-2xl">
-                {popupType === 'error' ? '⚠️' : '✅'}
-              </div>
-              <p className="font-medium pr-6">{popupMessage}</p>
-              
-              <button 
-                onClick={() => setShowPopup(false)}
-                className="ml-4 text-gray-500 hover:text-gray-700 text-xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
     </div>
-
   );
 };
 
-export default NewAlbumPage;
+export default NewAlbumPage
