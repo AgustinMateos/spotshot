@@ -18,7 +18,7 @@ export default function MisSesionDetail() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   // Form data para editar
   const [formData, setFormData] = useState({
     audience: '',
@@ -45,14 +45,14 @@ const [errorMessage, setErrorMessage] = useState('');
           setSession(data);
           // Inicializar form
           // Inicializar form (corregido)
-setFormData({
-  audience: data.audience || 'FREE_SURFERS',
-  location: data.location || '',
-  schoolName: data.schoolName || '',
-  startTime: data.startTime ? data.startTime.slice(0, 5) : '',   // ← CORREGIDO
-  endTime: data.endTime ? data.endTime.slice(0, 5) : '',         // ← CORREGIDO
-  unitPricePhotographerEur: data.pricing?.unitPricePhotographerEur || 5,
-});
+          setFormData({
+            audience: data.audience || 'FREE_SURFERS',
+            location: data.location || '',
+            schoolName: data.schoolName || '',
+            startTime: data.startTime ? data.startTime.slice(0, 5) : '',   // ← CORREGIDO
+            endTime: data.endTime ? data.endTime.slice(0, 5) : '',         // ← CORREGIDO
+            unitPricePhotographerEur: data.pricing?.unitPricePhotographerEur || 5,
+          });
         } else {
           router.push('/shot/misSesiones');
         }
@@ -95,45 +95,45 @@ setFormData({
     }
   };
   const handleUpdate = async () => {
-  setUpdating(true);
-  setErrorMessage('');   // si ya tienes errorMessage
+    setUpdating(true);
+    setErrorMessage('');   // si ya tienes errorMessage
 
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-    const payload = {
-      audience: formData.audience,
-      location: formData.location || null,
-      schoolName: formData.schoolName || null,
-      startTime: formData.startTime,           // ya está en HH:mm
-      endTime: formData.endTime,               // ya está en HH:mm
-      unitPricePhotographerEur: Number(formData.unitPricePhotographerEur),
-    };
+      const payload = {
+        audience: formData.audience,
+        location: formData.location || null,
+        schoolName: formData.schoolName || null,
+        startTime: formData.startTime,           // ya está en HH:mm
+        endTime: formData.endTime,               // ya está en HH:mm
+        unitPricePhotographerEur: Number(formData.unitPricePhotographerEur),
+      };
 
-    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+      const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      setShowEditModal(false);
-      setShowSuccess(true);
-      setTimeout(() => window.location.reload(), 1500);
-    } else {
-      const errorData = await res.json().catch(() => ({}));
-      setErrorMessage(errorData.message || 'Error al actualizar la sesión');
+      if (res.ok) {
+        setShowEditModal(false);
+        setShowSuccess(true);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        setErrorMessage(errorData.message || 'Error al actualizar la sesión');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Error de conexión');
+    } finally {
+      setUpdating(false);
     }
-  } catch (err) {
-    console.error(err);
-    setErrorMessage('Error de conexión');
-  } finally {
-    setUpdating(false);
-  }
-};
+  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Cargando sesión...</div>;
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
@@ -141,22 +141,22 @@ setFormData({
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
     ? `${session.photographer.firstName} ${session.photographer.lastName}`
     : session.photographer?.alias || 'Fotógrafo';
-    // Funciones para calcular días
-const getDaysSincePublished = (publishedAt) => {
-  if (!publishedAt) return 0;
-  const published = new Date(publishedAt);
-  const now = new Date();
-  const diffTime = Math.abs(now - published);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
+  // Funciones para calcular días
+  const getDaysSincePublished = (publishedAt) => {
+    if (!publishedAt) return 0;
+    const published = new Date(publishedAt);
+    const now = new Date();
+    const diffTime = Math.abs(now - published);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
 
-const getDaysUntil = (activeUntil) => {
-  if (!activeUntil) return 0;
-  const until = new Date(activeUntil);
-  const now = new Date();
-  const diffTime = until - now;
-  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-};
+  const getDaysUntil = (activeUntil) => {
+    if (!activeUntil) return 0;
+    const until = new Date(activeUntil);
+    const now = new Date();
+    const diffTime = until - now;
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -167,78 +167,89 @@ const getDaysUntil = (activeUntil) => {
           <span>›</span>
           <span className="text-gray-900">{session.title}</span>
         </div>
-<div className='w-full flex justify-between'> 
-  <div><p className='text-center'>Detalle de la Sesión</p></div>
-   {/* Botones de acción */}
-        <div className="flex justify-end gap-3 mb-8">
-          <button 
+        <div className='w-full flex-col md:flex-row flex justify-between'>
+          <div><p className='md:text-center'>Detalle de la Sesión</p></div>
+          {/* Botones de acción */}
+         {/* Botones de acción */}
+<div className="flex justify-end gap-3 mb-8">
+  
+  {/* Copiar Link */}
+  <button
     onClick={() => {
       const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
       navigator.clipboard.writeText(shareUrl).then(() => {
-        
+        // Opcional: mostrar mensaje de copiado
       });
     }}
     className="flex items-center gap-2 border border-gray-300 px-5 py-2.5 rounded-xl hover:bg-gray-50 transition"
-  > <img src='/icons/copiar.svg'/>Copiar link
-          </button>
-          
-          <button 
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700"
-          >
-           <img src='/icons/eliminar.svg'/> Eliminar
-          </button>
+  >
+    <img src='/icons/copiar.svg' alt="copiar" className="w-5 h-5" />
+    <span className="hidden md:inline">Copiar link</span>
+  </button>
 
-          <button 
-            onClick={() => setShowEditModal(true)}
-            className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black"
-          >
-            <img src='/icons/editar.svg'/>Editar
-          </button>
-        </div></div>
+  {/* Eliminar */}
+  <button
+    onClick={() => setShowDeleteModal(true)}
+    className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700 transition"
+  >
+    <img src='/icons/eliminar.svg' alt="eliminar" className="w-5 h-5" />
+    <span className="hidden md:inline">Eliminar</span>
+  </button>
+
+  {/* Editar */}
+  <button
+    onClick={() => setShowEditModal(true)}
+    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition"
+  >
+    <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
+    <span className="hidden md:inline">Editar</span>
+  </button>
+
+</div>
+          </div>
         {/* Banner grande */}
-        <div className="relative h-[420px] rounded-3xl overflow-hidden mb-10">
+        <div className="relative h-105 rounded-3xl overflow-hidden mb-10">
           {/* <img
             src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
             className="object-cover"
           /> */}
-           <img
+          <img
             src={'/banner-surf.png' || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/70" />
 
           <div className="absolute bottom-10 left-10 text-white">
             <h1 className="text-5xl font-bold mb-2">{session.title}</h1>
             <p className="text-2xl opacity-90">{session.location || session.schoolName}</p>
-            
+
           </div>
         </div>
 
-      
+
 
         {/* Info publicación y expiración */}
-       {/* Info publicación y expiración */}
-<div className="flex justify-between gap-8 mb-10 text-sm w-full">
-  <p className="text-gray-600">
-    Publicado hace {getDaysSincePublished(session.publishedAt)} días
-  </p>
-  
-  {session.activeUntil && (
-    <div className="flex items-center gap-2">
-      <span>
-        <img height={16} width={16} alt='hour' src='/icons/timeout.svg' />
-      </span>
-      <span className="text-[#EF4444]">
-        Expira en {getDaysUntil(session.activeUntil)} días
-      </span>
-    </div>
-  )}
-</div>
+        {/* Info publicación y expiración */}
+        <div className="flex justify-between gap-8 mb-10 text-sm w-full">
+          <p className="text-gray-600">
+            Publicado hace {getDaysSincePublished(session.publishedAt)} días
+          </p>
+
+          {session.activeUntil && (
+            <div className="flex items-center gap-2">
+              <span>
+                <img height={16} width={16} alt='hour' src='/icons/timeout.svg' />
+              </span>
+              <span className="text-[#EF4444]">
+                Expira en {getDaysUntil(session.activeUntil)} días
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Precio y Packs */}
         <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
@@ -251,35 +262,35 @@ const getDaysUntil = (activeUntil) => {
 
           <div>
             <p className="font-medium mb-4">Packs activos</p>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {session.pricing?.packs
-    ?.filter(pack => pack.enabledByPhotographer === true) // Solo los que el fotógrafo activó
-    .map(pack => (
-      <div key={pack.packId} className="border border-gray-200 rounded-2xl p-5">
-        <div className="flex justify-between">
-          <div>
-            <p className="font-semibold">{pack.label}</p>
-            <p className="text-sm text-gray-500">{pack.photoQuantity} fotos</p>
-          </div>
-          <div className="text-right">
-            <span className="text-green-600 font-medium">-{pack.discountPercent}% OFF</span>
-            <p className="text-xs text-gray-500 mt-1">
-              €{pack.effectivePricePerPhoto || '—'} / foto
-            </p>
-          </div>
-        </div>
-      </div>
-    ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {session.pricing?.packs
+                ?.filter(pack => pack.enabledByPhotographer === true) // Solo los que el fotógrafo activó
+                .map(pack => (
+                  <div key={pack.packId} className="border border-gray-200 rounded-2xl p-5">
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="font-semibold">{pack.label}</p>
+                        <p className="text-sm text-gray-500">{pack.photoQuantity} fotos</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-green-600 font-medium">-{pack.discountPercent}% OFF</span>
+                        <p className="text-xs text-gray-500 mt-1">
+                          €{pack.effectivePricePerPhoto || '—'} / foto
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
 
-  {/* Mensaje si no hay packs activos */}
-  {(!session.pricing?.packs || 
-    session.pricing.packs.filter(p => p.enabledByPhotographer).length === 0) && (
-    <p className="text-gray-500 italic col-span-full py-4">
-      No tienes packs activos en esta sesión
-    </p>
-  )}
-</div>
-</div>
+              {/* Mensaje si no hay packs activos */}
+              {(!session.pricing?.packs ||
+                session.pricing.packs.filter(p => p.enabledByPhotographer).length === 0) && (
+                  <p className="text-gray-500 italic col-span-full py-4">
+                    No tienes packs activos en esta sesión
+                  </p>
+                )}
+            </div>
+          </div>
         </div>
 
         {/* Galería de fotos */}
@@ -315,7 +326,7 @@ const getDaysUntil = (activeUntil) => {
               Esta acción no se puede deshacer.<br />
               Se eliminarán todas las fotos y la sesión dejará de estar disponible.
             </p>
-            
+
             <div className="flex gap-4">
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -334,94 +345,94 @@ const getDaysUntil = (activeUntil) => {
           </div>
         </div>
       )}
-{showEditModal && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div className="bg-white rounded-3xl p-8 max-w-lg w-full mx-4">
-      <h3 className="text-2xl font-semibold mb-6">Editar Sesión</h3>
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full mx-4">
+            <h3 className="text-2xl font-semibold mb-6">Editar Sesión</h3>
 
-      {/* Mensaje de error */}
-      {errorMessage && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 text-sm">
-          {errorMessage}
+            {/* Mensaje de error */}
+            {errorMessage && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 text-sm">
+                {errorMessage}
+              </div>
+            )}
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Tipo</label>
+                <select
+                  value={formData.audience}
+                  onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
+                  className="w-full border border-gray-300 rounded-xl p-3"
+                >
+                  <option value="FREE_SURFERS">Free Surfers</option>
+                  <option value="SCHOOLS">Escuelas</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Ubicación / Escuela</label>
+                <input
+                  type="text"
+                  value={formData.location || formData.schoolName}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value, schoolName: e.target.value })}
+                  className="w-full border border-gray-300 rounded-xl p-3"
+                  placeholder="Ej: Bristol o Surf School"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Hora Inicio</label>
+                  <input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    className="w-full border border-gray-300 rounded-xl p-3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Hora Fin</label>
+                  <input
+                    type="time"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    className="w-full border border-gray-300 rounded-xl p-3"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="1"
+                  value={formData.unitPricePhotographerEur}
+                  onChange={(e) => setFormData({ ...formData, unitPricePhotographerEur: e.target.value })}
+                  className="w-full border border-gray-300 rounded-xl p-3"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => { setShowEditModal(false); setErrorMessage(''); }}
+                className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleUpdate}
+                disabled={updating}
+                className="flex-1 py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
+              >
+                {updating ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      <div className="space-y-5">
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Tipo</label>
-          <select 
-            value={formData.audience} 
-            onChange={(e) => setFormData({...formData, audience: e.target.value})}
-            className="w-full border border-gray-300 rounded-xl p-3"
-          >
-            <option value="FREE_SURFERS">Free Surfers</option>
-            <option value="SCHOOLS">Escuelas</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Ubicación / Escuela</label>
-          <input 
-            type="text" 
-            value={formData.location || formData.schoolName} 
-            onChange={(e) => setFormData({...formData, location: e.target.value, schoolName: e.target.value})}
-            className="w-full border border-gray-300 rounded-xl p-3"
-            placeholder="Ej: Bristol o Surf School"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Hora Inicio</label>
-            <input 
-              type="time" 
-              value={formData.startTime} 
-              onChange={(e) => setFormData({...formData, startTime: e.target.value})}
-              className="w-full border border-gray-300 rounded-xl p-3"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Hora Fin</label>
-            <input 
-              type="time" 
-              value={formData.endTime} 
-              onChange={(e) => setFormData({...formData, endTime: e.target.value})}
-              className="w-full border border-gray-300 rounded-xl p-3"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
-          <input 
-            type="number" 
-            step="0.5"
-            min="1"
-            value={formData.unitPricePhotographerEur} 
-            onChange={(e) => setFormData({...formData, unitPricePhotographerEur: e.target.value})}
-            className="w-full border border-gray-300 rounded-xl p-3"
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <button
-          onClick={() => { setShowEditModal(false); setErrorMessage(''); }}
-          className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleUpdate}
-          disabled={updating}
-          className="flex-1 py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
-        >
-          {updating ? 'Guardando...' : 'Guardar cambios'}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
       {/* ==================== MENSAJE DE ÉXITO ==================== */}
       {showSuccess && (
         <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">

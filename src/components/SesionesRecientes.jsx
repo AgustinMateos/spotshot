@@ -56,7 +56,7 @@ export default function SesionesRecientes() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <p className="text-sm  mb-1 bg-white w-[220px] text-[#1E3A5F] p-1.5 text-center rounded-2xl">Nuevas sesiones todos los días</p>
+            <p className="text-sm  mb-1 bg-white w-55 text-[#1E3A5F] p-1.5 text-center rounded-2xl">Nuevas sesiones todos los días</p>
             <h2 className="text-4xl font-semibold text-gray-900">Sesiones recientes</h2>
           </div>
           <Link href="/sesiones" className="flex items-center gap-2 text-gray-700 hover:text-black font-medium">
@@ -72,7 +72,7 @@ export default function SesionesRecientes() {
               <Link 
                 href={`/sesiones/${session.id}`} 
                 key={session.id}
-                className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 h-[420px]"
+                className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 h-105"
               >
                 <img
                   src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
@@ -80,7 +80,7 @@ export default function SesionesRecientes() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
                 {/* Badge de fotos + días restantes */}
                 <div className="absolute top-4 right-4 flex  gap-2 z-10">

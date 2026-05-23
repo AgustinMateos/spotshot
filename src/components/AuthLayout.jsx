@@ -24,7 +24,7 @@ export default function AuthLayout({
               <img
                 src="/icons/check.svg"
                 alt="check"
-                className="w-6 h-6 mt-1 flex-shrink-0"
+                className="w-6 h-6 mt-1 shrink-0"
               />
               <span>Mantené el control de tus precios</span>
             </li>
@@ -33,7 +33,7 @@ export default function AuthLayout({
               <img
                 src="/icons/check.svg"
                 alt="check"
-                className="w-6 h-6 mt-1 flex-shrink-0"
+                className="w-6 h-6 mt-1 shrink-0"
               />
               <span>Llegá a surfistas que buscan activamente tus fotos</span>
             </li>
@@ -42,7 +42,7 @@ export default function AuthLayout({
               <img
                 src="/icons/check.svg"
                 alt="check"
-                className="w-6 h-6 mt-1 flex-shrink-0"
+                className="w-6 h-6 mt-1 shrink-0"
               />
               <span>Sin costos iniciales</span>
             </li>

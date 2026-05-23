@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import Link from 'next/link';
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading } = useAuth();
@@ -33,6 +34,11 @@ const NewAlbumPage = () => {
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [publishing, setPublishing] = useState(false);
 // Cargar catálogo de packs
+
+  // Estados para Pop-up
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupType, setPopupType] = useState('error'); // 'error' o 'success'
 useEffect(() => {
   const loadPacks = async () => {
     if (!token) return;
@@ -97,12 +103,22 @@ const confirmPublish = async () => {
     setPublishing(false);
   }
 };
+  const showPopupMessage = (message, type = 'error') => {
+    setPopupMessage(message);
+    setPopupType(type);
+    setShowPopup(true);
+
+    // Se cierra automáticamente después de 4.5 segundos
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 4500);
+  };
 // ====================== CREAR SESIÓN ======================
 const handleCreateSession = async () => {
   if (!formData.date || !formData.startTime || !formData.endTime) {
-    alert("Por favor completa la fecha y horarios");
-    return;
-  }
+  showPopupMessage("Por favor completa la fecha y los horarios");
+  return;
+}
 
   // === DEBUG TOKEN ===
   console.log("🔑 DEBUG TOKEN EN CREATE SESSION:");
@@ -224,11 +240,7 @@ const handleUploadPhotos = async () => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const url = `${API_URL}/api/v1/photo-sessions/${sessionId}/images`;
 
-    console.log("🔍 DEBUG UPLOAD:");
-    console.log("→ API_URL:", API_URL);
-    console.log("→ URL completa:", url);
-    console.log("→ Token existe:", !!token);
-    console.log("→ Cantidad de fotos:", photos.length);
+   
 
     const res = await fetch(url, {
       method: 'POST',
@@ -387,20 +399,58 @@ const handleUpdatePacks = async () => {
   const handleFileSelect = (e) => handleFiles(e.target.files);
 
 const handleNext = async () => {
+  // ==================== PASO 1 ====================
   if (step === 1) {
-    await handleCreateSession();
-  } 
+  if (!formData.date || !formData.startTime || !formData.endTime) {
+    showPopupMessage("Por favor completa la fecha y los horarios");
+    return;
+  }
+  if (formData.type === 'free-surfers' && !formData.location?.trim()) {
+    showPopupMessage("Debes indicar la playa o ubicación");
+    return;
+  }
+  if (formData.type === 'escuelas' && !formData.school?.trim()) {
+    showPopupMessage("Debes indicar el nombre de la escuela");
+    return;
+  }
+  await handleCreateSession();
+}
+
+  // ==================== PASO 2 ====================
   else if (step === 2) {
+    if (photos.length === 0 && uploadedImages.length === 0) {
+      alert("❌ Debes seleccionar al menos una foto para subir");
+      return; // ← NO avanza
+    }
+
     if (photos.length > 0) {
       await handleUploadPhotos();
+      // Solo avanzamos si la subida fue exitosa
+      // (handleUploadPhotos ya actualiza uploadedImages si todo va bien)
+    } else {
+      setStep(3); // Si ya tenía fotos subidas, avanza directamente
     }
-    setStep(3);
   } 
+
+  // ==================== PASO 3 ====================
   else if (step === 3) {
-    await handleUpdatePricing();
+    if (formData.basePrice < 1) {
+      alert("❌ El precio debe ser mayor o igual a 1€");
+      return;
+    }
+
+    if (uploadedImages.length === 0) {
+      alert("❌ Debes subir al menos una foto antes de configurar el precio");
+      setStep(2);
+      return;
+    }
+
+    await handleUpdatePricing(); // Solo avanza si todo está bien (dentro de handleUpdatePricing ya haces setStep(4))
   } 
+
+  // ==================== PASO 4 ====================
   else if (step === 4) {
-    await handlePublishSession();   // ← Ahora publica aquí
+    await handlePublishSession();
   }
 };
 
@@ -427,7 +477,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       {/* Header */}
       <div className="border-b bg-white">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-2 text-sm text-gray-600">
-          <span>Mis sesiones</span>
+          <Link href='/shot/misSesiones'>Mis sesiones</Link>
           <span>›</span>
           <span className="font-medium text-gray-900">Nueva sesión</span>
         </div>
@@ -899,7 +949,29 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
   </div>
 )}
       </div>
+              {/* ==================== POP-UP / TOAST ==================== */}
+        {showPopup && (
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border 
+              ${popupType === 'error' 
+                ? 'bg-red-50 border-red-300 text-red-800' 
+                : 'bg-green-50 border-green-300 text-green-800'}`}>
+              <div className="text-2xl">
+                {popupType === 'error' ? '⚠️' : '✅'}
+              </div>
+              <p className="font-medium pr-6">{popupMessage}</p>
+              
+              <button 
+                onClick={() => setShowPopup(false)}
+                className="ml-4 text-gray-500 hover:text-gray-700 text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
     </div>
+
   );
 };
 

@@ -41,7 +41,7 @@ const Steps = ({ currentStep = 1 }) => {
 
                 {/* Línea conectora */}
                 {index < steps.length - 1 && (
-                  <div className={`absolute top-6 left-[calc(50%+24px)] w-full h-[3px] -z-10 transition-all
+                  <div className={`absolute top-6 left-[calc(50%+24px)] w-full h-0.75 -z-10 transition-all
                     ${isCompleted ? 'bg-blue-600' : 'bg-gray-200'}`} 
                   />
                 )}

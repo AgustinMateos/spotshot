@@ -42,7 +42,7 @@ const Fotografo = () => {
 
             <div className="space-y-8 mb-10">
               <div className="flex gap-4">
-                <div className="w-10 h-10 bg-[#E7F0FC] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm p-2">
+                <div className="w-10 h-10 bg-[#E7F0FC] rounded-2xl flex items-center justify-center shrink-0 shadow-sm p-2">
                   <img src="/fotografo/publica.svg" alt="Publicar sesión" className="w-full h-full object-contain" />
                 </div>
                 <div>
@@ -52,7 +52,7 @@ const Fotografo = () => {
               </div>
 
               <div className="flex gap-4">
-                <div className="w-10 h-10 bg-[#E7F0FC] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm p-2">
+                <div className="w-10 h-10 bg-[#E7F0FC] rounded-2xl flex items-center justify-center shrink-0 shadow-sm p-2">
                   <img src="/fotografo/monetiza.svg" alt="Monetizar" className="w-full h-full object-contain" />
                 </div>
                 <div>

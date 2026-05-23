@@ -2,14 +2,14 @@ import React from 'react';
 
 const Encontrar = () => {
   return (
-    <div className="w-full mx-auto py-16 px-6 bg-[#FAFBFF] relative overflow-hidden h-full md:h-[596px] flex items-center justify-center">
+    <div className="w-full mx-auto py-16 px-6 bg-[#FAFBFF] relative overflow-hidden h-full md:h-149 flex items-center justify-center">
       
       {/* Imagen de fondo CENTRADA en el medio */}
       <img
         src="/encontrar/curva.svg"
         alt=""
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[114px] 
-                   w-[833px] h-auto max-w-[90%] md:max-w-none 
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 
+                   w-208.25 h-auto max-w-[90%] md:max-w-none 
                    opacity-30 pointer-events-none z-0"
       />
 
@@ -24,7 +24,7 @@ const Encontrar = () => {
         <div className="relative flex flex-col md:flex-row justify-center items-center md:items-start gap-10 md:gap-8">
           
           {/* Card 1 */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 w-[376px] h-[245px] p-8 flex flex-col items-center md:items-start  z-10">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 w-94 h-61.25 p-8 flex flex-col items-center md:items-start  z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/lupa.svg" 
@@ -41,7 +41,7 @@ const Encontrar = () => {
           </div>
 
           {/* Card 2 */}
-            <div className="bg-white rounded-3xl shadow-sm border items-center md:items-start border-gray-100 w-[376px] h-[245px] p-8 flex flex-col z-10">
+            <div className="bg-white rounded-3xl shadow-sm border items-center md:items-start border-gray-100 w-94 h-61.25 p-8 flex flex-col z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/elige.svg" 
@@ -58,7 +58,7 @@ const Encontrar = () => {
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white rounded-3xl shadow-sm items-center md:items-start border border-gray-100 p-8 flex  flex-col w-[376px] h-[245px] z-10">
+          <div className="bg-white rounded-3xl shadow-sm items-center md:items-start border border-gray-100 p-8 flex  flex-col w-94 h-61.25 z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/descargar.svg" 
