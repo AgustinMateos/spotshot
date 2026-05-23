@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import ImageWithLoader from '@/components/ImageWithLoader';
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading } = useAuth();
@@ -29,6 +30,7 @@ const NewAlbumPage = () => {
   const [sessionId, setSessionId] = useState(null);
   const [creatingSession, setCreatingSession] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); 
   // ← ESTADOS IMPORTANTES
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -85,8 +87,8 @@ const confirmPublish = async () => {
     });
 
     if (res.ok) {
-      alert('🎉 ¡Sesión publicada con éxito!');
-      router.push('/shot/misSesiones');
+      setShowSuccessModal(true);     // ← Abre el modal bonito
+      // Ya NO usamos alert ni router.push aquí
     } else {
       const data = await res.json();
       alert(data.message || 'Error al publicar');
@@ -145,7 +147,7 @@ const handleCreateSession = async () => {
 
     if (res.ok) {
       setSessionId(data.id);
-
+    
       setStep(2);
     } else {
       alert(data.message || 'Error al crear la sesión');
@@ -250,7 +252,7 @@ const handleUploadPhotos = async () => {
     console.log("→ Respuesta del servidor:", data);
 
    if (res.ok) {
-
+ 
   setUploadedImages(data.images || []);
   setPhotos([]);           // Limpiamos las pendientes
 } else {
@@ -310,7 +312,7 @@ const handleUpdatePricing = async () => {
         setFormData(prev => ({ ...prev, basePrice: serverPrice }));
       }
 
-
+      
       setStep(4);
     } else {
       alert(data.message || 'Error al guardar precio');
@@ -322,6 +324,11 @@ const handleUpdatePricing = async () => {
     setUpdatingPrice(false);
   }
 };
+// Función para cerrar éxito e ir a mis sesiones
+  const handleGoToMySessions = () => {
+    setShowSuccessModal(false);
+    router.push('/shot/misSesiones');
+  };
 // ====================== ACTUALIZAR PACKS ======================
 // ====================== ACTUALIZAR PACKS ======================
 // ====================== ACTUALIZAR PACKS ======================
@@ -574,13 +581,13 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         /></div>
       </div>
       <div>
-
-
+       
+        
       </div>
     </div>
 
-
-
+    
+   
   </div>
 )}
 
@@ -630,26 +637,28 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {photos.map((photo, index) => (
-              <div key={index} className="relative group rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                <img 
-                  src={URL.createObjectURL(photo)} 
-                  alt={`preview-${index}`} 
-                  className="w-full aspect-square object-cover" 
-                />
-                {index === 0 && (
-                  <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-3 py-1 rounded font-medium">
-                    Portada
-                  </div>
-                )}
-                <button
-                  onClick={(e) => { e.stopPropagation(); removePhoto(index); }}
-                  className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-md opacity-0 group-hover:opacity-100 transition-all"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+           {photos.map((photo, index) => (
+  <div key={index} className="relative group rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+    <ImageWithLoader
+      src={URL.createObjectURL(photo)}
+      alt={`preview-${index}`}
+      aspectRatio="aspect-square"
+    />
+    
+    {index === 0 && (
+      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-3 py-1 rounded font-medium">
+        Portada
+      </div>
+    )}
+
+    <button
+      onClick={(e) => { e.stopPropagation(); removePhoto(index); }}
+      className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-md opacity-0 group-hover:opacity-100 transition-all"
+    >
+      ✕
+    </button>
+  </div>
+))}
           </div>
         </div>
       )}
@@ -662,11 +671,15 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {uploadedImages.map((img, index) => (
-              <div key={index} className="relative rounded-2xl overflow-hidden border border-green-300">
-                <img src={img.publicUrl} alt={`uploaded-${index}`} className="w-full aspect-square object-cover" />
-                <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">Subida</div>
-              </div>
-            ))}
+  <div key={index} className="relative rounded-2xl overflow-hidden border border-green-300">
+    <ImageWithLoader
+      src={img.publicUrl}
+      alt={`uploaded-${index}`}
+      aspectRatio="aspect-square"
+    />
+    <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">Subida</div>
+  </div>
+))}
           </div>
         </div>
       )}
@@ -757,7 +770,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       )}
     </div>
 
-
+    
   </div>
 )}
       {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
@@ -813,24 +826,35 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     </div>
 
     {/* Fotos subidas */}
-    <div>
-      <p className="text-sm text-gray-600 mb-4 font-medium">
-        {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''} subidas
-      </p>
-      {uploadedImages.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {uploadedImages.map((img, index) => (
-            <div key={index} className="aspect-square rounded-2xl overflow-hidden border border-green-200">
-              <img src={img.publicUrl} alt={`foto-${index}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
+    {/* Fotos subidas */}
+<div>
+
+  <p className="text-sm text-gray-600 mb-4 font-medium">
+    {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''} subidas
+  </p>
+   <p className="text-xs text-gray-400 mt-1">*No hace falta esperar a que termine el proceso de carga.</p>
+  
+  {uploadedImages.length > 0 ? (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {uploadedImages.map((img, index) => (
+        <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border border-green-200">
+          <ImageWithLoader
+            src={img.publicUrl}
+            alt={`foto-${index}`}
+            aspectRatio="aspect-square"
+          />
+          <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">
+            Subida
+          </div>
         </div>
-      ) : (
-        <p className="text-red-600 text-center py-8 bg-red-50 rounded-2xl">
-          ⚠️ Debes subir al menos una foto antes de publicar
-        </p>
-      )}
+      ))}
     </div>
+  ) : (
+    <p className="text-red-600 text-center py-8 bg-red-50 rounded-2xl">
+      ⚠️ Debes subir al menos una foto antes de publicar
+    </p>
+  )}
+</div>
   </div>
 )}
 
@@ -899,9 +923,34 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     </div>
   </div>
 )}
+{showSuccessModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-10 max-w-md w-full mx-4 text-center">
+            <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <span className="text-5xl">🎉</span>
+            </div>
+            
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              ¡Sesión publicada con éxito!
+            </h2>
+            
+            <p className="text-gray-600 mb-8">
+              Tu álbum ya está visible para todos los usuarios.<br />
+              ¡Muchas gracias por compartir tu arte!
+            </p>
+
+            <button
+              onClick={handleGoToMySessions}
+              className="w-full py-4 bg-[#106BB9] hover:bg-blue-700 text-white font-semibold rounded-2xl transition"
+            >
+              Ver mis sesiones
+            </button>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
 };
 
-export default NewAlbumPage
+export default NewAlbumPage;

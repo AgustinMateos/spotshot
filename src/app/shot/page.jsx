@@ -112,9 +112,10 @@ const [loadingFilters, setLoadingFilters] = useState(false);
     }));
   };
 
-  const goToPage = (newPage) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
-  };
+ const goToPage = (newPage) => {
+  if (newPage < 1 || newPage > pagination.totalPages) return;
+  setFilters(prev => ({ ...prev, page: newPage }));
+};
 
   const isStripeReady = stripeConnect?.isReady === true;
   const alias = user?.alias || 'Fotógrafo';
@@ -200,15 +201,16 @@ if (authLoading || loadingProfile || loadingInitial) {
           )}
         </div>
 
-        {/* ====================== MIS SESIONES ====================== */}
-      
+     
 
         {isStripeReady ? (
             /* ==================== LISTA DE SESIONES ==================== */
             <>
                 <div>
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl text-[#10487C] font-semibold">Mis sesiones ({filteredSessions.length})</h3>
+           <h3 className="text-xl text-[#10487C] font-semibold">
+  Mis sesiones ({pagination.total})
+</h3>
             <Link 
               href="/shot/newAlbum" 
               className="bg-gray-900 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-black"
@@ -290,27 +292,48 @@ if (authLoading || loadingProfile || loadingInitial) {
           )}
 
           {/* Paginación */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-center gap-3 mt-10">
-              <button
-                onClick={() => goToPage(filters.page - 1)}
-                disabled={!pagination.hasPreviousPage}
-                className="px-5 py-2 border rounded-xl disabled:opacity-50"
-              >
-                ← Anterior
-              </button>
-              <span className="px-6 py-2">
-                Página {filters.page} de {pagination.totalPages}
-              </span>
-              <button
-                onClick={() => goToPage(filters.page + 1)}
-                disabled={!pagination.hasNextPage}
-                className="px-5 py-2 border rounded-xl disabled:opacity-50"
-              >
-                Siguiente →
-              </button>
-            </div>
-          )}
+          {/* Paginación - Estilo idéntico a Mis Ventas */}
+{pagination.totalPages > 1 && (
+  <div className="bg-white rounded-3xl shadow-sm mt-10">
+    <div className="flex items-center justify-between px-8 py-6 border-t">
+      <p className="text-lg font-medium text-gray-900">
+        Página {filters.page} de {pagination.totalPages}
+      </p>
+
+      <div className="flex gap-3">
+        <button 
+          onClick={() => goToPage(1)} 
+          disabled={!pagination.hasPreviousPage}
+          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+        >
+          «
+        </button>
+        <button 
+          onClick={() => goToPage(filters.page - 1)} 
+          disabled={!pagination.hasPreviousPage}
+          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+        >
+          ‹
+        </button>
+
+        <button 
+          onClick={() => goToPage(filters.page + 1)} 
+          disabled={!pagination.hasNextPage}
+          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+        >
+          ›
+        </button>
+        <button 
+          onClick={() => goToPage(pagination.totalPages)} 
+          disabled={!pagination.hasNextPage}
+          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+        >
+          »
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         </div>
             </>
           ) : (
