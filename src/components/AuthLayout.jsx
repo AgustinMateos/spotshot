@@ -13,7 +13,7 @@ export default function AuthLayout({
       <div className="w-full lg:w-[60%] flex-col flex justify-between   ">
         <div className="w-full md:pl-20 md:pt-20 ">
           <h1 className="text-5xl w-full font-bold text-gray-900 leading-tight">
-            Convierte tus fotos de surf en <br />ingresos reales.
+            Convierte tus fotos de surf en ingresos reales.
           </h1>
           <p className="mt-6 text-xl text-gray-600">
             Únete a una plataforma curada diseñada para fotógrafos de surf que desean monetizar su trabajo.

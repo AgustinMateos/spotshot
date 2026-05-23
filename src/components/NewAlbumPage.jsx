@@ -526,7 +526,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Escuela o Ubicación */}
     {formData.type === 'escuelas' ? (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/school.svg'}/>  Nombre de la Escuela</label>
+        <label className="block text-gray-700 mb-2 font-medium  "><Image width={16} height={16} alt='playa' src={'/icons/school.svg'}/>  Nombre de la Escuela</label>
         <input
           type="text"
           value={formData.school}
@@ -537,7 +537,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
       </div>
     ) : (
       <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium flex "><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> Playa / Ubicación</label>
+        <label className="block text-gray-700 mb-2 font-medium  "><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> Playa / Ubicación</label>
         <input
           type="text"
           value={formData.location}
@@ -551,7 +551,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Fecha y Hora */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-1">
-        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
+        <label className="block text-gray-700 mb-2 font-medium "><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
         <input
           type="date"
           value={formData.date}
@@ -560,7 +560,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         />
       </div>
       <div>
-        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
+        <label className="block text-gray-700 mb-2 font-medium "><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
         <div className='flex gap-4'><input
           type="time"
           value={formData.startTime}
@@ -760,8 +760,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     
   </div>
 )}
-      {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
-{/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
+
 {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
 {step === 4 && (
   <div className="space-y-8">
@@ -769,7 +768,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     {/* Banner de confirmación */}
     <div className="relative rounded-3xl overflow-hidden h-80">
       <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
       <div className="absolute bottom-8 left-8 text-white">
         <p className="text-4xl font-bold">
           {formData.date ? new Intl.DateTimeFormat('es-ES', { 

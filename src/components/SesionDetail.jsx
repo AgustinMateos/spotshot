@@ -64,7 +64,22 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   };
 
   const closeLightbox = () => setIsLightboxOpen(false);
+// Función para formatear precios correctamente
+// Función para formatear precios (mejorada)
+const formatPrice = (price) => {
+  if (price == null) return '0';
 
+  const num = Number(price);
+  if (isNaN(num)) return '0';
+
+  // Si es número entero → sin decimales
+  if (Number.isInteger(num)) {
+    return num.toString();
+  }
+
+  // Si tiene decimales → mostrar hasta 2, pero quitar ceros innecesarios
+  return num.toFixed(2).replace(/\.?0+$/, '');
+};
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? session.images.length - 1 : prev - 1));
   };
@@ -132,9 +147,9 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   return (
     <div className="min-h-screen bg-white">
       {/* Banner grande */}
-      <div className="relative h-[500px] w-full">
+      <div className="relative h-125 w-full">
         <img src={firstImage} alt={session.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/30 via-black/40 to-black/70" />
 
         <div className="absolute top-6 left-6">
           <button 
@@ -208,7 +223,7 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
                 <img src={img.publicUrl} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="text-white/30 text-5xl font-bold rotate-[-12deg] tracking-widest">SPOTSHOT</span>
+                  <span className="text-white/30 text-5xl font-bold -rotate-12 tracking-widest">SPOTSHOT</span>
                 </div>
                 <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
                   {index + 1}
@@ -238,7 +253,7 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
       {/* DRAWER DEL CARRITO */}
       {isCartOpen && (
-        <div className="fixed inset-0 bg-black/70 z-[200] flex justify-end">
+        <div className="fixed inset-0 bg-black/70 z-200 flex justify-end">
           <div className="bg-white w-full max-w-md h-full overflow-auto">
             <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-2xl font-semibold">Tu selección ({totalPhotos})</h3>
@@ -264,38 +279,39 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
             </div>
 
             <div className="p-6 border-t bg-gray-50">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Subtotal ({totalPhotos} fotos)</span>
-                  <span>€{subtotal}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-emerald-600">
-                    <span>{packName}</span>
-                    <span>-€{discount.toFixed(0)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-xl font-bold pt-4 border-t">
-                  <span>Total a pagar</span>
-                  <span>€{totalToPay.toFixed(0)}</span>
-                </div>
-              </div>
+  <div className="space-y-3">
+    <div className="flex justify-between">
+      <span>Subtotal ({totalPhotos} fotos)</span>
+      <span>€{formatPrice(subtotal)}</span>
+    </div>
+    
+    {discount > 0 && (
+      <div className="flex justify-between text-emerald-600">
+        <span>{packName}</span>
+        <span>-€{formatPrice(discount)}</span>
+      </div>
+    )}
+    
+    <div className="flex justify-between text-xl font-bold pt-4 border-t">
+      <span>Total a pagar</span>
+      <span>€{formatPrice(totalToPay)}</span>
+    </div>
+  </div>
 
-                            {/* Botón que abre el modal */}
-              <button 
-                onClick={() => setIsCheckoutModalOpen(true)}
-                className="w-full bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
-              >
-                Finalizar compra
-              </button>
-            </div>
+  <button 
+    onClick={() => setIsCheckoutModalOpen(true)}
+    className="w-full bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
+  >
+    Finalizar compra
+  </button>
+</div>
           </div>
         </div>
       )}
 
       {/* LIGHTBOX */}
       {isLightboxOpen && session && (
-        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center">
           <div className="relative w-full max-w-5xl px-4">
             <button onClick={closeLightbox} className="absolute -top-4 -right-4 bg-white text-black rounded-full p-3 shadow-lg z-10">
               <X size={28} />
@@ -309,7 +325,7 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
               />
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-white/30 text-5xl font-bold rotate-[-12deg] tracking-widest">SPOTSHOT</span>
+                <span className="text-white/30 text-5xl font-bold -rotate-12 tracking-widest">SPOTSHOT</span>
               </div>
 
               <button onClick={goToPrevious} className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full">
@@ -338,7 +354,7 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
       )}
       {/* MODAL DE EMAIL + CHECKOUT */}
       {isCheckoutModalOpen && (
-        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 z-300 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="flex justify-between items-center p-6 border-b">
               <button 

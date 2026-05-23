@@ -259,7 +259,7 @@ const handleChangePassword = async (e) => {
 
       {/* Datos Personales */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex  justify-between items-center mb-8">
           <h2 className="text-2xl font-semibold">Datos personales</h2>
           <button
             onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
@@ -271,7 +271,7 @@ const handleChangePassword = async (e) => {
         </div>
 
        {/* ====================== AVATAR ====================== */}
-<div className="flex items-center gap-6 mb-10">
+<div className="flex flex-col md:flex-row items-center gap-6 mb-10">
   <div className="relative group">
     {avatarUrl ? (
       <img
@@ -348,9 +348,9 @@ Tamaño máximo: 5 MB.</p>
       {/* ====================== MÉTODO DE COBRO ====================== */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
         <h2 className="text-2xl font-semibold mb-6">Método de cobro</h2>
-        <div className="flex items-center justify-between bg-gray-50 rounded-2xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded">stripe</div>
+        <div className="flex flex-col md:flex-row items-start  md:items-center justify-between bg-gray-50 rounded-2xl p-6">
+          <div className="flex items-center pb-4 md:pb-0 gap-4">
+            <div className="bg-purple-600 text-white  text-xs font-bold px-3 py-1 rounded">stripe</div>
             <div>
               <p className="font-medium">Stripe Connect</p>
               {stripeConnect?.isReady ? (
@@ -389,7 +389,7 @@ Tamaño máximo: 5 MB.</p>
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
         <h2 className="text-2xl font-semibold mb-6">Seguridad</h2>
         <p className="text-xs text-gray-400 mt-1">*Al cambiar la contraseña se redijirá nuevamente al login.</p>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
             <p className="font-medium">Contraseña</p>
             <p className="text-sm text-gray-500">Último cambio: hace poco</p>

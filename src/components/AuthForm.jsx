@@ -85,8 +85,8 @@ export default function AuthForm({ mode = 'login' }) {
   };
 
   return (
-    <div className='border border-gray-200 p-6 rounded-[10px]'>
-      <h2 className="text-3xl font-bold text-gray-900  mb-2">
+    <div className='border border-gray-200 p-6 mt-10 rounded-[10px]'>
+      <h2 className="text-3xl font-bold text-black  mb-2">
         {isLogin && 'Inicia sesión en Spotshot'}
         {isRegister && 'Crea tu cuenta de fotógrafo'}
         {isForgot && '¿Olvidaste tu contraseña?'}
@@ -121,7 +121,7 @@ export default function AuthForm({ mode = 'login' }) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
+              className="w-full px-5 py-4 border text-black border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900 pr-12"
               required
               minLength={8}
             />

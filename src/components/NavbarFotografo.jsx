@@ -71,7 +71,7 @@ export default function NavbarFotografo() {
                         </div>
 
         {/* Menú Desktop */}
-        <div className='flex '><div className="hidden pr-[80px] md:flex items-center gap-10 text-sm font-medium text-gray-300">
+        <div className='flex '><div className="hidden pr-20 md:flex items-center gap-10 text-sm font-medium text-gray-300">
           <a href="/sesiones" className="hover:text-white transition-colors">Explorar sesiones</a>
           <a href="/shot/misSesiones" className="hover:text-white transition-colors">Mis sesiones</a>
           <a href="/shot/misVentas" className="hover:text-white transition-colors">Mis ventas</a>
