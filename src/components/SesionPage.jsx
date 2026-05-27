@@ -10,7 +10,7 @@ export default function MisSesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
-
+const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -174,18 +174,36 @@ export default function MisSesionDetail() {
 <div className="flex justify-end gap-3 mb-8">
   
   {/* Copiar Link */}
-  <button
-    onClick={() => {
-      const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        // Opcional: mostrar mensaje de copiado
-      });
-    }}
-    className="flex items-center gap-2 border border-gray-300 px-5 py-2.5 rounded-xl hover:bg-gray-50 transition"
-  >
-    <img src='/icons/copiar.svg' alt="copiar" className="w-5 h-5" />
-    <span className="hidden md:inline">Copiar link</span>
-  </button>
+  {/* Copiar Link */}
+<button
+  onClick={() => {
+    const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
+    
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setIsLinkCopied(true);
+
+      // Vuelve al estado original después de 2.5 segundos
+      setTimeout(() => {
+        setIsLinkCopied(false);
+      }, 2500);
+    });
+  }}
+  className={`flex items-center gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
+    isLinkCopied 
+      ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+      : 'border-gray-300 hover:bg-gray-50'
+  }`}
+  disabled={isLinkCopied}
+>
+  <img 
+    src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'} 
+    alt="copiar" 
+    className="w-5 h-5" 
+  />
+  <span className="hidden md:inline font-medium">
+    {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
+  </span>
+</button>
 
   {/* Eliminar */}
   <button

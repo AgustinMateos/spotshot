@@ -3,23 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
 
 const OrderSuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { clearCart } = useCart();     // ← Usamos el clearCart
 
   const [orderId, setOrderId] = useState('');
   const [email, setEmail] = useState('');
   const [imageCount, setImageCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // LIMPIAR CARRITO AL CARGAR LA PÁGINA DE ÉXITO (recomendado)
   useEffect(() => {
-    const checkoutSessionId = searchParams.get('checkout_session_id');
+    clearCart();   // ← Limpiamos inmediatamente al entrar
+  }, [clearCart]);
+
+  // También limpiamos al salir (por si navega con el botón Atrás del navegador)
+  useEffect(() => {
+    return () => {
+      clearCart();
+    };
+  }, [clearCart]);
+
+  useEffect(() => {
     const orderIdParam = searchParams.get('orderId');
     const emailParam = searchParams.get('email');
     const countParam = searchParams.get('count');
 
-    // Prioridad 1: Parámetros directos en la URL
     if (orderIdParam) {
       setOrderId(orderIdParam);
       setEmail(emailParam || '');
@@ -28,22 +40,20 @@ const OrderSuccessContent = () => {
       return;
     }
 
-    // Prioridad 2: Recuperar desde localStorage (backup)
+    // Backup desde localStorage
     const lastOrder = localStorage.getItem('lastOrder');
     if (lastOrder) {
       const data = JSON.parse(lastOrder);
       setOrderId(data.orderId);
       setEmail(data.email);
       setImageCount(data.imageCount);
-      localStorage.removeItem('lastOrder'); // limpiar
-      setLoading(false);
-      return;
+      localStorage.removeItem('lastOrder');
+    } else {
+      // Fallback de prueba
+      setOrderId('312dab89-09ff-4713-84c1-f1fa219ce13a');
+      setEmail('agustinxx@gmail.com');
+      setImageCount(8);
     }
-
-    // Fallback (solo para pruebas)
-    setOrderId('312dab89-09ff-4713-84c1-f1fa219ce13a');
-    setEmail('agustinxx@gmail.com');
-    setImageCount(8);
     setLoading(false);
   }, [searchParams]);
 
@@ -53,6 +63,7 @@ const OrderSuccessContent = () => {
 
   const handleDownload = () => {
     alert(`Descargando ${imageCount} imágenes de la orden ${orderId}...`);
+    // Aquí iría la lógica real de descarga
   };
 
   if (loading) {

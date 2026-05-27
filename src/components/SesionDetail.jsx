@@ -209,32 +209,68 @@ const formatPrice = (price) => {
           )}
         </div>
 
-        {/* Galería */}
-        <div>
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-semibold">Selecciona tus fotos</h2>
-            <p className="text-gray-500">{session.photoCount} fotos</p>
+       {/* Galería */}
+<div>
+  <div className="flex justify-between items-center mb-8">
+    <h2 className="text-3xl font-semibold">Selecciona tus fotos</h2>
+    <p className="text-gray-500">{session.photoCount} fotos</p>
+  </div>
+
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    {session.images.map((img, index) => {
+      const inCart = isInCart(img.id);
+
+      return (
+        <div
+          key={img.id}
+          className="relative aspect-square rounded-3xl overflow-hidden shadow-sm group cursor-pointer"
+        >
+          {/* Imagen - Click para abrir lightbox */}
+          <div onClick={() => openLightbox(index)} className="w-full h-full">
+            <img 
+              src={img.publicUrl} 
+              alt={`Foto ${index + 1}`} 
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+            />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {session.images.map((img, index) => (
-              <div
-                key={img.id}
-                onClick={() => openLightbox(index)}
-                className="relative aspect-square rounded-3xl overflow-hidden shadow-sm cursor-pointer hover:scale-105 transition-transform duration-300"
+          {/* Overlay sutil */}
+          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
+          {/* Número de foto */}
+          <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+            {index + 1}
+          </div>
+
+          {/* BOTÓN AGREGAR AL CARRITO - Superior Derecho */}
+          <div className="absolute top-3 right-3 z-10">
+            {inCart ? (
+              <button
+                className="bg-emerald-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg cursor-default"
+                title="Ya está en el carrito"
               >
-                <img src={img.publicUrl} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="text-white/30 text-5xl font-bold -rotate-12 tracking-widest">SPOTSHOT</span>
-                </div>
-                <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-                  {index + 1}
-                </div>
-              </div>
-            ))}
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // ← Importante: evita abrir el lightbox
+                  addToCart(img, session);
+                }}
+                className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+                title="Agregar al carrito"
+              >
+                <ShoppingCart size={18} />
+              </button>
+            )}
           </div>
         </div>
+      );
+    })}
+  </div>
+</div>
       </div>
 
       {/* CARRITO FLOTANTE */}
