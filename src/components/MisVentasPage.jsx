@@ -103,8 +103,46 @@ const MisVentasPage = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Cargando tus ventas...</p>
+      <div className="min-h-screen bg-gray-50 pb-12">
+        <div className="max-w-6xl mx-auto px-6 pt-8">
+          <div className="h-9 w-48 bg-gray-200 rounded-xl animate-pulse mb-8" />
+
+          {/* Skeleton Resumen */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-3" />
+                <div className="h-12 w-32 bg-gray-200 rounded-xl animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* Skeleton Tabla */}
+          <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-5 px-8"><div className="h-4 w-20 bg-gray-200 rounded animate-pulse" /></th>
+                    <th className="text-left py-5 px-8"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></th>
+                    <th className="text-left py-5 px-8"><div className="h-4 w-16 bg-gray-200 rounded animate-pulse" /></th>
+                    <th className="text-right py-5 px-8"><div className="h-4 w-20 bg-gray-200 rounded animate-pulse ml-auto" /></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...Array(5)].map((_, i) => (
+                    <tr key={i} className="border-b border-gray-100">
+                      <td className="py-6 px-8"><div className="h-5 w-28 bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="py-6 px-8"><div className="h-5 w-64 bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="py-6 px-8"><div className="h-5 w-16 bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="py-6 px-8 text-right"><div className="h-5 w-24 bg-gray-200 rounded animate-pulse ml-auto" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
