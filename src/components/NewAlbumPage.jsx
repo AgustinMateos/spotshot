@@ -1129,36 +1129,48 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
   </div>
 )}
 
-    {/* Fecha y Hora */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-1">
-        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/fecha.svg'}/> Fecha</label>
-        <input
-          type="date"
-          value={formData.date}
-          onChange={(e) => updateForm('date', e.target.value)}
-          className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-        />
-      </div>
-      <div>
-        <label className="block text-gray-700 mb-2 font-medium flex"><Image width={16} height={16} alt='playa' src={'/icons/hora.svg'}/> Hora Inicio</label>
-        <div className='flex gap-4'><input
-          type="time"
-          value={formData.startTime}
-          onChange={(e) => updateForm('startTime', e.target.value)}
-          className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-        /><input
-          type="time"
-          value={formData.endTime}
-          onChange={(e) => updateForm('endTime', e.target.value)}
-          className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-        /></div>
-      </div>
-      <div>
-       
-        
-      </div>
-    </div>
+   {/* Fecha y Hora */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div className="md:col-span-1">
+    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+      <Image width={16} height={16} alt='fecha' src={'/icons/fecha.svg'}/> 
+      Fecha
+    </label>
+    <input
+      type="date"
+      value={formData.date}
+      onChange={(e) => updateForm('date', e.target.value)}
+      max={new Date().toISOString().split('T')[0]}   // ← No permite fechas futuras
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+      <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'}/> 
+      Hora Inicio
+    </label>
+    <input
+      type="time"
+      value={formData.startTime}
+      onChange={(e) => updateForm('startTime', e.target.value)}
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div>
+    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+      <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'}/> 
+      Hora Fin
+    </label>
+    <input
+      type="time"
+      value={formData.endTime}
+      onChange={(e) => updateForm('endTime', e.target.value)}
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
+    />
+  </div>
+</div>
 
     
    
@@ -1435,11 +1447,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         {/* Botones */}
 {/* ====================== BOTONES INFERIORES ====================== */}
 <div className="flex justify-between items-center mt-8">
-  {step > 1 && (
-    <button className="px-6 py-3 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium text-gray-700">
-      Guardar borrador
-    </button>
-  )}
+  
 
   <div className="flex gap-4">
     {step > 1 && (

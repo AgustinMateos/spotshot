@@ -255,23 +255,38 @@ const handleChangePassword = async (e) => {
 
   return (
     <div className="max-w-full mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold text-gray-900 mb-10">Mi cuenta</h1>
+     
 
       {/* Datos Personales */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+         <h1 className="text-4xl font-bold text-gray-900 mb-10">Mi cuenta</h1>
         <div className="flex  justify-between items-center mb-8">
+          
           <h2 className="text-2xl font-semibold">Datos personales</h2>
-          <button
-            onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
-            disabled={loadingSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-2xl hover:bg-black transition disabled:opacity-70"
-          >
-            {loadingSave ? 'Guardando...' : isEditing ? '💾 Guardar' : '✏️ Editar'}
-          </button>
+   {/* Botón Editar / Guardar */}
+<button
+  onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
+  disabled={loadingSave}
+  className="flex items-center gap-2 px-5 py-2.5 text-[#0D2744] rounded-2xl border border-[#E4E4E7] cursor-pointer hover:bg-gray-50 transition"
+>
+  {loadingSave ? (
+    'Guardando...'
+  ) : isEditing ? (
+    <>
+      <img src="/icons/guardar.svg" alt="Guardar" className="w-5 h-5" />
+      <span className="hidden md:inline">Guardar cambios</span>
+    </>
+  ) : (
+    <>
+      <img src="/icons/editar2.svg" alt="Editar" className="w-5 h-5" />
+      <span className="hidden md:inline">Editar</span>
+    </>
+  )}
+</button>
         </div>
 
        {/* ====================== AVATAR ====================== */}
-<div className="flex flex-col md:flex-row items-center gap-6 mb-10">
+<div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
   <div className="relative group">
     {avatarUrl ? (
       <img
@@ -391,12 +406,12 @@ Tamaño máximo: 5 MB.</p>
         <p className="text-xs text-gray-400 mt-1">*Al cambiar la contraseña se redijirá nuevamente al login.</p>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
-            <p className="font-medium">Contraseña</p>
+            <p className="font-medium pt-5 md:pt-0">Contraseña</p>
             <p className="text-sm text-gray-500">Último cambio: hace poco</p>
           </div>
           <button 
             onClick={() => setShowPasswordModal(true)}
-            className="bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-black transition"
+            className="bg-gray-900 mt-8 md:mt-0 text-white px-6 py-3 rounded-2xl hover:bg-black transition"
           >
             Cambiar contraseña
           </button>
