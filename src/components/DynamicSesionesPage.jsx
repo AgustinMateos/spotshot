@@ -4,16 +4,31 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Footer from '@/components/Footer';
 
 export default function DynamicSesionesPage() {
   const params = useParams();
 
   const audienceParam = params.audience;
   const locationSegments = params.location || [];
-  const locationParam = locationSegments.join(' ');
 
-  const audience = audienceParam === 'free-surfers' ? 'FREE_SURFERS' 
+// Parsing del slug desde la URL
+let searchTerm = Array.isArray(locationSegments)
+  ? decodeURIComponent(locationSegments.join(' '))
+      .replace(/-/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  : '';
+
+// Restaurar ñ de forma más robusta
+searchTerm = searchTerm
+  .replace(/\bcan tabria\b/gi, 'Cantabria')
+  .replace(/\bespana\b/gi, 'España')
+  .replace(/\bnnora\b/gi, 'Ñora')
+  .replace(/\bpenarrubia\b/gi, 'Peñarrubia')
+  .replace(/\bpena\b/gi, 'Peña')
+  .replace(/\b n /gi, ' Ñ ');
+
+  const audience = audienceParam === 'free-surfers' ? 'FREE_SURFERS'
                  : audienceParam === 'escuelas' ? 'SCHOOLS' : '';
 
   const [sessions, setSessions] = useState([]);
@@ -28,8 +43,8 @@ export default function DynamicSesionesPage() {
 
   const [filters, setFilters] = useState({
     audience,
-    location: locationParam || '',
-    schoolName: '',
+    location: audience === 'FREE_SURFERS' ? searchTerm : '',
+    schoolName: audience === 'SCHOOLS' ? searchTerm : '',
     sessionDate: '',
     startTime: '',
   });
@@ -54,8 +69,11 @@ export default function DynamicSesionesPage() {
       const paramsQuery = new URLSearchParams();
 
       if (filters.audience) paramsQuery.append('audience', filters.audience);
+      
+      // === LÓGICA CLAVE ===
       if (filters.location) paramsQuery.append('location', filters.location);
       if (filters.schoolName) paramsQuery.append('schoolName', filters.schoolName);
+
       if (filters.sessionDate) paramsQuery.append('sessionDate', filters.sessionDate);
       if (filters.startTime) paramsQuery.append('startTime', filters.startTime);
       paramsQuery.append('page', pagination.page);
@@ -76,7 +94,7 @@ export default function DynamicSesionesPage() {
           });
         }
       } catch (err) {
-        console.error('Error:', err);
+        console.error('Error fetching sessions:', err);
       } finally {
         setLoading(false);
       }
@@ -85,12 +103,29 @@ export default function DynamicSesionesPage() {
     fetchSessions();
   }, [filters, pagination.page]);
 
-  useEffect(() => {
-    let newTitle = audience === 'FREE_SURFERS' ? 'Free Surfers' 
-                 : audience === 'SCHOOLS' ? 'Escuelas' : 'Sesiones';
-    if (locationParam) newTitle += ` en ${locationParam}`;
-    setTitle(newTitle);
-  }, [audience, locationParam]);
+  // Actualizar título
+// Actualizar título
+useEffect(() => {
+  let newTitle = audience === 'FREE_SURFERS' ? 'Free Surfers'
+               : audience === 'SCHOOLS' ? 'Escuelas' : 'Sesiones';
+
+  if (searchTerm) {
+    newTitle += ` en ${searchTerm}`;
+  }
+  setTitle(newTitle);
+}, [audience, searchTerm]);
+
+// Dentro del input de búsqueda:
+<input 
+  type="text" 
+  placeholder={filters.audience === 'SCHOOLS' ? "Buscar escuela..." : "Buscar playa o spot..."} 
+  value={filters.audience === 'SCHOOLS' ? (filters.schoolName || '') : (filters.location || '')} 
+  onChange={(e) => {
+    const field = filters.audience === 'SCHOOLS' ? 'schoolName' : 'location';
+    handleFilterChange(field, e.target.value);
+  }} 
+  className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500" 
+/>
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -119,9 +154,12 @@ export default function DynamicSesionesPage() {
 
           <input 
             type="text" 
-            placeholder="Playa o ubicación..." 
-            value={filters.location} 
-            onChange={(e) => handleFilterChange('location', e.target.value)} 
+            placeholder={filters.audience === 'SCHOOLS' ? "Buscar escuela..." : "Buscar playa o spot..."} 
+            value={filters.audience === 'SCHOOLS' ? filters.schoolName : filters.location} 
+            onChange={(e) => {
+              const field = filters.audience === 'SCHOOLS' ? 'schoolName' : 'location';
+              handleFilterChange(field, e.target.value);
+            }} 
             className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500" 
           />
 
@@ -134,7 +172,7 @@ export default function DynamicSesionesPage() {
           </select>
         </div>
 
-        {/* Grid de Sesiones */}
+        {/* Grid y Paginación (mantén igual) */}
         {loading ? (
           <p className="text-center py-20 text-gray-500">Cargando sesiones...</p>
         ) : sessions.length > 0 ? (
@@ -146,38 +184,37 @@ export default function DynamicSesionesPage() {
                   <div className="relative rounded-3xl overflow-hidden bg-black shadow-md hover:shadow-xl transition-all">
                     {session.images?.[0]?.publicUrl ? (
                       <img
-                        onContextMenu={(e) => e.preventDefault()}
-                        onDragStart={(e) => e.preventDefault()}
                         src={session.images[0].publicUrl}
                         alt={session.title}
-                        className="w-full aspect-16/10 object-cover group-hover:scale-105 transition-transform"
+                        className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform"
                       />
                     ) : (
-                      <div className="w-full aspect-16/10 bg-gray-200 flex items-center justify-center">
+                      <div className="w-full aspect-[16/10] bg-gray-200 flex items-center justify-center">
                         <span className="text-4xl">🌊</span>
                       </div>
                     )}
 
-                    <div className="absolute top-4 right-4 flex gap-2 z-10">
-                      {daysLeft && (
-                        <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                          <Image src="/icons/hour.svg" width={16} height={16} alt="tiempo" /> {daysLeft}
-                        </div>
-                      )}
-                      <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                        <Image src="/icons/camara.svg" width={16} height={16} alt="fotos" />
-                        {session.photoCount} fotos
-                      </div>
+                     <div className="absolute top-4 right-4 flex  gap-2 z-10">
+                                          {daysLeft && (
+                                            <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                                              <Image src={'/icons/hour.svg'} width={16} height={16} alt='camara' />  {daysLeft}
+                                            </div>
+                                          )}
+                                          <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                                            <Image src={'/icons/camara.svg'} width={16} height={16} alt='camara' />
+                                            {session.photoCount} fotos
+                                          </div>
+                    
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
                       <p className="font-semibold text-lg">{session.title}</p>
-                      <div className="flex justify-between text-sm opacity-90 mt-1">
+                      
                         <p>{session.location || session.schoolName}</p>
-                        <p>{session.startTime} - {session.endTime}</p>
-                      </div>
+                        <p>{session.startTime?.slice(0,5)} - {session.endTime?.slice(0,5)}</p>
+                     
                       <p className="text-sm opacity-75 mt-2">
-                        by {session.photographer?.alias || `${session.photographer?.firstName || ''} ${session.photographer?.lastName || ''}`.trim() || 'Fotógrafo'}
+                        by {session.photographer?.alias || 'Fotógrafo'}
                       </p>
                     </div>
                   </div>
@@ -191,50 +228,23 @@ export default function DynamicSesionesPage() {
           </div>
         )}
 
-       {/* Paginación - Estilo Mis Ventas */}
-{pagination.totalPages > 1 && (
-  <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
-    <div className="flex items-center justify-between px-8 py-6 border-t">
-      <p className="text-lg font-medium text-gray-900">
-        Página {pagination.page} de {pagination.totalPages}
-      </p>
-
-      <div className="flex gap-3">
-        <button 
-          onClick={() => goToPage(1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          «
-        </button>
-        <button 
-          onClick={() => goToPage(pagination.page - 1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ‹
-        </button>
-
-        <button 
-          onClick={() => goToPage(pagination.page + 1)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ›
-        </button>
-        <button 
-          onClick={() => goToPage(pagination.totalPages)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          »
-        </button>
+        {/* Paginación (igual que antes) */}
+        {pagination.totalPages > 1 && (
+          <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
+            <div className="flex items-center justify-between px-8 py-6 border-t">
+              <p className="text-lg font-medium text-gray-900">
+                Página {pagination.page} de {pagination.totalPages}
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => goToPage(1)} disabled={!pagination.hasPreviousPage} className="w-10 h-10 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40">«</button>
+                <button onClick={() => goToPage(pagination.page - 1)} disabled={!pagination.hasPreviousPage} className="w-10 h-10 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40">‹</button>
+                <button onClick={() => goToPage(pagination.page + 1)} disabled={!pagination.hasNextPage} className="w-10 h-10 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40">›</button>
+                <button onClick={() => goToPage(pagination.totalPages)} disabled={!pagination.hasNextPage} className="w-10 h-10 border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40">»</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  </div>
-)}
-      </div>
-     
     </div>
   );
 }
