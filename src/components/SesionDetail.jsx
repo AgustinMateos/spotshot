@@ -389,7 +389,7 @@ const formatPrice = (price) => {
   ) : (
     <button
       onClick={() => addToCart(session.images[currentIndex], session)}
-      className="bg-[#1F2937] w-[255px] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
+      className="bg-[#1F2937] w-63.75 hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
     >
       <ShoppingCart size={24} />
       Agregar al carrito

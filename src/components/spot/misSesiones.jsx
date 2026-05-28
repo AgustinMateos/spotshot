@@ -192,10 +192,10 @@ export default function MisSesiones() {
                     <img
                       src={session.images[0].publicUrl}
                       alt={session.title}
-                      className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform"
+                      className="w-full aspect-16/10 object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
+                    <div className="w-full aspect-16/10 bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
                   )}
 
                   <div className="absolute top-3 flex right-3 bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full">
@@ -203,7 +203,7 @@ export default function MisSesiones() {
                                    
                   </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
+                  <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
                     <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
                       {session.status}
                     </div>
