@@ -253,6 +253,74 @@ const handleChangePassword = async (e) => {
     .toUpperCase()
     .slice(0, 2);
 
+ // ====================== SKELETON LOADING ======================
+if (loading) {
+  return (
+    <div className="max-w-full mx-auto px-6 py-10">
+      {/* Título */}
+      <div className="h-10 w-48 bg-gray-200 rounded-2xl animate-pulse mb-10"></div>
+
+      {/* Sección Datos Personales */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+        <div className="flex justify-between items-center mb-8">
+          <div className="h-8 w-56 bg-gray-200 rounded-2xl animate-pulse"></div>
+          <div className="h-11 w-32 bg-gray-200 rounded-2xl animate-pulse"></div>
+        </div>
+
+        {/* Avatar + Info */}
+        <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
+          <div className="w-24 h-24 bg-gray-200 rounded-3xl animate-pulse"></div>
+          
+          <div className="space-y-3">
+            <div className="h-7 w-64 bg-gray-200 rounded-xl animate-pulse"></div>
+            <div className="h-5 w-80 bg-gray-200 rounded-xl animate-pulse"></div>
+            <div className="h-4 w-96 bg-gray-200 rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Campos del formulario */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse"></div>
+              <div className="h-14 w-full bg-gray-200 rounded-2xl animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sección Método de Cobro */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+        <div className="h-8 w-52 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
+        
+        <div className="bg-gray-50 rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+          <div className="flex-1 flex items-center gap-4">
+            <div className="w-10 h-6 bg-gray-300 rounded animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div className="h-12 w-44 bg-gray-200 rounded-2xl animate-pulse"></div>
+        </div>
+      </div>
+
+      {/* Sección Seguridad */}
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+        <div className="h-8 w-40 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div className="space-y-2">
+            <div className="h-6 w-36 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="h-12 w-52 bg-gray-200 rounded-2xl animate-pulse mt-6 md:mt-0"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="max-w-full mx-auto px-6 py-10">
      
