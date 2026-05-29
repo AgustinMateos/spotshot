@@ -222,82 +222,50 @@ const handleUploadPhotos = async () => {
 
   setUploading(true);
 
+  const formData = new FormData();
+  photos.forEach((photo, i) => {
+    formData.append('files', photo);
+  });
+
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const url = `${API_URL}/api/v1/photo-sessions/${sessionId}/images`;
 
-    // ==================== 1. PREPARE UPLOADS ====================
-    const filesMetadata = photos.map(file => ({
-      mimeType: file.type,
-      sizeBytes: file.size,
-      originalName: file.name,
-    }));
+    console.log("🔍 DEBUG UPLOAD:");
+    console.log("→ API_URL:", API_URL);
+    console.log("→ URL completa:", url);
+    console.log("→ Token existe:", !!token);
+    console.log("→ Cantidad de fotos:", photos.length);
 
-    const prepareRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/prepare-uploads`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ files: filesMetadata }),
+      body: formData,
     });
 
-    const prepareData = await prepareRes.json();
+    console.log("→ Status:", res.status, res.statusText);
 
-    if (!prepareRes.ok) {
-      throw new Error(prepareData.message || 'Error al preparar las subidas');
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      data = { message: await res.text() || "No se pudo leer la respuesta" };
     }
 
-    // ==================== 2. SUBIDA DIRECTA (PUT) ====================
-    const uploadPromises = prepareData.uploads.map(async (upload, index) => {
-      const file = photos[index];
-      const response = await fetch(upload.uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
+    console.log("→ Respuesta del servidor:", data);
 
-      if (!response.ok) {
-        console.error(`Fallo al subir ${file.name}`);
-        return null; // Falló
-      }
-
-      return upload.imageId;
-    });
-
-    const imageIdsResults = await Promise.all(uploadPromises);
-    const successfulImageIds = imageIdsResults.filter(id => id !== null);
-
-    if (successfulImageIds.length === 0) {
-      throw new Error("Ninguna foto se pudo subir correctamente");
-    }
-
-    // ==================== 3. CONFIRM UPLOADS ====================
-    const confirmRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/confirm-uploads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ imageIds: successfulImageIds }),
-    });
-
-    const confirmData = await confirmRes.json();
-
-    if (!confirmRes.ok) {
-      throw new Error(confirmData.message || 'Error al confirmar las subidas');
-    }
-
-    // Actualizar estado
-    setUploadedImages(confirmData.images || []);
-    setPhotos([]); // Limpiar fotos pendientes
-
-    alert(`✅ ${successfulImageIds.length} foto(s) subidas correctamente`);
-
+   if (res.ok) {
+ 
+  setUploadedImages(data.images || []);
+  setPhotos([]);           // Limpiamos las pendientes
+} else {
+  alert(data.message || 'Error al subir las fotos');
+}
   } catch (err) {
-    console.error("❌ Error en subida directa:", err);
-    alert(err.message || 'Error durante la subida de fotos. Revisa la consola.');
+    console.error("❌ Error completo:", err);
+    alert(`Error de conexión.\n\nRevisa la consola (F12) y dime qué ves.`);
   } finally {
     setUploading(false);
   }
