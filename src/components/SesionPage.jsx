@@ -19,6 +19,9 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [deletingImageId, setDeletingImageId] = useState(null);
+const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
+const [imageToDelete, setImageToDelete] = useState(null);
   // Form data para editar
   const [formData, setFormData] = useState({
     audience: '',
@@ -94,6 +97,42 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
       setDeleting(false);
     }
   };
+  const handleDeleteImage = async () => {
+  if (!imageToDelete) return;
+
+  setDeletingImageId(imageToDelete.id);
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const res = await fetch(
+      `${API_URL}/api/v1/photo-sessions/${id}/images/${imageToDelete.id}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (res.ok) {
+      // Actualizar la sesión localmente (sin recargar toda la página)
+      setSession(prev => ({
+        ...prev,
+        images: prev.images.filter(img => img.id !== imageToDelete.id),
+        photoCount: prev.photoCount - 1,
+      }));
+
+      setShowDeleteImageModal(false);
+    } else {
+      alert('No se pudo eliminar la foto');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error al eliminar la foto');
+  } finally {
+    setDeletingImageId(null);
+    setImageToDelete(null);
+  }
+};
   const handleUpdate = async () => {
     setUpdating(true);
     setErrorMessage('');   // si ya tienes errorMessage
@@ -318,20 +357,33 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {session.images.map((img, index) => (
-              <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100">
-                <img
-                  src={img.publicUrl}
-                  alt={`Foto ${index + 1}`}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform"
-                />
-                <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-                  {index + 1}
-                </div>
-              </div>
-            ))}
-          </div>
+  {session.images.map((img, index) => (
+    <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
+      <img
+        src={img.publicUrl}
+        alt={`Foto ${index + 1}`}
+        fill
+        className="object-cover hover:scale-105 transition-transform"
+      />
+
+      {/* Overlay con número */}
+      <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+        {index + 1}
+      </div>
+
+      {/* Botón eliminar (visible al hover) */}
+      <button
+        onClick={() => {
+          setImageToDelete(img);
+          setShowDeleteImageModal(true);
+        }}
+        className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
+      >
+        <img src='/icons/eliminar.svg' alt="eliminar" className="w-4 h-4" />
+      </button>
+    </div>
+  ))}
+</div>
         </div>
       </div>
 
@@ -458,6 +510,33 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
           <span className="font-medium">Sesión eliminada correctamente</span>
         </div>
       )}
+      {/* Modal Eliminar Foto Individual */}
+{showDeleteImageModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+      <h3 className="text-2xl font-semibold mb-4">¿Eliminar esta foto?</h3>
+      <p className="text-gray-600 mb-8">
+        Esta acción no se puede deshacer.
+      </p>
+
+      <div className="flex gap-4">
+        <button
+          onClick={() => setShowDeleteImageModal(false)}
+          className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleDeleteImage}
+          disabled={deletingImageId}
+          className="flex-1 py-3 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+        >
+          {deletingImageId ? 'Eliminando...' : 'Sí, eliminar foto'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
