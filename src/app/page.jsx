@@ -17,7 +17,7 @@ export default function Home() {
        
 
         <Image
-          src="/inicio/surf.png"
+          src="/inicio/somo1.webp"
           alt="Surf en la playa"
           fill
           priority

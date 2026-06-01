@@ -169,11 +169,11 @@ export default function SesionesPage() {
                     <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
                       
                       <p className="font-semibold text-lg">{session.title}</p>
-                      <div className='flex text-center items-center'>
+                      
                         <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                       <p className="text-sm opacity-90">
                         {session.startTime} - {session.endTime}
-                      </p></div>
+                      </p>
                       <p className="text-sm opacity-90">
                         by {session.photographer?.firstName && session.photographer?.lastName
                           ? `${session.photographer.firstName} ${session.photographer.lastName}`

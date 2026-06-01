@@ -44,7 +44,7 @@ const Footer = ({ isShotSection = false }) => {
             <a href="/faqs" className="hover:text-[#D4A373] transition-colors">
               FAQs
             </a>
-            <a href="#" className="hover:text-[#D4A373] transition-colors">
+            <a href="/sesiones/contacto" className="hover:text-[#D4A373] transition-colors">
               Contacto
             </a>
           </div>

@@ -173,8 +173,73 @@ const [imageToDelete, setImageToDelete] = useState(null);
       setUpdating(false);
     }
   };
+if (loading) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-6 py-8">
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl">Cargando sesión...</div>;
+        {/* Breadcrumb Skeleton */}
+        <div className="flex items-center gap-2 mb-6">
+          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+          <span className="text-gray-300">›</span>
+          <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+
+        {/* Botones Skeleton */}
+        <div className="flex justify-end gap-3 mb-8">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-11 w-32 bg-gray-200 rounded-xl animate-pulse"></div>
+          ))}
+        </div>
+
+        {/* Banner Grande Skeleton */}
+        <div className="relative h-[420px] rounded-3xl overflow-hidden mb-10 bg-gray-200 animate-pulse">
+          <div className="absolute bottom-10 left-10 space-y-3">
+            <div className="h-12 w-96 bg-gray-300/80 rounded-lg animate-pulse"></div>
+            <div className="h-8 w-64 bg-gray-300/80 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Info publicación */}
+        <div className="flex justify-between mb-10">
+          <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-5 w-48 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+
+        {/* Precio y Packs Skeleton */}
+        <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
+          <div className="h-8 w-40 bg-gray-200 rounded animate-pulse mb-8"></div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2].map(i => (
+              <div key={i} className="border border-gray-200 rounded-2xl p-5 bg-white">
+                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Galería Skeleton */}
+        <div>
+          <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-6"></div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div 
+                key={i} 
+                className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
+              >
+                {/* Número falso */}
+                <div className="absolute bottom-3 right-3 h-5 w-5 bg-gray-300/70 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
 
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
@@ -273,10 +338,10 @@ const [imageToDelete, setImageToDelete] = useState(null);
             className="object-cover"
           /> */}
           <img
-            src={'/banner-surf.png' || '/placeholder-surf.jpg'}
+            src={'/inicio/somo1.webp' || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
-            className="object-cover"
+            className="object-contain"
           />
           <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/70" />
 
@@ -356,14 +421,14 @@ const [imageToDelete, setImageToDelete] = useState(null);
             <h3 className="text-2xl font-semibold">{session.photoCount} fotos en esta sesión</h3>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
   {session.images.map((img, index) => (
     <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
       <img
         src={img.publicUrl}
         alt={`Foto ${index + 1}`}
         fill
-        className="object-cover hover:scale-105 transition-transform"
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
       />
 
       {/* Overlay con número */}

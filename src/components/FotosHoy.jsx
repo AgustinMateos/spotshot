@@ -6,7 +6,7 @@ const FotosHoy = () => {
       <div className="relative rounded-3xl overflow-hidden h-122 shadow-2xl">
         
         <img
-          src="/fotosHoy/fotoola.png"
+          src="/fotosHoy/somo2.webp"
           alt="Surfista en ola grande"
           className="absolute inset-0 w-full h-full object-cover"
         />
