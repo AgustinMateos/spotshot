@@ -153,7 +153,7 @@ export default function ContactoPage() {
           <p className="text-center text-xs text-gray-500 mt-8">
             También podés escribirnos a <br />
             <a href="mailto:hola@spotshot.com" className="text-gray-700 hover:underline">
-              hola@spotshot.com
+             infospotshot@gmail.com
             </a>
           </p>
         </div>
