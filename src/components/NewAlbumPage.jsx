@@ -467,21 +467,21 @@ const togglePack = (packId) => {
 const commissionRate = 0.25;
 const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen w-full bg-gray-50 pb-12">
       {/* Header */}
       <div className="border-b bg-white">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-2 text-sm text-gray-600">
+        <div className="w-full mx-auto px-6 py-4 flex items-center gap-2 text-sm text-gray-600">
           <span>Mis sesiones</span>
           <span>›</span>
           <span className="font-medium text-gray-900">Nueva sesión</span>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 pt-8">
+      <div className="mx-auto px-6 pt-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Nuevo álbum</h1>
 
         {/* Stepper Mejorado - Con tick azul */}
-<div className="flex justify-center mb-10">
+<div className="flex justify-center w-full mb-10">
   <div className="flex items-center">
     {[
       { label: 'Detalles', icon: '/icons/details.svg', activeIcon: '/icons/details-active.svg' },
@@ -751,7 +751,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
             {photos.length} foto{photos.length !== 1 ? 's' : ''} lista{photos.length !== 1 ? 's' : ''} para subir
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
            {photos.map((photo, index) => (
   <div key={index} className="relative group rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
     <ImageWithLoader
