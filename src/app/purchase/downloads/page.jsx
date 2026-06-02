@@ -1,10 +1,10 @@
+import { Suspense } from 'react';
+import Downloads from '@/components/Downloads';   // Ajusta la ruta si es necesario
 
-import React from 'react'
-import Downloads from '@/components/Downloads'
-const page = () => {
+export default function DownloadsPage() {
   return (
-    <div><Downloads/></div>
-  )
+    <Suspense fallback={<div>Cargando descargas...</div>}>
+      <Downloads />
+    </Suspense>
+  );
 }
-
-export default page
