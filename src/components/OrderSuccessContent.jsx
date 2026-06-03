@@ -142,7 +142,7 @@ const OrderSuccessContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6">
+    <div className="min-h-screen pt-20 mt-20 bg-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
         <div className="mb-10 flex justify-center">
           <img src="/success-illustration.svg" alt="Felicitaciones" className="w-80 h-auto" />
