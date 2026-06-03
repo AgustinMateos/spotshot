@@ -13,15 +13,18 @@ const OrderSuccessContent = () => {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
-  const checkoutSessionId = searchParams.get('session_id'); // ← Stripe suele enviarlo como session_id
+  // Soporta ambos nombres de parámetro (Stripe a veces usa uno u otro)
+  const checkoutSessionId = searchParams.get('checkout_session_id') || 
+                           searchParams.get('session_id');
 
-  // Limpiar carrito
+  // Limpiar carrito al cargar
   useEffect(() => {
     clearCart();
   }, [clearCart]);
 
-  // Obtener datos de la orden usando el checkoutSessionId
+  // Obtener datos de la orden
   useEffect(() => {
     const fetchOrder = async () => {
       if (!checkoutSessionId) {
@@ -31,19 +34,26 @@ const OrderSuccessContent = () => {
       }
 
       try {
+        console.log("🔍 Buscando orden con ID:", checkoutSessionId);
+
         const res = await fetch(
           `https://spotshot-api-six.vercel.app/api/v1/purchases/orders/by-checkout/${checkoutSessionId}`,
-          { method: 'GET' }
+          { 
+            method: 'GET',
+            headers: { 'accept': 'application/json' }
+          }
         );
 
         if (!res.ok) {
-          throw new Error("No se pudo obtener la información de tu compra");
+          const errorText = await res.text();
+          throw new Error(`Error ${res.status}: ${errorText}`);
         }
 
         const data = await res.json();
+        console.log("✅ Orden obtenida:", data);
         setOrderData(data);
       } catch (err) {
-        console.error(err);
+        console.error("❌ Error fetching order:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -53,11 +63,40 @@ const OrderSuccessContent = () => {
     fetchOrder();
   }, [checkoutSessionId]);
 
-  const handleGoToDownloads = () => {
-    if (orderData?.accessCode) {
-      router.push(`/purchase/downloads?code=${orderData.accessCode}`);
-    } else {
-      alert("No se encontró código de acceso");
+  // Descargar todas las imágenes
+  const handleDownloadAll = async () => {
+    if (!checkoutSessionId || downloading) return;
+
+    setDownloading(true);
+    try {
+      const res = await fetch(
+        `https://spotshot-api-six.vercel.app/api/v1/purchases/orders/by-checkout/${checkoutSessionId}/downloads`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}) // vacío = todas las imágenes
+        }
+      );
+
+      if (!res.ok) throw new Error("No se pudieron generar los enlaces de descarga");
+
+      const { downloads } = await res.json();
+
+      downloads.forEach((item, index) => {
+        setTimeout(() => {
+          const link = document.createElement('a');
+          link.href = item.signedUrl;
+          link.download = `spotshot-imagen-${item.imageId.slice(0, 8)}.jpg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }, index * 250);
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Hubo un problema al descargar las imágenes");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -71,15 +110,13 @@ const OrderSuccessContent = () => {
 
   if (error || !orderData) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-xl text-red-600">
+      <div className="min-h-screen flex items-center justify-center text-xl text-red-600 p-6 text-center">
         {error || "Hubo un problema al cargar tu orden"}
+        <br />
+        <small className="text-gray-500 mt-2 block">ID recibido: {checkoutSessionId || 'ninguno'}</small>
       </div>
     );
   }
-
-  const maskedEmail = orderData.email 
-    ? orderData.email.replace(/(.{2})(.*)(@.*)/, '$1***$3') 
-    : 'tu@email.com';
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
@@ -93,17 +130,17 @@ const OrderSuccessContent = () => {
         </h1>
 
         <p className="text-gray-600 mb-8 text-lg">
-          Te enviamos un email a <strong>{maskedEmail}</strong> con tus imágenes.<br />
-          También puedes descargarlas aquí:
+          Tus imágenes están listas para descargar.
         </p>
 
         <div className="space-y-4">
           <button
-            onClick={handleGoToDownloads}
-            className="w-full bg-[#1F2937] hover:bg-black text-white py-4 px-8 rounded-2xl text-lg font-medium flex items-center justify-center gap-3 transition"
+            onClick={handleDownloadAll}
+            disabled={downloading}
+            className="w-full bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 px-8 rounded-2xl text-lg font-medium flex items-center justify-center gap-3 transition"
           >
             <Download size={24} />
-            Descargar Imágenes ({orderData.images?.length || 0})
+            {downloading ? 'Descargando...' : `Descargar Todas las Imágenes (${orderData.images?.length || 0})`}
           </button>
 
           <button
@@ -115,7 +152,7 @@ const OrderSuccessContent = () => {
           </button>
         </div>
 
-        {/* Mini galería de previews */}
+        {/* Previews */}
         {orderData.images && orderData.images.length > 0 && (
           <div className="mt-10">
             <p className="text-sm text-gray-500 mb-4">Vista previa de tus imágenes:</p>
