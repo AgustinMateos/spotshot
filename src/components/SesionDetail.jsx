@@ -42,6 +42,19 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
     if (id) fetchSession();
   }, [id, router]);
 
+
+useEffect(() => {
+  if (isLightboxOpen) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'unset';
+  }
+
+  return () => {
+    document.body.style.overflow = 'unset';
+  };
+}, [isLightboxOpen]);
+
   const unitPrice = session?.pricing?.unitPriceCustomer || 8;
 
   const totalPhotos = cart.length;
@@ -65,6 +78,27 @@ const isInCart = (imageId) => {
     setCurrentIndex(index);
     setIsLightboxOpen(true);
   };
+  // ==================== NAVEGACIÓN CON TECLADO ====================
+useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (!isLightboxOpen) return;
+
+    if (e.key === 'ArrowLeft') {
+      goToPrevious();
+    } else if (e.key === 'ArrowRight') {
+      goToNext();
+    } else if (e.key === 'Escape') {
+      closeLightbox();
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+
+  // Cleanup
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [isLightboxOpen, currentIndex, session?.images?.length]); // Dependencias importantes
 
   const closeLightbox = () => setIsLightboxOpen(false);
 // Función para formatear precios correctamente

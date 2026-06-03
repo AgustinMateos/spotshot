@@ -184,10 +184,13 @@ const updateForm = (field, value) => {
     let newValue = value;
 
     if (field === 'basePrice') {
-      newValue = parseFloat(value) || 0;
+      // Permitimos que quede vacío temporalmente
+      if (value === '' || value === null) {
+        newValue = '';
+      } else {
+        newValue = parseFloat(value) || 0;
+      }
     }
-
-    console.log(`🔄 updateForm → ${field} = ${newValue}`); // ← debug importante
 
     return { ...prev, [field]: newValue };
   });
@@ -464,8 +467,10 @@ const togglePack = (packId) => {
   }));
 };
 
-const commissionRate = 0.25;
-const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
+const commissionRate = 0.20; // ← Cambiado a 20%
+const finalPrice = formData.basePrice > 0 
+  ? (formData.basePrice * (1 - commissionRate)).toFixed(2) 
+  : '—';
   return (
     <div className="min-h-screen w-full bg-gray-50 pb-12">
       {/* Header */}
@@ -809,27 +814,30 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
     <p className="text-gray-600 mb-6">Elige un precio por foto y activa promociones</p>
 
     {/* Precio base */}
-    <div className="mb-8">
-      <div className="flex items-center gap-3">
-        <input
-          type="number"
-          value={formData.basePrice}
-          onChange={(e) => updateForm('basePrice', parseFloat(e.target.value) || 0)}
-          className="w-32 text-5xl font-semibold border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500"
-          min="1"
-          step="0.5"
-        />
-        <span className="text-5xl text-gray-400">€</span>
-      </div>
-      <p className="text-sm text-gray-500 mt-2">Precio recomendado: 3€ - 8€ por foto</p>
-    </div>
+   {/* Precio base */}
+<div className="mb-8">
+  <label className="block text-gray-700 mb-2 font-medium">Precio por foto (€)</label>
+  <div className="flex items-center gap-3">
+    <input
+      type="number"
+      value={formData.basePrice}
+      onChange={(e) => updateForm('basePrice', e.target.value)}
+      className="w-32 text-5xl font-semibold border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500"
+      min="0"
+      step="0.5"
+      placeholder="0"
+    />
+    <span className="text-5xl text-gray-400">€</span>
+  </div>
+  <p className="text-sm text-gray-500 mt-2">Precio recomendado: 3€ - 8€ por foto</p>
+</div>
 
     {/* Comisión */}
     <div className="bg-blue-50 rounded-2xl p-5 mb-8">
       <div className="flex justify-between items-center">
-        <p className="font-medium">Comisión Spotshot (25%)</p>
+        <p className="font-medium">Comisión Spotshot (20%)</p>
         <div className="text-right">
-          <p className="font-medium">Precio final para el cliente</p>
+          <p className="font-medium">Precio final para el fotógrafo por foto</p>
           <p className="text-2xl font-semibold text-emerald-600">€{finalPrice}</p>
         </div>
       </div>

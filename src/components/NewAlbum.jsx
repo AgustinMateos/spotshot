@@ -437,7 +437,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header */}
-      <div className="border-b w-full bg-white">
+      <div className="border-b bg-white">
         <div className=" mx-auto px-6 py-4 flex items-center gap-2 text-sm text-gray-600">
           <span>Mis sesiones</span>
           <span>›</span>
@@ -445,7 +445,7 @@ const finalPrice = (formData.basePrice * (1 - commissionRate)).toFixed(2);
         </div>
       </div>
 
-      <div className=" mx-auto px-6 pt-8">
+      <div className="max-w-3xl mx-auto px-6 pt-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Nuevo álbum</h1>
 
         {/* Stepper Mejorado - Con tick azul */}
