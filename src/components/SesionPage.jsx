@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -22,6 +23,9 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [deletingImageId, setDeletingImageId] = useState(null);
 const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
 const [imageToDelete, setImageToDelete] = useState(null);
+const [successMessage, setSuccessMessage] = useState('');
+const [uploading, setUploading] = useState(false);
+const fileInputRef = useRef(null);
   // Form data para editar
   const [formData, setFormData] = useState({
     audience: '',
@@ -69,7 +73,50 @@ const [imageToDelete, setImageToDelete] = useState(null);
 
     fetchSession();
   }, [id, token, router]);
+const handlePublish = async () => {
+  if (!session) return;
 
+  setPublishing(true);
+  setErrorMessage('');
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/publish`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+  const updatedSession = await res.json();
+  setSession(updatedSession);
+  
+  setSuccessMessage("¡Sesión publicada correctamente!");
+  setShowSuccess(true);
+
+  // Opcional: ocultar el mensaje después de 4 segundos
+  setTimeout(() => setShowSuccess(false), 4000);
+} else {
+      const errorData = await res.json().catch(() => ({}));
+      
+      if (res.status === 409) {
+        alert('Esta sesión ya fue publicada.');
+      } else if (res.status === 400) {
+        alert(errorData.message || 'Faltan requisitos: precio o fotos mínimas.');
+      } else {
+        alert(errorData.message || 'No se pudo publicar la sesión');
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error de conexión al publicar');
+  } finally {
+    setPublishing(false);
+  }
+};
   // Eliminar sesión
   const handleDelete = async () => {
     setDeleting(true);
@@ -81,13 +128,14 @@ const [imageToDelete, setImageToDelete] = useState(null);
       });
 
       if (res.ok) {
-        setShowDeleteModal(false);
-        setShowSuccess(true);
+  setShowDeleteModal(false);
+  setSuccessMessage("Sesión eliminada correctamente");
+  setShowSuccess(true);
 
-        setTimeout(() => {
-          router.push('/shot/misSesiones');
-        }, 1800);
-      } else {
+  setTimeout(() => {
+    router.push('/shot/misSesiones');
+  }, 1800);
+} else {
         alert('No se pudo eliminar la sesión');
       }
     } catch (err) {
@@ -133,6 +181,56 @@ const [imageToDelete, setImageToDelete] = useState(null);
     setImageToDelete(null);
   }
 };
+const handleUploadImages = async (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+
+  if (files.length > 20) {
+    alert("Máximo 20 fotos por subida");
+    return;
+  }
+
+  setUploading(true);
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const formData = new FormData();
+
+    files.forEach(file => {
+      formData.append('files', file);   // ← Campo correcto según tu API
+    });
+
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/images`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (res.ok) {
+      const updatedSession = await res.json();
+      
+      setSession(updatedSession); // Actualizamos toda la sesión con la respuesta
+      
+      setSuccessMessage(`${files.length} foto(s) subidas correctamente`);
+      setShowSuccess(true);
+      
+      // Ocultar mensaje después de 4 segundos
+      setTimeout(() => setShowSuccess(false), 4000);
+
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      alert(errorData.message || "Error al subir las fotos");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error de conexión al subir las fotos");
+  } finally {
+    setUploading(false);
+    e.target.value = ''; // Limpiar input
+  }
+};
   const handleUpdate = async () => {
     setUpdating(true);
     setErrorMessage('');   // si ya tienes errorMessage
@@ -159,10 +257,11 @@ const [imageToDelete, setImageToDelete] = useState(null);
       });
 
       if (res.ok) {
-        setShowEditModal(false);
-        setShowSuccess(true);
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
+  setShowEditModal(false);
+  setSuccessMessage("Sesión actualizada correctamente");
+  setShowSuccess(true);
+  setTimeout(() => window.location.reload(), 1500);
+} else {
         const errorData = await res.json().catch(() => ({}));
         setErrorMessage(errorData.message || 'Error al actualizar la sesión');
       }
@@ -326,6 +425,22 @@ if (loading) {
     <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
     <span className="hidden md:inline">Editar</span>
   </button>
+  {session.status === 'DRAFT' && (
+    <button
+      onClick={handlePublish}
+      disabled={publishing}
+      className="flex items-center gap-2 bg-[#103457] hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition font-medium disabled:opacity-70"
+    >
+      {publishing ? (
+        <>Publicando<span className="animate-pulse">...</span></>
+      ) : (
+        <>
+          
+          Publicar Sesión
+        </>
+      )}
+    </button>
+  )}
 
 </div>
           </div>
@@ -416,40 +531,69 @@ if (loading) {
         </div>
 
         {/* Galería de fotos */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-semibold">{session.photoCount} fotos en esta sesión</h3>
-          </div>
+        {/* Galería de fotos */}
+<div>
+  <div className="flex justify-between items-center mb-6">
+    <h3 className="text-2xl font-semibold">
+      {session.photoCount} fotos en esta sesión
+    </h3>
 
-           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-  {session.images.map((img, index) => (
-    <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
-      <img
-        src={img.publicUrl}
-        alt={`Foto ${index + 1}`}
-        fill
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-      />
-
-      {/* Overlay con número */}
-      <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-        {index + 1}
-      </div>
-
-      {/* Botón eliminar (visible al hover) */}
+    {/* Botón Subir más fotos - Solo en DRAFT */}
+    {session.status === 'DRAFT' && (
       <button
-        onClick={() => {
-          setImageToDelete(img);
-          setShowDeleteImageModal(true);
-        }}
-        className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl transition disabled:opacity-70"
       >
-        <img src='/icons/eliminar.svg' alt="eliminar" className="w-4 h-4" />
+        {uploading ? (
+          <>Subiendo fotos...</>
+        ) : (
+          <>
+            <img src="/icons/eliminar.svg" alt="subir" className="w-5 h-5" />
+            Subir más fotos
+          </>
+        )}
       </button>
-    </div>
-  ))}
-</div>
+    )}
+
+    {/* Input oculto */}
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      accept="image/jpeg,image/png,image/webp"
+      className="hidden"
+      onChange={handleUploadImages}
+    />
+  </div>
+
+  {/* Grid de imágenes */}
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    {session.images.map((img, index) => (
+      <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
+        <img
+          src={img.publicUrl}
+          alt={`Foto ${index + 1}`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+        />
+
+        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+          {index + 1}
         </div>
+
+        <button
+          onClick={() => {
+            setImageToDelete(img);
+            setShowDeleteImageModal(true);
+          }}
+          className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
+        >
+          <img src='/icons/eliminar.svg' alt="eliminar" className="w-4 h-4" />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
       </div>
 
       {/* ==================== MODAL DE CONFIRMACIÓN ==================== */}
@@ -569,12 +713,13 @@ if (loading) {
         </div>
       )}
       {/* ==================== MENSAJE DE ÉXITO ==================== */}
-      {showSuccess && (
-        <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
-          <span className="text-2xl">✅</span>
-          <span className="font-medium">Sesión eliminada correctamente</span>
-        </div>
-      )}
+    {/* MENSAJE DE ÉXITO DINÁMICO */}
+{showSuccess && (
+  <div className="fixed bottom-8 right-8 bg-[#103457] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
+    <span className="text-2xl">✅</span>
+    <span className="font-medium">{successMessage}</span>
+  </div>
+)}
       {/* Modal Eliminar Foto Individual */}
 {showDeleteImageModal && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
