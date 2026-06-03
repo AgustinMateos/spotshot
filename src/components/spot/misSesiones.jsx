@@ -121,15 +121,14 @@ export default function MisSesiones() {
 
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Mis Sesiones</h1>
-          
+
           {/* Botón Crear Sesión - Deshabilitado si no tiene Stripe */}
           <Link
             href={isStripeReady ? "/shot/newAlbum" : "#"}
-            className={`px-6 py-3 rounded-2xl flex items-center gap-2 transition font-medium ${
-              isStripeReady 
-                ? 'bg-gray-900 text-white hover:bg-black' 
+            className={`px-6 py-3 rounded-2xl flex items-center gap-2 transition font-medium ${isStripeReady
+                ? 'bg-gray-900 text-white hover:bg-black'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
             onClick={(e) => {
               if (!isStripeReady) {
                 e.preventDefault();
@@ -199,8 +198,8 @@ export default function MisSesiones() {
                   )}
 
                   <div className="absolute top-3 flex right-3 bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full">
-                       <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora'/> {session.photoCount} fotos
-                                   
+                    <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora' /> {session.photoCount} fotos
+
                   </div>
 
                   <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
@@ -212,7 +211,7 @@ export default function MisSesiones() {
                     <p className="text-xs opacity-75 mt-1">
                       {session.startTime} - {session.endTime}
                     </p>
-                    
+
                   </div>
                 </div>
               </Link>
@@ -224,49 +223,49 @@ export default function MisSesiones() {
           </div>
         )}
 
-        {/* Paginación */}
+
         {/* Paginación - Estilo Mis Ventas */}
-{pagination.totalPages > 1 && (
-  <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
-    <div className="flex items-center justify-between px-8 py-6 border-t">
-      <p className="text-lg font-medium text-gray-900">
-        Página {pagination.page} de {pagination.totalPages}
-      </p>
+        {pagination.totalPages > 1 && (
+          <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
+            <div className="flex items-center justify-between px-8 py-6 border-t">
+              <p className="text-lg font-medium text-gray-900">
+                Página {pagination.page} de {pagination.totalPages}
+              </p>
 
-      <div className="flex gap-3">
-        <button 
-          onClick={() => goToPage(1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          «
-        </button>
-        <button 
-          onClick={() => goToPage(pagination.page - 1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ‹
-        </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => goToPage(1)}
+                  disabled={!pagination.hasPreviousPage}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                >
+                  «
+                </button>
+                <button
+                  onClick={() => goToPage(pagination.page - 1)}
+                  disabled={!pagination.hasPreviousPage}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                >
+                  ‹
+                </button>
 
-        <button 
-          onClick={() => goToPage(pagination.page + 1)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ›
-        </button>
-        <button 
-          onClick={() => goToPage(pagination.totalPages)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          »
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                <button
+                  onClick={() => goToPage(pagination.page + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                >
+                  ›
+                </button>
+                <button
+                  onClick={() => goToPage(pagination.totalPages)}
+                  disabled={!pagination.hasNextPage}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

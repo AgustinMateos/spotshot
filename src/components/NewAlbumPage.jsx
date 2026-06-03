@@ -293,7 +293,7 @@ const handleUploadPhotos = async () => {
     setUploadedImages(confirmData.images || []);
     setPhotos([]); // Limpiar fotos pendientes
 
-    alert(`✅ ${successfulImageIds.length} foto(s) subidas correctamente`);
+    // alert(`✅ ${successfulImageIds.length} foto(s) subidas correctamente`);
 
   } catch (err) {
     console.error("❌ Error en subida directa:", err);

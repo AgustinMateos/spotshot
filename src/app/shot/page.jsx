@@ -277,6 +277,9 @@ if (authLoading || loadingProfile || loadingInitial) {
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
+                      <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
+                      {session.status}
+                    </div>
                       <p className="font-semibold">{session.title}</p>
                       <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                       <p className="text-xs opacity-75">{session.startTime} - {session.endTime}</p>
