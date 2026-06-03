@@ -35,8 +35,8 @@ export default function Marquesina() {
                   </div>
                 ))}
 
-                <h3 className="text-5xl font-semibold text-gray-900 px-8 whitespace-nowrap">
-                  Disfruta el momento
+                <h3 className="text-5xl font-normal text-[#1E3A5F] px-8 whitespace-nowrap">
+                  Disfruta el <strong>momento</strong> 
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (
@@ -73,8 +73,8 @@ export default function Marquesina() {
                   </div>
                 ))}
 
-                <h3 className="text-5xl font-semibold text-gray-900 px-8 whitespace-nowrap">
-                  Nosotros lo capturamos
+                <h3 className="text-5xl font-normal text-[#1E3A5F] px-8 whitespace-nowrap">
+                  Nosotros lo  <strong>capturamos</strong> 
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (

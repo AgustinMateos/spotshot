@@ -115,11 +115,11 @@ export default function SesionesPage() {
             <button onClick={() => handleFilterChange('audience', 'SCHOOLS')} className={`px-6 py-2.5 rounded-2xl font-medium transition ${filters.audience === 'SCHOOLS' ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>Escuelas</button>
           </div>
 
-          <input type="text" placeholder="Playa o ubicación..." value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500" />
+          <input type="text" placeholder="Playa o ubicación..." value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" />
 
-          <input type="date" value={filters.sessionDate} onChange={(e) => handleFilterChange('sessionDate', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500" />
+          <input type="date" value={filters.sessionDate} onChange={(e) => handleFilterChange('sessionDate', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" />
 
-          <select onChange={(e) => handleFilterChange('startTime', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500">
+          <select onChange={(e) => handleFilterChange('startTime', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900">
             <option value="">Desde</option>
             <option value="09:00">09:00 am</option>
             <option value="10:00">10:00 am</option>

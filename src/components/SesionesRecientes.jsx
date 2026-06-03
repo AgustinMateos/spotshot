@@ -53,15 +53,15 @@ export default function SesionesRecientes() {
   return (
     <div className="py-16  pt-40" style={{ background: "#F1F7FE" }}>
       <Buscador />
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between mb-10">
+      <div className="md:max-w-7xl mx-auto px-6">
+        <div className="flex w-full md:items-center flex-col md:flex-row justify-between mb-10">
           <div>
             <p className="text-sm  mb-1 bg-white w-55 text-[#1E3A5F] p-1.5 text-center rounded-2xl">Nuevas sesiones todos los días</p>
-            <h2 className="text-4xl font-semibold text-gray-900">Sesiones recientes</h2>
+            <h2 className="text-3xl pb-4 md:pb-0 md:text-4xl font-medium text-[#1E3A5F] pt-4">Sesiones recientes</h2>
           </div>
-          <Link href="/sesiones" className="flex items-center gap-2 text-gray-700 hover:text-black font-medium">
-            Ver todas <span className="text-xl">→</span>
-          </Link>
+          <div className='flex justify-end h-full'><Link href="/sesiones" className="flex h-full items-end justify-end  md:items-center gap-2 text-[#1E3A5F] hover:text-black font-medium text-[14px]">
+            Ver todas <span className="text-xl"><Image src={'/icons/FlechaVerTodas.svg'} width={20} height={20} alt='flecha'/></span>
+          </Link></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

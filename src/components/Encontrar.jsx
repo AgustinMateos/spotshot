@@ -16,8 +16,8 @@ const Encontrar = () => {
       {/* Contenido principal */}
       <div className="relative z-10">
         {/* Título principal */}
-        <h2 className="text-4xl font-semibold text-center text-gray-900 mb-16">
-          Encontrar tus fotos es fácil.
+        <h2 className="text-4xl font-normal text-center text-[#1E3A5F] mb-16">
+          Encontrar tus fotos es <strong>fácil.</strong> 
         </h2>
 
         {/* Contenedor de las 3 cards */}
@@ -32,10 +32,10 @@ const Encontrar = () => {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            <h3 className="text-xl font-semibold text-center md:text-start text-gray-900 mb-3">
+            <h3 className="text-xl font-normal text-center md:text-start text-[#1E3A5F] mb-3">
               Busca tu sesión
             </h3>
-            <p className="text-gray-600 text-center md:text-start leading-relaxed">
+            <p className="text-[#1E3A5F] text-center md:text-start leading-relaxed">
               Encuentra las sesiones disponibles por lugar y fecha.
             </p>
           </div>
@@ -49,10 +49,10 @@ const Encontrar = () => {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            <h3 className="text-xl font-semibold text-center md:text-start text-gray-900 mb-3">
+            <h3 className="text-xl font-normal text-center md:text-start text-[#1E3A5F] mb-3">
               Elige tus mejores momentos.
             </h3>
-            <p className="text-gray-600 text-center md:text-start leading-relaxed">
+            <p className="text-[#1E3A5F] text-center md:text-start leading-relaxed">
               Selecciona las que más te gusten y añádelas al carrito.
             </p>
           </div>
@@ -66,10 +66,10 @@ const Encontrar = () => {
                 className="w-6 h-6 object-contain"
               />
             </div>
-            <h3 className="text-xl text-center md:text-start font-semibold text-gray-900 mb-3">
+            <h3 className="text-xl text-center md:text-start font-normal text-[#1E3A5F] mb-3">
               Descarga al instante
             </h3>
-            <p className="text-gray-600 text-center md:text-start leading-relaxed">
+            <p className="text-[#1E3A5F] text-center md:text-start leading-relaxed">
               Compra segura y acceso inmediato a tus fotos.
             </p>
           </div>
