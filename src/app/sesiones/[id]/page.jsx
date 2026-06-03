@@ -1,11 +1,11 @@
-import Footer from '@/components/Footer'
+
 
 import SesionDetail from '@/components/SesionDetail'
 import React from 'react'
 
 const page = () => {
   return (
-    <div><SesionDetail/><Footer/></div>
+    <div className='pt-20'><SesionDetail/></div>
   )
 }
 

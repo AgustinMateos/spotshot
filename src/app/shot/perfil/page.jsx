@@ -2,7 +2,7 @@ import React from 'react'
 import PerfilPage from '@/components/PerfilPage'
 const page = () => {
   return (
-    <div><PerfilPage/></div>
+    <div className='pt-20'><PerfilPage/></div>
   )
 }
 

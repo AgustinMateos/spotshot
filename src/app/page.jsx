@@ -6,7 +6,7 @@ import Encontrar from "@/components/Encontrar";
 import Fotografo from "@/components/Fotografo";
 import FotosHoy from "@/components/FotosHoy";
 
-import Footer from "@/components/Footer";
+
 
 
 export default function Home() {
@@ -47,7 +47,7 @@ export default function Home() {
       <Encontrar/>
       <Fotografo/>
       <FotosHoy/>
-      <Footer />
+     
     </>
   );
 }

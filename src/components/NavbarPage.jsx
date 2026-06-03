@@ -8,7 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export default function NavbarComponent() {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, loading: authLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -18,7 +18,7 @@ export default function NavbarComponent() {
   const [loadingLogout, setLoadingLogout] = useState(false);
 
   const isHome = pathname === '/';
-  const isLoggedIn = !!token && !!user;
+  const isLoggedIn = !!token && !!user && !authLoading;
 
   const alias = user?.alias || 'Usuario';
   const avatarUrl = user?.avatarUrl;
@@ -36,6 +36,12 @@ export default function NavbarComponent() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Cerrar menú al cambiar de página
+  useEffect(() => {
+    setIsOpen(false);
+    setIsDropdownOpen(false);
+  }, [pathname]);
 
   const hasBackground = !isHome || scrolled;
 
@@ -60,6 +66,13 @@ export default function NavbarComponent() {
       router.push('/login');
     }
   };
+
+  // Mientras carga la autenticación mostramos un navbar neutro (evita flash)
+  if (authLoading) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#103457] h-20 shadow-md" />
+    );
+  }
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -139,10 +152,12 @@ export default function NavbarComponent() {
                     <p className="font-medium text-gray-900">{alias}</p>
                     <p className="text-sm text-gray-500 truncate">{user?.email}</p>
                   </div>
+
                   <a href="/shot/perfil" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsDropdownOpen(false)}>
                     <img src="/icons/miCuenta.svg" alt="" className="w-5 h-5" />
                     Mi cuenta
                   </a>
+
                   <button
                     onClick={handleLogout}
                     disabled={loadingLogout}
@@ -164,7 +179,7 @@ export default function NavbarComponent() {
           )}
         </div>
 
-        {/* Hamburguesa Mobile */}
+        {/* Hamburguesa */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-white p-2 focus:outline-none"
@@ -177,15 +192,13 @@ export default function NavbarComponent() {
         </button>
       </div>
 
-      {/* ==================== MENÚ MOBILE ==================== */}
+      {/* Menú Mobile */}
       {isOpen && (
         <div className="md:hidden bg-[#103457] border-t border-white/10">
           <div className="px-6 py-8 flex flex-col gap-6 text-white text-lg">
-            
             {isLoggedIn ? (
-              /* ==================== MENÚ MOBILE - LOGUEADO ==================== */
               <>
-                {/* Info del Usuario */}
+                {/* Info del usuario */}
                 <div className="flex items-center gap-4 pb-4 border-b border-white/10">
                   {avatarUrl ? (
                     <Image
@@ -207,7 +220,6 @@ export default function NavbarComponent() {
                   </div>
                 </div>
 
-                {/* Enlaces */}
                 <a href="/sesiones" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
                 <a href="/shot/misSesiones" onClick={() => setIsOpen(false)}>Mis sesiones</a>
                 <a href="/shot/misVentas" onClick={() => setIsOpen(false)}>Mis ventas</a>
@@ -215,7 +227,6 @@ export default function NavbarComponent() {
 
                 <hr className="border-white/10 my-2" />
 
-                {/* Cerrar Sesión */}
                 <button
                   onClick={handleLogout}
                   disabled={loadingLogout}
@@ -226,7 +237,6 @@ export default function NavbarComponent() {
                 </button>
               </>
             ) : (
-              /* ==================== MENÚ MOBILE - NO LOGUEADO ==================== */
               <>
                 <a href="/sesiones" onClick={() => setIsOpen(false)}>Explorar sesiones</a>
                 <a href="/register" onClick={() => setIsOpen(false)}>Vender fotos</a>

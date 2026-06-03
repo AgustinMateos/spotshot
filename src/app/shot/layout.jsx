@@ -1,5 +1,5 @@
 
-import Footer from '@/components/Footer';
+
 
 export default function ShotLayout({ children }) {
   return (
@@ -12,7 +12,7 @@ export default function ShotLayout({ children }) {
         {children}
       </main>
 
-      <Footer isShotSection={true} />
+      
     </div>
   );
 }

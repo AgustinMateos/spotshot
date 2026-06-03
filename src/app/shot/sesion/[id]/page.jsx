@@ -4,7 +4,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div><SesionPage/></div>
+    <div className='pt-20'><SesionPage/></div>
   )
 }
 

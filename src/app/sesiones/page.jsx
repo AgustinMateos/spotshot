@@ -1,13 +1,13 @@
 import SesionesPage from '@/components/SesionesPage'
 import React from 'react'
 
-import Footer from '@/components/Footer'
+
 const page = () => {
   return (
-    <div>
+    <div className='pt-20'>
      
       <SesionesPage/>
-      <Footer/>
+ 
       </div>
 
   )
