@@ -64,41 +64,64 @@ const OrderSuccessContent = () => {
   }, [checkoutSessionId]);
 
   // Descargar todas las imágenes
-  const handleDownloadAll = async () => {
-    if (!checkoutSessionId || downloading) return;
+  const handleDownloadAllAsZip = async () => {
+  if (!checkoutSessionId || downloading) return;
 
-    setDownloading(true);
-    try {
-      const res = await fetch(
-        `https://spotshot-api-six.vercel.app/api/v1/purchases/orders/by-checkout/${checkoutSessionId}/downloads`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}) // vacío = todas las imágenes
-        }
-      );
+  setDownloading(true);
 
-      if (!res.ok) throw new Error("No se pudieron generar los enlaces de descarga");
+  try {
+    // 1. Obtener las URLs firmadas
+    const res = await fetch(
+      `https://spotshot-api-six.vercel.app/api/v1/purchases/orders/by-checkout/${checkoutSessionId}/downloads`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}) // todas las imágenes
+      }
+    );
 
-      const { downloads } = await res.json();
+    if (!res.ok) throw new Error("Error al generar enlaces de descarga");
 
-      downloads.forEach((item, index) => {
-        setTimeout(() => {
-          const link = document.createElement('a');
-          link.href = item.signedUrl;
-          link.download = `spotshot-imagen-${item.imageId.slice(0, 8)}.jpg`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }, index * 250);
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Hubo un problema al descargar las imágenes");
-    } finally {
-      setDownloading(false);
+    const { downloads } = await res.json();
+
+    if (!downloads || downloads.length === 0) {
+      alert("No hay imágenes para descargar");
+      return;
     }
-  };
+
+    // 2. Crear ZIP
+    const JSZip = (await import('jszip')).default;
+    const FileSaver = (await import('file-saver')).default;
+    
+    const zip = new JSZip();
+    const folder = zip.folder("Mis-Imágenes-SpotShot");
+
+    // Descargar las imágenes y agregarlas al ZIP
+    const promises = downloads.map(async (item, index) => {
+      const response = await fetch(item.signedUrl);
+      const blob = await response.blob();
+      
+      const fileName = `imagen-${String(index + 1).padStart(3, '0')}-${item.imageId.slice(0, 8)}.jpg`;
+      
+      folder.file(fileName, blob);
+    });
+
+    await Promise.all(promises);
+
+    // 3. Generar y descargar el ZIP
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    
+    FileSaver.saveAs(zipBlob, `SpotShot-Orden-${orderData.orderId.slice(0, 8)}.zip`);
+
+    alert("¡Descarga completada! 🎉");
+
+  } catch (err) {
+    console.error(err);
+    alert("Hubo un error al crear el archivo ZIP");
+  } finally {
+    setDownloading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -134,14 +157,17 @@ const OrderSuccessContent = () => {
         </p>
 
         <div className="space-y-4">
-          <button
-            onClick={handleDownloadAll}
-            disabled={downloading}
-            className="w-full bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 px-8 rounded-2xl text-lg font-medium flex items-center justify-center gap-3 transition"
-          >
-            <Download size={24} />
-            {downloading ? 'Descargando...' : `Descargar Todas las Imágenes (${orderData.images?.length || 0})`}
-          </button>
+         <button
+  onClick={handleDownloadAllAsZip}
+  disabled={downloading}
+  className="w-full bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 px-8 rounded-2xl text-lg font-medium flex items-center justify-center gap-3 transition"
+>
+  <Download size={24} />
+  {downloading 
+    ? 'Creando archivo ZIP...' 
+    : `Descargar Todo como ZIP (${orderData.images?.length || 0} imágenes)`
+  }
+</button>
 
           <button
             onClick={() => router.push('/sesiones')}
