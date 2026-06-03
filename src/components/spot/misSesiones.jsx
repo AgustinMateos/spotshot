@@ -181,7 +181,16 @@ export default function MisSesiones() {
 
         {/* Grid de Sesiones */}
         {loading ? (
-          <p className="text-center py-20 text-gray-500">Cargando tus sesiones...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm animate-pulse">
+        {/* Imagen Skeleton */}
+        <div className="w-full aspect-16/10 bg-gray-200"></div>
+
+       
+      </div>
+    ))}
+  </div>
         ) : filteredSessions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSessions.map((session) => (
