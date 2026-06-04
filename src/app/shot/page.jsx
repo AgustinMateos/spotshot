@@ -128,7 +128,7 @@ if (authLoading || loadingProfile || loadingInitial) {
 }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen pt-20 bg-white">
       <div className="max-w-full mx-auto px-6 py-8">
 
         {/* Header de bienvenida */}
@@ -226,7 +226,7 @@ if (authLoading || loadingProfile || loadingInitial) {
               placeholder="Buscar por título, playa o escuela..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="lg:col-span-2 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500"
+              className="lg:col-span-2 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:border-gray-900"
             />
 
             <select 
@@ -240,7 +240,7 @@ if (authLoading || loadingProfile || loadingInitial) {
 
             <select 
               onChange={(e) => handleFilterChange('status', e.target.value)} 
-              className="border border-gray-300 rounded-xl px-4 py-3"
+              className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
             >
               <option value="">Todos los estados</option>
               <option value="DRAFT">Borrador</option>
@@ -252,7 +252,7 @@ if (authLoading || loadingProfile || loadingInitial) {
               type="date"
               value={filters.sessionDate}
               onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-3"
+              className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
             />
           </div>
 
@@ -298,7 +298,7 @@ if (authLoading || loadingProfile || loadingInitial) {
           {/* Paginación - Estilo idéntico a Mis Ventas */}
 {pagination.totalPages > 1 && (
   <div className="bg-white rounded-3xl shadow-sm mt-10">
-    <div className="flex items-center justify-between px-8 py-6 border-t">
+    <div className="flex items-center justify-between px-8 py-6 ">
       <p className="text-lg font-medium text-gray-900">
         Página {filters.page} de {pagination.totalPages}
       </p>

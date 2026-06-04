@@ -126,7 +126,7 @@ export default function MisSesiones() {
           <Link
             href={isStripeReady ? "/shot/newAlbum" : "#"}
             className={`px-6 py-3 rounded-2xl flex items-center gap-2 transition font-medium ${isStripeReady
-                ? 'bg-gray-900 text-white hover:bg-black'
+                ? 'bg-[#0D2744] text-white hover:bg-[#0d2744e5]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             onClick={(e) => {
@@ -148,12 +148,12 @@ export default function MisSesiones() {
               placeholder="Buscar por título, playa o escuela..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="lg:col-span-2 border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-blue-500"
+              className="lg:col-span-2 border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
             />
 
             <select
               onChange={(e) => handleFilterChange('audience', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3"
+              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
             >
               <option value="">Todas las audiencias</option>
               <option value="FREE_SURFERS">Free Surfers</option>
@@ -162,7 +162,7 @@ export default function MisSesiones() {
 
             <select
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3"
+              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
             >
               <option value="">Todos los estados</option>
               <option value="DRAFT">Borrador</option>
@@ -174,7 +174,7 @@ export default function MisSesiones() {
               type="date"
               value={filters.sessionDate}
               onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3"
+              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
             />
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function MisSesiones() {
         {/* Paginación - Estilo Mis Ventas */}
         {pagination.totalPages > 1 && (
           <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
-            <div className="flex items-center justify-between px-8 py-6 border-t">
+            <div className="flex items-center justify-between px-8 py-6 ">
               <p className="text-lg font-medium text-gray-900">
                 Página {pagination.page} de {pagination.totalPages}
               </p>

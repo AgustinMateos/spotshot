@@ -62,22 +62,32 @@ useEffect(() => {
 }, [token]);
 // ====================== PUBLICAR SESIÓN ======================
 const handlePublishSession = async () => {
+  console.log("=== DEBUG HANDLE PUBLISH SESSION ===");
+  console.log("Session ID:", sessionId);
+  console.log("basePrice en formData:", formData.basePrice);
+  console.log("Tipo de basePrice:", typeof formData.basePrice);
+  console.log("uploadedImages.length:", uploadedImages.length);
+  console.log("Token existe?", !!token);
+
   if (!sessionId) {
     alert("No se encontró el ID de la sesión");
     return;
   }
+
   if (formData.basePrice <= 0) {
+    console.error("❌ PRECIO INVÁLIDO DETECTADO");
     alert("Configurá un precio por foto mayor a cero");
     setStep(3);
     return;
   }
+
   if (uploadedImages.length === 0) {
     alert("Debes subir al menos una foto");
     setStep(2);
     return;
   }
 
-  setShowPublishModal(true);   // ← Abre el modal en vez de publicar directamente
+  setShowPublishModal(true);
 };
 
 const confirmPublish = async () => {
@@ -307,6 +317,10 @@ const handleUploadPhotos = async () => {
 };
 // ====================== ACTUALIZAR PRECIO + PACKS ======================
 const handleUpdatePricing = async () => {
+  console.log("=== INICIANDO handleUpdatePricing ===");
+  console.log("Session ID:", sessionId);
+  console.log("basePrice antes de enviar:", formData.basePrice);
+
   if (!sessionId) {
     alert("Sesión no encontrada");
     return;
@@ -325,11 +339,11 @@ const handleUpdatePricing = async () => {
   }));
 
   const payload = {
-    unitPricePhotographerEur: formData.basePrice,   // ← ESTE ES EL CAMBIO CLAVE
+    unitPricePhotographerEur: Number(formData.basePrice),
     packs: packsPayload
   };
 
-  console.log("📤 Enviando PATCH:", payload);
+  console.log("📤 Payload que se envía al backend:", payload);
 
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -343,22 +357,23 @@ const handleUpdatePricing = async () => {
     });
 
     const data = await res.json();
-    console.log("📥 Respuesta del servidor:", data);
+    
+    console.log("📥 Respuesta del servidor (PATCH):");
+    console.log("- Status:", res.status);
+    console.log("- Body:", data);
 
     if (res.ok) {
-      // Actualizamos el precio local con lo que devuelve el backend
-      const serverPrice = data?.pricing?.unitPricePhotographerEur;
-      if (serverPrice) {
-        setFormData(prev => ({ ...prev, basePrice: serverPrice }));
-      }
-
+      const newPrice = data?.pricing?.unitPricePhotographerEur || data?.unitPricePhotographerEur || formData.basePrice;
+      console.log("✅ Precio actualizado correctamente a:", newPrice);
       
+      setFormData(prev => ({ ...prev, basePrice: Number(newPrice) }));
       setStep(4);
     } else {
-      alert(data.message || 'Error al guardar precio');
+      console.error("❌ Error en PATCH:", data);
+      alert(data.message || `Error ${res.status}`);
     }
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error en handleUpdatePricing:", err);
     alert('Error de conexión');
   } finally {
     setUpdatingPrice(false);

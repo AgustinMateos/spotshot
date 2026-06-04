@@ -191,7 +191,7 @@ export default function SesionesPage() {
        {/* Paginación - Estilo Mis Ventas */}
 {pagination.totalPages > 1 && (
   <div className="bg-white rounded-3xl shadow-sm mt-12">
-    <div className="flex items-center justify-between px-8 py-6 border-t">
+    <div className="flex items-center justify-between px-8 py-6 ">
       <p className="text-lg font-medium text-gray-900">
         Página {pagination.page} de {pagination.totalPages}
       </p>
