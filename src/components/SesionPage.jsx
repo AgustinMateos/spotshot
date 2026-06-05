@@ -33,7 +33,7 @@ const fileInputRef = useRef(null);
     schoolName: '',
     startTime: '',
     endTime: '',
-    unitPricePhotographerEur: 0,
+    unitPriceCustomerEur: 0,
   });
 
   // Cargar detalle
@@ -53,13 +53,14 @@ const fileInputRef = useRef(null);
           // Inicializar form
           // Inicializar form (corregido)
           setFormData({
-            audience: data.audience || 'FREE_SURFERS',
-            location: data.location || '',
-            schoolName: data.schoolName || '',
-            startTime: data.startTime ? data.startTime.slice(0, 5) : '',   // ← CORREGIDO
-            endTime: data.endTime ? data.endTime.slice(0, 5) : '',         // ← CORREGIDO
-            unitPricePhotographerEur: data.pricing?.unitPricePhotographerEur || 5,
-          });
+  audience: data.audience || 'FREE_SURFERS',
+  location: data.location || '',
+  schoolName: data.schoolName || '',
+  startTime: data.startTime ? data.startTime.slice(0, 5) : '',
+  endTime: data.endTime ? data.endTime.slice(0, 5) : '',
+  unitPriceCustomerEur: data.pricing?.unitPriceCustomerEur || 
+                       data.pricing?.unitPricePhotographerEur || 5,  // fallback por si acaso
+});
         } else {
           router.push('/shot/misSesiones');
         }
@@ -231,47 +232,47 @@ const handleUploadImages = async (e) => {
     e.target.value = ''; // Limpiar input
   }
 };
-  const handleUpdate = async () => {
-    setUpdating(true);
-    setErrorMessage('');   // si ya tienes errorMessage
+ const handleUpdate = async () => {
+  setUpdating(true);
+  setErrorMessage('');
 
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-      const payload = {
-        audience: formData.audience,
-        location: formData.location || null,
-        schoolName: formData.schoolName || null,
-        startTime: formData.startTime,           // ya está en HH:mm
-        endTime: formData.endTime,               // ya está en HH:mm
-        unitPricePhotographerEur: Number(formData.unitPricePhotographerEur),
-      };
+    const payload = {
+      audience: formData.audience,
+      location: formData.location || null,
+      schoolName: formData.schoolName || null,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      unitPriceCustomerEur: Number(formData.unitPriceCustomerEur),   // ← Cambiado aquí
+    };
 
-      const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (res.ok) {
-  setShowEditModal(false);
-  setSuccessMessage("Sesión actualizada correctamente");
-  setShowSuccess(true);
-  setTimeout(() => window.location.reload(), 1500);
-} else {
-        const errorData = await res.json().catch(() => ({}));
-        setErrorMessage(errorData.message || 'Error al actualizar la sesión');
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMessage('Error de conexión');
-    } finally {
-      setUpdating(false);
+    if (res.ok) {
+      setShowEditModal(false);
+      setSuccessMessage("Sesión actualizada correctamente");
+      setShowSuccess(true);
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      setErrorMessage(errorData.message || 'Error al actualizar la sesión');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setErrorMessage('Error de conexión');
+  } finally {
+    setUpdating(false);
+  }
+};
 if (loading) {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -493,8 +494,9 @@ if (loading) {
           <div className="flex justify-between items-start mb-8">
             <div>
               <p className="text-gray-500">Precio por foto</p>
-              <p className="text-5xl font-bold">€{session.pricing?.unitPriceCustomer || 8}</p>
-            </div>
+           <p className="text-5xl font-bold">
+  €{session.pricing?.unitPriceCustomerEur || session.pricing?.unitPriceCustomer || 0}
+</p>  </div>
           </div>
 
           <div>

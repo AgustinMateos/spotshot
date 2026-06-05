@@ -94,21 +94,41 @@ const confirmPublish = async () => {
   setShowPublishModal(false);
   setPublishing(true);
 
+  console.log("=== INTENTANDO PUBLICAR ===");
+  console.log("Session ID:", sessionId);
+  console.log("Token:", token ? token.substring(0, 50) + "..." : "NO TOKEN");
+
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/publish`, {
+    const url = `${API_URL}/api/v1/photo-sessions/${sessionId}/publish`;
+    console.log("Llamando a:", url);
+
+    const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'   // ← Agregar esto también
+      },
     });
 
+    console.log("Status de publish:", res.status);
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      data = await res.text();
+    }
+
+    console.log("Respuesta completa del publish:", data);
+
     if (res.ok) {
-      setShowSuccessModal(true);     // ← Abre el modal bonito
-      // Ya NO usamos alert ni router.push aquí
+      setShowSuccessModal(true);
     } else {
-      const data = await res.json();
-      alert(data.message || 'Error al publicar');
+      alert(data.message || data || `Error ${res.status} al publicar`);
     }
   } catch (err) {
+    console.error("Error en confirmPublish:", err);
     alert('Error de conexión');
   } finally {
     setPublishing(false);
@@ -194,13 +214,15 @@ const updateForm = (field, value) => {
     let newValue = value;
 
     if (field === 'basePrice') {
-      // Permitimos que quede vacío temporalmente
-      if (value === '' || value === null) {
-        newValue = '';
+      if (value === '' || value === null || value === undefined) {
+        newValue = '';                    // Permitir vacío temporalmente
       } else {
-        newValue = parseFloat(value) || 0;
+        const parsed = parseFloat(value);
+        newValue = isNaN(parsed) ? 0 : parsed;
       }
     }
+
+    console.log(`🔄 updateForm - ${field}:`, value, '→', newValue); // ← Debug
 
     return { ...prev, [field]: newValue };
   });
@@ -319,7 +341,7 @@ const handleUploadPhotos = async () => {
 const handleUpdatePricing = async () => {
   console.log("=== INICIANDO handleUpdatePricing ===");
   console.log("Session ID:", sessionId);
-  console.log("basePrice antes de enviar:", formData.basePrice);
+  console.log("Precio que quiere el fotógrafo:", formData.basePrice);
 
   if (!sessionId) {
     alert("Sesión no encontrada");
@@ -338,15 +360,17 @@ const handleUpdatePricing = async () => {
     enabled: true
   }));
 
+  // ← CAMBIO IMPORTANTE
   const payload = {
-    unitPricePhotographerEur: Number(formData.basePrice),
+    unitPriceCustomerEur: Number(formData.basePrice),   // ← Campo que espera el backend
     packs: packsPayload
   };
 
-  console.log("📤 Payload que se envía al backend:", payload);
+  console.log("📤 Payload enviado:", payload);
 
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    
     const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}`, {
       method: 'PATCH',
       headers: {
@@ -357,23 +381,23 @@ const handleUpdatePricing = async () => {
     });
 
     const data = await res.json();
-    
-    console.log("📥 Respuesta del servidor (PATCH):");
-    console.log("- Status:", res.status);
-    console.log("- Body:", data);
+    console.log("📥 Respuesta PATCH:", { status: res.status, data });
 
-    if (res.ok) {
-      const newPrice = data?.pricing?.unitPricePhotographerEur || data?.unitPricePhotographerEur || formData.basePrice;
-      console.log("✅ Precio actualizado correctamente a:", newPrice);
-      
-      setFormData(prev => ({ ...prev, basePrice: Number(newPrice) }));
+    // Verificamos el precio real guardado
+    const serverPrice = data?.pricing?.unitPricePhotographerEur || 
+                       data?.pricing?.unitPriceCustomerEur;
+
+    console.log("💰 Precio según backend:", serverPrice);
+
+    if (serverPrice && serverPrice > 0) {
+      setFormData(prev => ({ ...prev, basePrice: Number(serverPrice) }));
+      alert("✅ Precio guardado correctamente");
       setStep(4);
     } else {
-      console.error("❌ Error en PATCH:", data);
-      alert(data.message || `Error ${res.status}`);
+      alert("Error: El precio no se guardó. Revisa la consola.");
     }
   } catch (err) {
-    console.error("❌ Error en handleUpdatePricing:", err);
+    console.error(err);
     alert('Error de conexión');
   } finally {
     setUpdatingPrice(false);
@@ -449,6 +473,8 @@ const handleUpdatePacks = async () => {
   const handleFileSelect = (e) => handleFiles(e.target.files);
 
 const handleNext = async () => {
+  console.log(`→ Avanzando del paso ${step} al siguiente`);
+
   if (step === 1) {
     await handleCreateSession();
   } 
@@ -459,10 +485,10 @@ const handleNext = async () => {
     setStep(3);
   } 
   else if (step === 3) {
-    await handleUpdatePricing();
+    await handleUpdatePricing();   // ← Aquí se guarda el precio
   } 
   else if (step === 4) {
-    await handlePublishSession();   // ← Ahora publica aquí
+    await handlePublishSession();
   }
 };
 
@@ -833,15 +859,15 @@ const finalPrice = formData.basePrice > 0
 <div className="mb-8">
   <label className="block text-gray-700 mb-2 font-medium">Precio por foto (€)</label>
   <div className="flex items-center gap-3">
-    <input
-      type="number"
-      value={formData.basePrice}
-      onChange={(e) => updateForm('basePrice', e.target.value)}
-      className="w-32 text-5xl font-semibold border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500"
-      min="0"
-      step="0.5"
-      placeholder="0"
-    />
+   <input
+  type="number"
+  value={formData.basePrice}
+  onChange={(e) => updateForm('basePrice', e.target.value)}
+  className="w-32 text-5xl font-semibold border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500"
+  min="0.5"
+  step="0.5"
+  placeholder="5"
+/>
     <span className="text-5xl text-gray-400">€</span>
   </div>
   <p className="text-sm text-gray-500 mt-2">Precio recomendado: 3€ - 8€ por foto</p>

@@ -52,6 +52,27 @@ export default function MisSesiones() {
     loadStripeStatus();
   }, [token]);
 
+  // Traducción y colores de estados
+  const getStatusLabel = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'DRAFT': return 'Borrador';
+      case 'PROCESSING': return 'En proceso';
+      case 'ACTIVE': return 'Publicada';
+      case 'DISABLED': return 'Desactivada';
+      default: return status || 'Desconocido';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'DRAFT': return 'bg-[#0D2744] text-white';
+      case 'PROCESSING': return 'bg-[#0D2744] text-white';
+      case 'ACTIVE': return 'bg-[#0D2744] text-white';
+      case 'DISABLED': return 'bg-[#0D2744] text-white';
+      default: return 'bg-[#0D2744] text-white';
+    }
+  };
+
   // Cargar sesiones
   useEffect(() => {
     const fetchMySessions = async () => {
@@ -122,7 +143,6 @@ export default function MisSesiones() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Mis Sesiones</h1>
 
-          {/* Botón Crear Sesión - Deshabilitado si no tiene Stripe */}
           <Link
             href={isStripeReady ? "/shot/newAlbum" : "#"}
             className={`px-6 py-3 rounded-2xl flex items-center gap-2 transition font-medium ${isStripeReady
@@ -140,7 +160,7 @@ export default function MisSesiones() {
           </Link>
         </div>
 
-        {/* Filtros y Buscador */}
+        {/* Filtros */}
         <div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <input
@@ -166,6 +186,7 @@ export default function MisSesiones() {
             >
               <option value="">Todos los estados</option>
               <option value="DRAFT">Borrador</option>
+              <option value="PROCESSING">En proceso</option>
               <option value="ACTIVE">Publicada</option>
               <option value="DISABLED">Desactivada</option>
             </select>
@@ -182,15 +203,12 @@ export default function MisSesiones() {
         {/* Grid de Sesiones */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {Array.from({ length: 6 }).map((_, i) => (
-      <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm animate-pulse">
-        {/* Imagen Skeleton */}
-        <div className="w-full aspect-16/10 bg-gray-200"></div>
-
-       
-      </div>
-    ))}
-  </div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm animate-pulse">
+                <div className="w-full aspect-16/10 bg-gray-200"></div>
+              </div>
+            ))}
+          </div>
         ) : filteredSessions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSessions.map((session) => (
@@ -206,21 +224,20 @@ export default function MisSesiones() {
                     <div className="w-full aspect-16/10 bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
                   )}
 
-                  <div className="absolute top-3 flex right-3 bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full">
-                    <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora' /> {session.photoCount} fotos
-
+                  <div className="absolute top-3 right-3 bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                    <Image src={'/icons/camara.svg'} width={16} height={16} alt='fotos' /> 
+                    {session.photoCount} fotos
                   </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
-                    <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
-                      {session.status}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
+                    <div className={`text-xs inline-block px-3 py-1 rounded-full mb-2 ${getStatusColor(session.status)}`}>
+                      {getStatusLabel(session.status)}
                     </div>
                     <p className="font-semibold text-lg">{session.title}</p>
                     <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                     <p className="text-xs opacity-75 mt-1">
                       {session.startTime} - {session.endTime}
                     </p>
-
                   </div>
                 </div>
               </Link>
@@ -232,45 +249,19 @@ export default function MisSesiones() {
           </div>
         )}
 
-
-        {/* Paginación - Estilo Mis Ventas */}
+        {/* Paginación */}
         {pagination.totalPages > 1 && (
           <div className="bg-white rounded-3xl shadow-sm mt-12 overflow-hidden">
-            <div className="flex items-center justify-between px-8 py-6 ">
+            <div className="flex items-center justify-between px-8 py-6">
               <p className="text-lg font-medium text-gray-900">
                 Página {pagination.page} de {pagination.totalPages}
               </p>
 
               <div className="flex gap-3">
-                <button
-                  onClick={() => goToPage(1)}
-                  disabled={!pagination.hasPreviousPage}
-                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  «
-                </button>
-                <button
-                  onClick={() => goToPage(pagination.page - 1)}
-                  disabled={!pagination.hasPreviousPage}
-                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  ‹
-                </button>
-
-                <button
-                  onClick={() => goToPage(pagination.page + 1)}
-                  disabled={!pagination.hasNextPage}
-                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  ›
-                </button>
-                <button
-                  onClick={() => goToPage(pagination.totalPages)}
-                  disabled={!pagination.hasNextPage}
-                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-                >
-                  »
-                </button>
+                <button onClick={() => goToPage(1)} disabled={!pagination.hasPreviousPage} className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition">«</button>
+                <button onClick={() => goToPage(pagination.page - 1)} disabled={!pagination.hasPreviousPage} className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition">‹</button>
+                <button onClick={() => goToPage(pagination.page + 1)} disabled={!pagination.hasNextPage} className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition">›</button>
+                <button onClick={() => goToPage(pagination.totalPages)} disabled={!pagination.hasNextPage} className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition">»</button>
               </div>
             </div>
           </div>
