@@ -12,7 +12,7 @@ const NewAlbumPage = () => {
   const { token, logout, loading } = useAuth();
 const [showDateModal, setShowDateModal] = useState(false);
   const [step, setStep] = useState(1);
-  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedImages, setUploadedImages] = useState([]); // ← se mantiene
  
 const [showDurationDropdown, setShowDurationDropdown] = useState(false);
  const [formData, setFormData] = useState({
@@ -43,6 +43,8 @@ const [showDurationDropdown, setShowDurationDropdown] = useState(false);
 const [showStartTimeDropdown, setShowStartTimeDropdown] = useState(false);
   const [showSchoolDropdown, setShowSchoolDropdown] = useState(false);
   const [showBeachDropdown, setShowBeachDropdown] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+const [errorMessage, setErrorMessage] = useState('');
 // Cargar catálogo de packs
 useEffect(() => {
   const loadPacks = async () => {
@@ -226,10 +228,31 @@ const updateForm = (field, value) => {
 };
 
   // ==================== MANEJO DE FOTOS ====================
-  const handleFiles = (files) => {
-    const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+ const handleFiles = (files) => {
+  const validFiles = [];
+  const invalidFiles = [];
+
+  Array.from(files).forEach(file => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    
+    if (allowedTypes.includes(file.type)) {
+      validFiles.push(file);
+    } else {
+      invalidFiles.push(file.name);
+    }
+  });
+
+  if (invalidFiles.length > 0) {
+    setErrorMessage(
+      `Formato no permitido:\n\n${invalidFiles.join('\n')}\n\nSolo se permiten: JPG, PNG y WEBP`
+    );
+    setShowErrorModal(true);
+  }
+
+  if (validFiles.length > 0) {
     setPhotos(prev => [...prev, ...validFiles]);
-  };
+  }
+};
 
   const removePhoto = (index) => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
@@ -317,22 +340,37 @@ const handleUploadPhotos = async () => {
 
     const confirmData = await confirmRes.json();
 
-    if (!confirmRes.ok) {
-      throw new Error(confirmData.message || 'Error al confirmar las subidas');
-    }
+if (!confirmRes.ok) {
+  throw new Error(confirmData.message || 'Error al confirmar las subidas');
+}
 
-    // Actualizar estado
-    setUploadedImages(confirmData.images || []);
-    setPhotos([]); // Limpiar fotos pendientes
+// === NUEVA LÓGICA: Combinar preview local + datos del servidor ===
+// === COMBINAR PREVIEW LOCAL + DATOS DEL SERVIDOR ===
+const newUploadedImages = photos.map((file, index) => {
+  const serverImage = confirmData.images?.[index] || {};
+  return {
+    ...serverImage,
+    localPreview: URL.createObjectURL(file),   // ← Preview inmediato
+    name: file.name
+  };
+});
 
-    // alert(`✅ ${successfulImageIds.length} foto(s) subidas correctamente`);
-
-  } catch (err) {
-    console.error("❌ Error en subida directa:", err);
-    alert(err.message || 'Error durante la subida de fotos. Revisa la consola.');
-  } finally {
-    setUploading(false);
+setUploadedImages(prev => [...prev, ...newUploadedImages]);
+setPhotos([]); // Limpiar fotos pendientes
+} catch (err) {
+  console.error("❌ Error en subida directa:", err);
+  
+  let message = err.message || 'Error durante la subida de fotos.';
+  
+  if (message.includes('mimeType') || message.includes('image/jpeg')) {
+    setErrorMessage("Formato de imagen no permitido por el servidor.\n\nSolo JPG, PNG y WEBP son aceptados.");
+    setShowErrorModal(true);
+  } else {
+    alert(message); // Solo alert para otros errores
   }
+} finally {
+  setUploading(false);
+}
 };
 // ====================== ACTUALIZAR PRECIO + PACKS ======================
 const handleUpdatePricing = async () => {
@@ -388,7 +426,7 @@ const handleUpdatePricing = async () => {
 
     if (serverPrice && serverPrice > 0) {
       setFormData(prev => ({ ...prev, basePrice: Number(serverPrice) }));
-      alert("✅ Precio guardado correctamente");
+      // alert("✅ Precio guardado correctamente");
       setStep(4);
     } else {
       alert("Error: El precio no se guardó. Revisa la consola.");
@@ -476,13 +514,22 @@ const handleNext = async () => {
     await handleCreateSession();
   } 
   else if (step === 2) {
+    if (uploadedImages.length === 0 && photos.length === 0) {
+      alert("Debes subir al menos una foto válida para continuar.");
+      return;
+    }
+
     if (photos.length > 0) {
       await handleUploadPhotos();
     }
-    setStep(3);
+
+    // Solo avanzamos si hay fotos subidas
+    if (uploadedImages.length > 0) {
+      setStep(3);
+    }
   } 
   else if (step === 3) {
-    await handleUpdatePricing();   // ← Aquí se guarda el precio
+    await handleUpdatePricing();
   } 
   else if (step === 4) {
     await handlePublishSession();
@@ -896,26 +943,37 @@ const finalPrice = formData.basePrice > 0
         </div>
       )}
 
-      {/* Fotos ya subidas */}
-      {uploadedImages.length > 0 && (
-        <div className="mt-10">
-          <p className="text-sm text-green-600 font-medium mb-4">
-            ✅ Fotos ya subidas ({uploadedImages.length})
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {uploadedImages.map((img, index) => (
-  <div key={index} className="relative rounded-2xl overflow-hidden border border-green-300">
-    <ImageWithLoader
-      src={img.publicUrl}
-      alt={`uploaded-${index}`}
-      aspectRatio="aspect-square"
-    />
-    <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">Subida</div>
-  </div>
-))}
+    {/* Fotos ya subidas */}
+{uploadedImages.length > 0 && (
+  <div className="mt-10">
+    <p className="text-sm text-green-600 font-medium mb-4">
+      ✅ Fotos ya subidas ({uploadedImages.length})
+    </p>
+    <div className="grid grid-cols-2 md:grid-cols-8 gap-4">
+      {uploadedImages.map((img, index) => {
+        const displayUrl = img.localPreview || img.publicUrl || img.url;
+        
+        return (
+          <div key={index} className="relative rounded-2xl overflow-hidden border border-green-300 aspect-square bg-gray-100">
+            <ImageWithLoader
+              src={displayUrl}
+              alt={`uploaded-${index}`}
+              aspectRatio="aspect-square"
+            />
+            <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded font-medium">
+              Subida
+            </div>
+            {img.localPreview && (
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                Preview
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })}
+    </div>
+  </div>
+)}
     </div>
   </div>
 )}
@@ -1061,29 +1119,39 @@ const finalPrice = formData.basePrice > 0
       </div>
     </div>
 
-    {/* Fotos subidas */}
-    {/* Fotos subidas */}
+{/* Fotos subidas */}
 <div>
-
   <p className="text-sm text-gray-600 mb-4 font-medium">
     {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''} subidas
   </p>
-   <p className="text-xs text-gray-400 mt-1">*No hace falta esperar a que termine el proceso de carga.</p>
+  <p className="text-xs text-gray-400 mt-1">*No hace falta esperar a que termine el proceso de carga.</p>
   
   {uploadedImages.length > 0 ? (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {uploadedImages.map((img, index) => (
-        <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border border-green-200">
-          <ImageWithLoader
-            src={img.publicUrl}
-            alt={`foto-${index}`}
-            aspectRatio="aspect-square"
-          />
-          <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">
-            Subida
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      {uploadedImages.map((img, index) => {
+        const displayUrl = img.localPreview || img.publicUrl || img.url;
+        
+        return (
+          <div 
+            key={index} 
+            className="relative aspect-square rounded-2xl overflow-hidden border border-green-200 bg-gray-100"
+          >
+            <ImageWithLoader
+              src={displayUrl}
+              alt={`foto-${index}`}
+              aspectRatio="aspect-square"
+            />
+            <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded font-medium">
+              Subida
+            </div>
+            {img.localPreview && (
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                Preview
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   ) : (
     <p className="text-red-600 text-center py-8 bg-red-50 rounded-2xl">
@@ -1109,22 +1177,22 @@ const finalPrice = formData.basePrice > 0
       </button>
     )}
 
-    <button
-      onClick={handleNext}
-      disabled={
-        (step === 1 && creatingSession) || 
-        (step === 2 && uploading) || 
-        (step === 3 && updatingPrice) ||
-        (step === 4 && publishing)
-      }
-      className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
-    >
-      {step === 1 && creatingSession ? 'Creando sesión...' :
-       step === 2 && uploading ? 'Subiendo fotos...' :
-       step === 3 && updatingPrice ? 'Guardando precio...' :
-       step === 4 && publishing ? 'Publicando...' :
-       step === 4 ? 'Publicar Sesión' : 'Siguiente →'}
-    </button>
+ <button
+  onClick={handleNext}
+  disabled={
+    (step === 1 && creatingSession) || 
+    (step === 2 && (uploading || showErrorModal || (uploadedImages.length === 0 && photos.length === 0))) || 
+    (step === 3 && updatingPrice) ||
+    (step === 4 && publishing)
+  }
+  className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+>
+  {step === 1 && creatingSession ? 'Creando sesión...' :
+   step === 2 && uploading ? 'Subiendo fotos...' :
+   step === 3 && updatingPrice ? 'Guardando precio...' :
+   step === 4 && publishing ? 'Publicando...' :
+   step === 4 ? 'Publicar Sesión' : 'Siguiente →'}
+</button>
   </div>
 </div>
 {/* ==================== MODAL PUBLICAR ==================== */}
@@ -1199,6 +1267,31 @@ const finalPrice = formData.basePrice > 0
         className="w-full py-3.5 bg-[#106BB9] text-white rounded-2xl font-medium hover:bg-blue-700 transition"
       >
         Completar ahora
+      </button>
+    </div>
+  </div>
+)}
+{/* ==================== MODAL ERROR DE FORMATO ==================== */}
+{showErrorModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+      <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+        <span className="text-4xl">⚠️</span>
+      </div>
+      
+      <h3 className="text-2xl font-semibold mb-3 text-red-600">Formato no permitido</h3>
+      <p className="text-gray-600 mb-8 whitespace-pre-line">
+        {errorMessage}
+      </p>
+
+      <button
+        onClick={() => {
+          setShowErrorModal(false);
+          setErrorMessage('');
+        }}
+        className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black transition"
+      >
+        Entendido
       </button>
     </div>
   </div>
