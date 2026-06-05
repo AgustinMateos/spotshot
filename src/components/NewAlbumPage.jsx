@@ -6,22 +6,26 @@ import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import ImageWithLoader from '@/components/ImageWithLoader';
 import { escuelas, playas } from '@/lib/constants/surfData';
+
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading } = useAuth();
-
+const [showDateModal, setShowDateModal] = useState(false);
   const [step, setStep] = useState(1);
   const [uploadedImages, setUploadedImages] = useState([]);
-  const [formData, setFormData] = useState({
-    type: 'free-surfers',
-    school: '',
-    location: '',
-    date: '',
-    startTime: '10:30',
-    endTime: '11:30',
-    basePrice: 5,
-    selectedPacks: [],
-  });
+ 
+const [showDurationDropdown, setShowDurationDropdown] = useState(false);
+ const [formData, setFormData] = useState({
+  type: 'free-surfers',
+  school: '',
+  location: '',
+  date: '',
+  startTime: '10:30',
+  endTime: '11:00',        // ← Cambiado a 30 min por defecto
+  duration: '0.5',         // ← Nuevo campo
+  basePrice: 5,
+  selectedPacks: [],
+});
 
   const [packsCatalog, setPacksCatalog] = useState([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(false);
@@ -36,7 +40,7 @@ const NewAlbumPage = () => {
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [publishing, setPublishing] = useState(false);
   // Lista de escuelas oficiales
-
+const [showStartTimeDropdown, setShowStartTimeDropdown] = useState(false);
   const [showSchoolDropdown, setShowSchoolDropdown] = useState(false);
   const [showBeachDropdown, setShowBeachDropdown] = useState(false);
 // Cargar catálogo de packs
@@ -137,18 +141,19 @@ const confirmPublish = async () => {
 // ====================== CREAR SESIÓN ======================
 const handleCreateSession = async () => {
   if (!formData.date || !formData.startTime || !formData.endTime) {
-    alert("Por favor completa la fecha y horarios");
+    setShowDateModal(true);   // ← Abre el modal en vez de alert
     return;
   }
 
-  // === DEBUG TOKEN ===
-  console.log("🔑 DEBUG TOKEN EN CREATE SESSION:");
-  console.log("→ Token actual:", token ? token.substring(0, 60) + "..." : "NULL / UNDEFINED");
-  console.log("→ Longitud del token:", token?.length || 0);
+  // Validación de duración permitida
+  const start = new Date(`2025-01-01 ${formData.startTime}`);
+  const end = new Date(`2025-01-01 ${formData.endTime}`);
+  const diffMinutes = (end - start) / (1000 * 60);
 
-  if (!token) {
-    alert("No tienes sesión activa. Inicia sesión nuevamente.");
-    router.push('/login');
+  const allowedDurations = [30, 60, 90, 120];
+
+  if (!allowedDurations.includes(diffMinutes)) {
+    alert("La duración de la sesión debe ser de 30 minutos, 1 hora, 1.5 horas o 2 horas.");
     return;
   }
 
@@ -178,19 +183,11 @@ const handleCreateSession = async () => {
 
     const data = await res.json();
 
-    console.log("→ Respuesta del servidor:", data);
-
     if (res.ok) {
       setSessionId(data.id);
-    
       setStep(2);
     } else {
       alert(data.message || 'Error al crear la sesión');
-      if (data.message?.toLowerCase().includes("token") || res.status === 401) {
-        alert("Tu sesión expiró. Inicia sesión nuevamente.");
-        logout();
-        router.push('/login');
-      }
     }
   } catch (err) {
     console.error("Error creando sesión:", err);
@@ -704,7 +701,8 @@ const finalPrice = formData.basePrice > 0
   </div>
 )}
 
-   {/* Fecha y Hora */}
+  
+{/* Fecha y Hora */}
 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
   <div className="md:col-span-1">
     <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
@@ -715,35 +713,109 @@ const finalPrice = formData.basePrice > 0
       type="date"
       value={formData.date}
       onChange={(e) => updateForm('date', e.target.value)}
-      max={new Date().toISOString().split('T')[0]}   // ← No permite fechas futuras
+      max={new Date().toISOString().split('T')[0]}
       className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
     />
   </div>
 
-  <div>
+  {/* Hora Inicio - Dropdown Personalizado */}
+  <div className="relative">
     <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
       <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'}/> 
       Hora Inicio
     </label>
-    <input
-      type="time"
-      value={formData.startTime}
-      onChange={(e) => updateForm('startTime', e.target.value)}
-      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-    />
+
+    <div
+      onClick={() => setShowStartTimeDropdown(!showStartTimeDropdown)}
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white cursor-pointer flex justify-between items-center"
+    >
+      <span className="text-lg">{formData.startTime || "Seleccionar hora"}</span>
+      <span className="text-gray-400">▼</span>
+    </div>
+
+    {showStartTimeDropdown && (
+      <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto py-2">
+        {Array.from({ length: 24 }, (_, i) => {
+          const hour = i.toString().padStart(2, '0');
+          return (
+            <React.Fragment key={i}>
+              <div
+                onClick={() => {
+                  updateForm('startTime', `${hour}:00`);
+                  setShowStartTimeDropdown(false);
+                }}
+                className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:00` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
+              >
+                {`${hour}:00`}
+              </div>
+              <div
+                onClick={() => {
+                  updateForm('startTime', `${hour}:30`);
+                  setShowStartTimeDropdown(false);
+                }}
+                className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:30` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
+              >
+                {`${hour}:30`}
+              </div>
+            </React.Fragment>
+          );
+        })}
+      </div>
+    )}
   </div>
 
-  <div>
-    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
-      <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'}/> 
-      Hora Fin
-    </label>
-    <input
-      type="time"
-      value={formData.endTime}
-      onChange={(e) => updateForm('endTime', e.target.value)}
-      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-    />
+  {/* Duración - Dropdown Personalizado */}
+  <div className="relative">
+    <label className="block text-gray-700 mb-2 font-medium">Duración de la sesión</label>
+
+    <div
+      onClick={() => setShowDurationDropdown(!showDurationDropdown)}
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white cursor-pointer flex justify-between items-center"
+    >
+      <span className="text-lg">
+        {formData.duration 
+          ? `${formData.duration === '0.5' ? '30 minutos' : 
+              formData.duration === '1' ? '1 hora' : 
+              formData.duration === '1.5' ? '1 hora y media' : '2 horas'}`
+          : "Seleccionar duración"}
+      </span>
+      <span className="text-gray-400">▼</span>
+    </div>
+
+    {showDurationDropdown && (
+      <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto py-2">
+        {[
+          { value: '0.5', label: '30 minutos' },
+          { value: '1', label: '1 hora' },
+          { value: '1.5', label: '1 hora y media' },
+          { value: '2', label: '2 horas' },
+        ].map((option) => (
+          <div
+            key={option.value}
+            onClick={() => {
+              updateForm('duration', option.value);
+              setShowDurationDropdown(false);
+
+              // Calcular automáticamente la hora de fin
+              if (formData.startTime) {
+                const [hours, minutes] = formData.startTime.split(':').map(Number);
+                let endHours = hours;
+                let endMinutes = minutes + parseFloat(option.value) * 60;
+
+                endHours += Math.floor(endMinutes / 60);
+                endMinutes %= 60;
+
+                const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+                updateForm('endTime', newEndTime);
+              }
+            }}
+            className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.duration === option.value ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
+          >
+            {option.label}
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 </div>
 
@@ -1108,6 +1180,29 @@ const finalPrice = formData.basePrice > 0
           </div>
         </div>
       )}
+      {/* ==================== MODAL FECHA Y HORARIOS ==================== */}
+{showDateModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+      <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <span className="text-4xl">🕒</span>
+      </div>
+      
+      <h3 className="text-2xl font-semibold mb-3">Faltan datos importantes</h3>
+      <p className="text-gray-600 mb-8">
+        Por favor completa la <strong>fecha</strong> y los <strong>horarios</strong> 
+        de la sesión para continuar.
+      </p>
+
+      <button
+        onClick={() => setShowDateModal(false)}
+        className="w-full py-3.5 bg-[#106BB9] text-white rounded-2xl font-medium hover:bg-blue-700 transition"
+      >
+        Completar ahora
+      </button>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );
