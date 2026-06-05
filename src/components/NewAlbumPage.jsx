@@ -565,6 +565,28 @@ const handleNext = async () => {
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   }
+  const calculateEndTime = (startTime, duration) => {
+  if (!startTime || !duration) return '';
+
+  const [hours, minutes] = startTime.split(':').map(Number);
+  let endHours = hours;
+  let endMinutes = minutes + parseFloat(duration) * 60;
+
+  endHours += Math.floor(endMinutes / 60);
+  endMinutes %= 60;
+
+  // Si pasa de medianoche, lo dejamos igual (o podés manejar +1 día si querés)
+  return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+};
+useEffect(() => {
+  if (formData.startTime && formData.duration) {
+    const newEndTime = calculateEndTime(formData.startTime, formData.duration);
+    
+    if (newEndTime !== formData.endTime) {
+      updateForm('endTime', newEndTime);
+    }
+  }
+}, [formData.startTime, formData.duration]);
 const togglePack = (packId) => {
   setFormData(prev => ({
     ...prev,
@@ -822,8 +844,9 @@ const finalPrice = formData.basePrice > 0
               </div>
               <div
                 onClick={() => {
-                  updateForm('startTime', `${hour}:30`);
-                  setShowStartTimeDropdown(false);
+  const newStart = `${hour}:00`;   // o :30
+  updateForm('startTime', newStart);
+  setShowStartTimeDropdown(false);
                 }}
                 className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:30` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
               >
@@ -864,9 +887,10 @@ const finalPrice = formData.basePrice > 0
         ].map((option) => (
           <div
             key={option.value}
-            onClick={() => {
-              updateForm('duration', option.value);
-              setShowDurationDropdown(false);
+           onClick={() => {
+  const newDuration = option.value;
+  updateForm('duration', newDuration);
+  setShowDurationDropdown(false);
 
               // Calcular automáticamente la hora de fin
               if (formData.startTime) {

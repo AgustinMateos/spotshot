@@ -19,17 +19,17 @@ export default function Marquesina() {
         <div className="overflow-hidden">
           <div className="flex animate-marquesina items-center gap-8 whitespace-nowrap">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-8 flex-shrink-0">
+              <div key={i} className="flex items-center gap-8 shrink-0">
                 {/* 3 Fotos + Texto + 3 Fotos */}
                 {images.slice(0, 3).map((src, idx) => (
-                  <div key={idx} className="w-[341px] h-[160px]rounded-3xl overflow-hidden flex-shrink-0">
-                    <div key={idx} className="w-[341px] h-[160px] rounded-3xl overflow-hidden flex-shrink-0">
+                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
+                    <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-[341px] h-[160px] object-contain"
+                      className="w-85.25 h-40 object-contain"
                     />
                   </div>
                   </div>
@@ -40,13 +40,13 @@ export default function Marquesina() {
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (
-                 <div key={idx} className="w-[341px] h-[160px] rounded-3xl overflow-hidden flex-shrink-0">
+                 <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-[341px] h-[160px] object-contain"
+                      className="w-85.25 h-40 object-contain"
                     />
                   </div>
                 ))}
@@ -59,16 +59,16 @@ export default function Marquesina() {
         <div className="overflow-hidden">
           <div className="flex animate-marquesina-reverse items-center gap-8 whitespace-nowrap">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-8 flex-shrink-0">
+              <div key={i} className="flex items-center gap-8 shrink-0">
                 {/* 3 Fotos + Texto + 3 Fotos */}
                 {images.slice(0, 3).map((src, idx) => (
-                  <div key={idx} className="w-[341px] h-[160px] rounded-3xl overflow-hidden flex-shrink-0">
+                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-[341px] h-[160px] object-contain"
+                      className="w-85.25 h-40 object-contain"
                     />
                   </div>
                 ))}
@@ -78,13 +78,13 @@ export default function Marquesina() {
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (
-                  <div key={idx} className="w-[341px] h-[160px] rounded-3xl overflow-hidden flex-shrink-0">
+                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-[341px] h-[160px] object-contain"
+                      className="w-85.25 h-40 object-contain"
                     />
                   </div>
                 ))}
