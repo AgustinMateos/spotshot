@@ -141,22 +141,30 @@ const confirmPublish = async () => {
   }
 };
 // ====================== CREAR SESIÓN ======================
+// ====================== CREAR SESIÓN ======================
 const handleCreateSession = async () => {
   if (!formData.date || !formData.startTime || !formData.endTime) {
-    setShowDateModal(true);   // ← Abre el modal en vez de alert
+    setShowDateModal(true);
     return;
   }
 
-  // Validación de duración permitida
-  const start = new Date(`2025-01-01 ${formData.startTime}`);
-  const end = new Date(`2025-01-01 ${formData.endTime}`);
-  const diffMinutes = (end - start) / (1000 * 60);
+  // Validación basada en el campo duration (más confiable)
+  const durationHours = parseFloat(formData.duration);
+  const allowedDurations = [0.5, 1, 1.5, 2];
 
-  const allowedDurations = [30, 60, 90, 120];
-
-  if (!allowedDurations.includes(diffMinutes)) {
+  if (!allowedDurations.includes(durationHours)) {
     alert("La duración de la sesión debe ser de 30 minutos, 1 hora, 1.5 horas o 2 horas.");
     return;
+  }
+
+  // Opcional: Validar que endTime coincida con duration (seguridad extra)
+  const start = new Date(`2025-01-01 ${formData.startTime}`);
+  const expectedEnd = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+  const expectedEndStr = expectedEnd.toTimeString().slice(0, 5); // HH:MM
+
+  if (formData.endTime !== expectedEndStr) {
+    // Actualizamos endTime automáticamente si no coincide
+    updateForm('endTime', expectedEndStr);
   }
 
   setCreatingSession(true);
@@ -165,6 +173,7 @@ const handleCreateSession = async () => {
 
   const payload = {
     audience,
+    title: formatSessionTitle(formData.date),   // ← Si ya tienes esta función
     location: formData.type === 'free-surfers' ? formData.location : null,
     schoolName: formData.type === 'escuelas' ? formData.school : null,
     sessionDate: formData.date,
@@ -198,7 +207,20 @@ const handleCreateSession = async () => {
     setCreatingSession(false);
   }
 };
+// ====================== FORMATEADOR DE TÍTULO ======================
+const formatSessionTitle = (dateString) => {
+  if (!dateString) return 'Nueva Sesión';
 
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Nueva Sesión';
+
+  const diasAbrev = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const diaSemana = diasAbrev[date.getDay()];
+  const dia = date.getDate().toString().padStart(2, '0');
+  const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+
+  return `${diaSemana} ${dia}/${mes}`;
+};
 
 useEffect(() => {
     if (loading) return;
@@ -718,7 +740,7 @@ const finalPrice = formData.basePrice > 0
       }}
       onFocus={() => setShowBeachDropdown(true)}
       onBlur={() => setTimeout(() => setShowBeachDropdown(false), 200)}
-      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white"
+      className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#103457] bg-white"
       placeholder="Busca playa (ej: Somo, Zurriola, Langre...)"
     />
     

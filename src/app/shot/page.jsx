@@ -7,13 +7,13 @@ import Image from 'next/image';
 
 export default function ShotPage() {
   const { user, token, loading: authLoading } = useAuth();
-  
+
   const [stripeConnect, setStripeConnect] = useState(null);
   const [allSessions, setAllSessions] = useState([]); // Todas las sesiones del backend
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [loadingInitial, setLoadingInitial] = useState(true);
-const [loadingFilters, setLoadingFilters] = useState(false);
+  const [loadingFilters, setLoadingFilters] = useState(false);
   // Filtros
   const [filters, setFilters] = useState({
     search: '',           // Búsqueda instantánea (client-side)
@@ -52,46 +52,46 @@ const [loadingFilters, setLoadingFilters] = useState(false);
   }, [token]);
 
   // Cargar Mis Sesiones (solo cuando cambian filtros del backend)
- useEffect(() => {
-  const loadMySessions = async () => {
-    if (!token) return;
-    
-    setLoadingFilters(true);        // ← solo loading de filtros
+  useEffect(() => {
+    const loadMySessions = async () => {
+      if (!token) return;
 
-    const params = new URLSearchParams();
-    if (filters.audience) params.append('audience', filters.audience);
-    if (filters.status) params.append('status', filters.status);
-    if (filters.location) params.append('location', filters.location);
-    if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
-    params.append('page', filters.page);
+      setLoadingFilters(true);        // ← solo loading de filtros
 
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(
-        `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const params = new URLSearchParams();
+      if (filters.audience) params.append('audience', filters.audience);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.location) params.append('location', filters.location);
+      if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
+      params.append('page', filters.page);
 
-      const data = await res.json();
-      if (res.ok) {
-        setAllSessions(data.items || []);
-        setPagination({
-          total: data.total || 0,
-          totalPages: data.totalPages || 1,
-          hasPreviousPage: data.hasPreviousPage || false,
-          hasNextPage: data.hasNextPage || false,
-        });
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(
+          `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const data = await res.json();
+        if (res.ok) {
+          setAllSessions(data.items || []);
+          setPagination({
+            total: data.total || 0,
+            totalPages: data.totalPages || 1,
+            hasPreviousPage: data.hasPreviousPage || false,
+            hasNextPage: data.hasNextPage || false,
+          });
+        }
+      } catch (err) {
+        console.error("Error cargando mis sesiones:", err);
+      } finally {
+        setLoadingFilters(false);
+        if (loadingInitial) setLoadingInitial(false); // solo la primera vez
       }
-    } catch (err) {
-      console.error("Error cargando mis sesiones:", err);
-    } finally {
-      setLoadingFilters(false);
-      if (loadingInitial) setLoadingInitial(false); // solo la primera vez
-    }
-  };
+    };
 
-  loadMySessions();
-}, [token, filters.audience, filters.status, filters.location, filters.sessionDate, filters.page]);
+    loadMySessions();
+  }, [token, filters.audience, filters.status, filters.location, filters.sessionDate, filters.page]);
   // Filtrado instantáneo (client-side) - Sin loading al escribir
   const filteredSessions = useMemo(() => {
     if (!filters.search.trim()) return allSessions;
@@ -105,27 +105,27 @@ const [loadingFilters, setLoadingFilters] = useState(false);
   }, [allSessions, filters.search]);
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      [key]: value, 
-      page: 1 
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      page: 1
     }));
   };
 
- const goToPage = (newPage) => {
-  if (newPage < 1 || newPage > pagination.totalPages) return;
-  setFilters(prev => ({ ...prev, page: newPage }));
-};
+  const goToPage = (newPage) => {
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    setFilters(prev => ({ ...prev, page: newPage }));
+  };
 
   const isStripeReady = stripeConnect?.isReady === true;
   const alias = user?.alias || 'Fotógrafo';
-if (authLoading || loadingProfile || loadingInitial) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-gray-500">Cargando...</p>
-    </div>
-  );
-}
+  if (authLoading || loadingProfile || loadingInitial) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Cargando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 bg-white">
@@ -183,11 +183,10 @@ if (authLoading || loadingProfile || loadingInitial) {
 
                 <Link
                   href="/shot/newAlbum"
-                  className={`px-6 py-3 rounded-xl font-medium transition inline-flex items-center gap-3 ${
-                    isStripeReady 
-                      ? 'bg-gray-900 text-white hover:bg-black' 
+                  className={`px-6 py-3 rounded-xl font-medium transition inline-flex items-center gap-3 ${isStripeReady
+                      ? 'bg-gray-900 text-white hover:bg-black'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   <span className="text-xl">+</span>
                   Crear sesión
@@ -195,173 +194,173 @@ if (authLoading || loadingProfile || loadingInitial) {
               </div>
 
               <div className="hidden md:block">
-                <Image height={183} width={280} alt="stripe steps" src="/icons/stripeSteps.svg"/>
+                <Image height={183} width={280} alt="stripe steps" src="/icons/stripeSteps.svg" />
               </div>
             </div>
           )}
         </div>
 
-     
+
 
         {isStripeReady ? (
-            /* ==================== LISTA DE SESIONES ==================== */
-            <>
-                <div>
-          <div className="flex justify-between items-center mb-6">
-           <h3 className="text-xl text-[#10487C] font-semibold">
-  Mis sesiones ({pagination.total})
-</h3>
-            <Link 
-              href="/shot/newAlbum" 
-              className="bg-gray-900 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-black"
-            >
-              <span className="text-xl">+</span> Crear nueva sesión
-            </Link>
-          </div>
+          /* ==================== LISTA DE SESIONES ==================== */
+          <>
+            <div>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h3 className="text-xl text-[#10487C] font-semibold pb-5 md:pb-0">
+                  Mis sesiones ({pagination.total})
+                </h3>
+                <Link
+                  href="/shot/newAlbum"
+                  className="bg-gray-900  text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-black"
+                >
+                  <span className="text-xl">+</span> Crear nueva sesión
+                </Link>
+              </div>
 
-          {/* Filtros */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <input
-              type="text"
-              placeholder="Buscar por título, playa o escuela..."
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="lg:col-span-2 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:border-gray-900"
-            />
+              {/* Filtros */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por título, playa o escuela..."
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  className="lg:col-span-2 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:border-gray-900"
+                />
 
-            <select 
-              onChange={(e) => handleFilterChange('audience', e.target.value)} 
-              className="border border-gray-300 rounded-xl px-4 py-3"
-            >
-              <option value="">Todas las audiencias</option>
-              <option value="FREE_SURFERS">Free Surfers</option>
-              <option value="SCHOOLS">Escuelas</option>
-            </select>
+                <select
+                  onChange={(e) => handleFilterChange('audience', e.target.value)}
+                  className="border border-gray-300 rounded-xl px-4 py-3"
+                >
+                  <option value="">Todas las audiencias</option>
+                  <option value="FREE_SURFERS">Free Surfers</option>
+                  <option value="SCHOOLS">Escuelas</option>
+                </select>
 
-            <select 
-              onChange={(e) => handleFilterChange('status', e.target.value)} 
-              className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
-            >
-              <option value="">Todos los estados</option>
-              <option value="DRAFT">Borrador</option>
-              <option value="ACTIVE">Activa</option>
-              <option value="DISABLED">Desactivada</option>
-            </select>
+                <select
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
+                >
+                  <option value="">Todos los estados</option>
+                  <option value="DRAFT">Borrador</option>
+                  <option value="ACTIVE">Activa</option>
+                  <option value="DISABLED">Desactivada</option>
+                </select>
 
-            <input
-              type="date"
-              value={filters.sessionDate}
-              onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
-            />
-          </div>
+                <input
+                  type="date"
+                  value={filters.sessionDate}
+                  onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
+                  className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-gray-900"
+                />
+              </div>
 
-          {/* Grid de Sesiones */}
-          {filteredSessions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSessions.map((session) => (
-                <Link href={`/shot/sesion/${session.id}`} key={session.id} className="group">
-                  <div className="relative rounded-3xl overflow-hidden bg-black shadow hover:shadow-xl transition">
-                    {session.images?.[0]?.publicUrl ? (
-                      <img 
-                        src={session.images[0].publicUrl} 
-                        alt={session.title} 
-                        className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition" 
-                      />
-                    ) : (
-                      <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
-                    )}
+              {/* Grid de Sesiones */}
+              {filteredSessions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredSessions.map((session) => (
+                    <Link href={`/shot/sesion/${session.id}`} key={session.id} className="group">
+                      <div className="relative rounded-3xl overflow-hidden bg-black shadow hover:shadow-xl transition">
+                        {session.images?.[0]?.publicUrl ? (
+                          <img
+                            src={session.images[0].publicUrl}
+                            alt={session.title}
+                            className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition"
+                          />
+                        ) : (
+                          <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
+                        )}
 
-                    <div className="absolute top-3 right-3 bg-[#0F172A] px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
-                         <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora'/>{session.photoCount}
-                    </div>
+                        <div className="absolute top-3 right-3 bg-[#0F172A] px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
+                          <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora' />{session.photoCount}
+                        </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
-                      <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
-                      {session.status}
-                    </div>
-                      <p className="font-semibold">{session.title}</p>
-                      <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
-                      <p className="text-xs opacity-75">{session.startTime} - {session.endTime}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
+                          <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
+                            {session.status}
+                          </div>
+                          <p className="font-semibold">{session.title}</p>
+                          <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
+                          <p className="text-xs opacity-75">{session.startTime} - {session.endTime}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 border border-dashed border-gray-300 rounded-2xl">
+                  <p className="text-gray-500">No se encontraron sesiones con los filtros aplicados.</p>
+                </div>
+              )}
+
+              {/* Paginación */}
+              {/* Paginación - Estilo idéntico a Mis Ventas */}
+              {pagination.totalPages > 1 && (
+                <div className="bg-white rounded-3xl shadow-sm mt-10">
+                  <div className="flex items-center justify-between px-8 py-6 ">
+                    <p className="text-lg font-medium text-gray-900">
+                      Página {filters.page} de {pagination.totalPages}
+                    </p>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => goToPage(1)}
+                        disabled={!pagination.hasPreviousPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                      >
+                        «
+                      </button>
+                      <button
+                        onClick={() => goToPage(filters.page - 1)}
+                        disabled={!pagination.hasPreviousPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                      >
+                        ‹
+                      </button>
+
+                      <button
+                        onClick={() => goToPage(filters.page + 1)}
+                        disabled={!pagination.hasNextPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                      >
+                        ›
+                      </button>
+                      <button
+                        onClick={() => goToPage(pagination.totalPages)}
+                        disabled={!pagination.hasNextPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
+                      >
+                        »
+                      </button>
                     </div>
                   </div>
-                </Link>
-              ))}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-20 border border-dashed border-gray-300 rounded-2xl">
-              <p className="text-gray-500">No se encontraron sesiones con los filtros aplicados.</p>
-            </div>
-          )}
-
-          {/* Paginación */}
-          {/* Paginación - Estilo idéntico a Mis Ventas */}
-{pagination.totalPages > 1 && (
-  <div className="bg-white rounded-3xl shadow-sm mt-10">
-    <div className="flex items-center justify-between px-8 py-6 ">
-      <p className="text-lg font-medium text-gray-900">
-        Página {filters.page} de {pagination.totalPages}
-      </p>
-
-      <div className="flex gap-3">
-        <button 
-          onClick={() => goToPage(1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          «
-        </button>
-        <button 
-          onClick={() => goToPage(filters.page - 1)} 
-          disabled={!pagination.hasPreviousPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ‹
-        </button>
-
-        <button 
-          onClick={() => goToPage(filters.page + 1)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          ›
-        </button>
-        <button 
-          onClick={() => goToPage(pagination.totalPages)} 
-          disabled={!pagination.hasNextPage}
-          className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition"
-        >
-          »
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-        </div>
-            </>
-          ) : (
-            /* ==================== EMPTY STATE (como en tu foto) ==================== */
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-              <Image 
-                src="/crearPrimerAlbum.svg" 
-                alt="Sin sesiones" 
-                width={120} 
-                height={120} 
-                className="mx-auto mb-6 opacity-75" 
-              />
-              <h4 className="text-2xl font-medium text-gray-800 mb-3">Crea tu primer álbum</h4>
-              <p className="text-gray-500 max-w-sm mx-auto mb-8">
-                Sube tu primer álbum para empezar a vender tus mejores capturas
-              </p>
-              <Link
-                href="#"
-                className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl font-medium bg-gray-300 text-gray-500 cursor-not-allowed"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span className="text-2xl">+</span> Crear álbum
-              </Link>
-            </div>
-          )}
+          </>
+        ) : (
+          /* ==================== EMPTY STATE (como en tu foto) ==================== */
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
+            <Image
+              src="/crearPrimerAlbum.svg"
+              alt="Sin sesiones"
+              width={120}
+              height={120}
+              className="mx-auto mb-6 opacity-75"
+            />
+            <h4 className="text-2xl font-medium text-gray-800 mb-3">Crea tu primer álbum</h4>
+            <p className="text-gray-500 max-w-sm mx-auto mb-8">
+              Sube tu primer álbum para empezar a vender tus mejores capturas
+            </p>
+            <Link
+              href="#"
+              className="inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl font-medium bg-gray-300 text-gray-500 cursor-not-allowed"
+              onClick={(e) => e.preventDefault()}
+            >
+              <span className="text-2xl">+</span> Crear álbum
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

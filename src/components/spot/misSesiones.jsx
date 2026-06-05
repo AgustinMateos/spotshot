@@ -10,7 +10,7 @@ export default function MisSesiones() {
 
   const [stripeConnect, setStripeConnect] = useState(null);
   const [loadingStripe, setLoadingStripe] = useState(true);
-
+const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -21,14 +21,14 @@ export default function MisSesiones() {
     hasNextPage: false,
   });
 
-  // Filtros
-  const [filters, setFilters] = useState({
-    search: '',
-    audience: '',
-    status: '',
-    location: '',
-    sessionDate: '',
-  });
+// Filtros
+const [filters, setFilters] = useState({
+  search: '',
+  audience: 'FREE_SURFERS',   // ← Free Surfers por defecto
+  status: '',
+  location: '',
+  sessionDate: '',
+});
 
   // Cargar estado de Stripe
   useEffect(() => {
@@ -51,7 +51,16 @@ export default function MisSesiones() {
     };
     loadStripeStatus();
   }, [token]);
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.relative')) {  // evita cerrar al hacer clic dentro del dropdown
+      setShowStatusDropdown(false);
+    }
+  };
 
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
   // Traducción y colores de estados
   const getStatusLabel = (status) => {
     switch (status?.toUpperCase()) {
@@ -138,10 +147,10 @@ export default function MisSesiones() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="mx-auto px-6 py-10">
 
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Mis Sesiones</h1>
+        <div className="flex justify-between flex-col md:flex-row items-start md:items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 pb-5 md:pb-0">Mis Sesiones</h1>
 
           <Link
             href={isStripeReady ? "/shot/newAlbum" : "#"}
@@ -161,44 +170,105 @@ export default function MisSesiones() {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <input
-              type="text"
-              placeholder="Buscar por título, playa o escuela..."
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="lg:col-span-2 border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
-            />
+<div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 
-            <select
-              onChange={(e) => handleFilterChange('audience', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
-            >
-              <option value="">Todas las audiencias</option>
-              <option value="FREE_SURFERS">Free Surfers</option>
-              <option value="SCHOOLS">Escuelas</option>
-            </select>
+    {/* Toggle Free Surfers / Escuelas */}
+    <div className="flex bg-[#F1F7FE] p-1 rounded-3xl w-fit h-[50px]">
+      <button
+        onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
+        className={`px-6 py-2.5 rounded-2xl text-[14px] font-medium transition-all ${
+          filters.audience === 'FREE_SURFERS' 
+            ? 'bg-white shadow-sm text-gray-900' 
+            : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        Free Surfers
+      </button>
+      <button
+        onClick={() => handleFilterChange('audience', 'SCHOOLS')}
+        className={`px-6 py-2.5 rounded-2xl text-[14px] font-medium transition-all ${
+          filters.audience === 'SCHOOLS' 
+            ? 'bg-white shadow-sm text-gray-900' 
+            : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        Escuelas
+      </button>
+    </div>
 
-            <select
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
-            >
-              <option value="">Todos los estados</option>
-              <option value="DRAFT">Borrador</option>
-              <option value="PROCESSING">En proceso</option>
-              <option value="ACTIVE">Publicada</option>
-              <option value="DISABLED">Desactivada</option>
-            </select>
+    <input
+      type="text"
+      placeholder="Buscar playa o escuela..."
+      value={filters.search}
+      onChange={(e) => handleFilterChange('search', e.target.value)}
+      className="lg:col-span-2 border border-gray-300 w-[250px] rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
+    />
 
-            <input
-              type="date"
-              value={filters.sessionDate}
-              onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-              className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
-            />
-          </div>
+    {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
+    {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
+<div className="relative">
+  <div
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowStatusDropdown(!showStatusDropdown);
+    }}
+    className="w-full px-5 py-3 border border-gray-300 rounded-2xl bg-white cursor-pointer flex justify-between items-center focus:outline-none focus:border-blue-500"
+  >
+    <span className="text-gray-700">
+      {filters.status 
+        ? getStatusLabel(filters.status) 
+        : "Todos los estados"}
+    </span>
+    <span className="text-gray-400">▼</span>
+  </div>
+
+  {showStatusDropdown && (
+    <div 
+      onClick={(e) => e.stopPropagation()} 
+      className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-lg overflow-auto py-2 max-h-80"
+    >
+      <div
+        onClick={() => {
+          handleFilterChange('status', '');
+          setShowStatusDropdown(false);
+        }}
+        className={`px-5 py-3 hover:bg-blue-50 cursor-pointer ${!filters.status ? 'bg-blue-50 font-medium' : ''}`}
+      >
+        Todos los estados
+      </div>
+      {[
+        { value: 'DRAFT', label: 'Borrador' },
+        { value: 'PROCESSING', label: 'En proceso' },
+        { value: 'ACTIVE', label: 'Publicada' },
+        { value: 'DISABLED', label: 'Desactivada' },
+      ].map((status) => (
+        <div
+          key={status.value}
+          onClick={() => {
+            handleFilterChange('status', status.value);
+            setShowStatusDropdown(false);
+          }}
+          className={`px-5 py-3 hover:bg-blue-50 cursor-pointer ${
+            filters.status === status.value ? 'bg-blue-50 font-medium' : ''
+          }`}
+        >
+          {status.label}
         </div>
+      ))}
+    </div>
+  )}
+</div>
+
+    <input
+      type="date"
+      value={filters.sessionDate}
+      onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
+      className="border border-gray-300 rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
+    />
+  </div>
+</div>
+
 
         {/* Grid de Sesiones */}
         {loading ? (

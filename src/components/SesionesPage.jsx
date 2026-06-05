@@ -16,7 +16,7 @@ export default function SesionesPage() {
   });
 
   const [filters, setFilters] = useState({
-    audience: '',
+    audience: 'FREE_SURFERS',
     location: '',
     schoolName: '',
     sessionDate: '',
@@ -99,7 +99,7 @@ export default function SesionesPage() {
 
   return (
     <div className="min-h-screen  bg-gray-50 pb-12">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className=" mx-auto px-6 py-8">
 
         {/* Título y contador */}
         <div className="mb-8">
@@ -108,23 +108,56 @@ export default function SesionesPage() {
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-wrap gap-4 mb-10 bg-white p-4 rounded-2xl shadow-sm">
-          <div className="flex gap-2">
-            <button onClick={() => handleFilterChange('audience', '')} className={`px-6 py-2.5 rounded-2xl font-medium transition ${!filters.audience ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>Todos</button>
-            <button onClick={() => handleFilterChange('audience', 'FREE_SURFERS')} className={`px-6 py-2.5 rounded-2xl font-medium transition ${filters.audience === 'FREE_SURFERS' ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>Free surfers</button>
-            <button onClick={() => handleFilterChange('audience', 'SCHOOLS')} className={`px-6 py-2.5 rounded-2xl font-medium transition ${filters.audience === 'SCHOOLS' ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>Escuelas</button>
-          </div>
+<div className="flex flex-wrap gap-4 mb-10 bg-white p-4 rounded-2xl shadow-sm">
 
-          <input type="text" placeholder="Playa o ubicación..." value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" />
+  {/* Toggle Free Surfers / Escuelas - Estilo como en tu imagen */}
+  <div className="flex bg-[#F1F7FE] p-1 rounded-3xl">
+    <button 
+      onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
+      className={`px-7 py-3 rounded-2xl font-medium transition-all text-sm ${
+        filters.audience === 'FREE_SURFERS' 
+          ? 'bg-white shadow-sm text-gray-900' 
+          : 'bg-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Free surfers
+    </button>
+    <button 
+      onClick={() => handleFilterChange('audience', 'SCHOOLS')}
+      className={`px-7 py-3 rounded-2xl font-medium transition-all text-sm ${
+        filters.audience === 'SCHOOLS' 
+          ? 'bg-white shadow-sm text-gray-900' 
+          : 'bg-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Escuelas
+    </button>
+  </div>
 
-          <input type="date" value={filters.sessionDate} onChange={(e) => handleFilterChange('sessionDate', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" />
+  <input 
+    type="text" 
+    placeholder="Playa o ubicación..." 
+    value={filters.location} 
+    onChange={(e) => handleFilterChange('location', e.target.value)} 
+    className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" 
+  />
 
-          <select onChange={(e) => handleFilterChange('startTime', e.target.value)} className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900">
-            <option value="">Desde</option>
-            <option value="09:00">09:00 am</option>
-            <option value="10:00">10:00 am</option>
-          </select>
-        </div>
+  <input 
+    type="date" 
+    value={filters.sessionDate} 
+    onChange={(e) => handleFilterChange('sessionDate', e.target.value)} 
+    className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" 
+  />
+
+  <select 
+    onChange={(e) => handleFilterChange('startTime', e.target.value)} 
+    className="px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900"
+  >
+    <option value="">Desde</option>
+    <option value="09:00">09:00 am</option>
+    <option value="10:00">10:00 am</option>
+  </select>
+</div>
 
         {/* Grid de Sesiones */}
         {loading ? (
