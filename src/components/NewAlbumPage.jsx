@@ -695,7 +695,7 @@ const finalPrice = formData.basePrice > 0
         setShowSchoolDropdown(true);
       }}
       onFocus={() => setShowSchoolDropdown(true)}
-      onBlur={() => setTimeout(() => setShowSchoolDropdown(false), 200)} // pequeño delay para click
+     onBlur={() => setTimeout(() => setShowSchoolDropdown(false), 150)}
       className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white"
       placeholder="Busca escuela (ej: Somo's, Sunset...)"
     />
@@ -711,15 +711,16 @@ const finalPrice = formData.basePrice > 0
           .slice(0, 15)
           .map((item, index) => (
             <div
-              key={index}
-              onClick={() => {
-                updateForm('school', item.value);
-                setShowSchoolDropdown(false);   // ← Cierra el dropdown
-              }}
-              className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
-            >
-              {item.label}
-            </div>
+  key={index}
+  onMouseDown={(e) => {           // ← Cambiar a onMouseDown
+    e.preventDefault();           // Muy importante
+    updateForm('school', item.value);   // o 'location'
+    setShowSchoolDropdown(false);
+  }}
+  className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
+>
+  {item.label}
+</div>
           ))}
       </div>
     )}
@@ -739,7 +740,7 @@ const finalPrice = formData.basePrice > 0
         setShowBeachDropdown(true);
       }}
       onFocus={() => setShowBeachDropdown(true)}
-      onBlur={() => setTimeout(() => setShowBeachDropdown(false), 200)}
+      onBlur={() => setTimeout(() => setShowBeachDropdown(false), 150)}
       className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#103457] bg-white"
       placeholder="Busca playa (ej: Somo, Zurriola, Langre...)"
     />
@@ -754,16 +755,18 @@ const finalPrice = formData.basePrice > 0
           )
           .slice(0, 15)
           .map((item, index) => (
+          
             <div
-              key={index}
-              onClick={() => {
-                updateForm('location', item.value);
-                setShowBeachDropdown(false);   // ← Cierra el dropdown
-              }}
-              className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
-            >
-              {item.label}
-            </div>
+  key={index}
+  onMouseDown={(e) => {           // ← Cambiar a onMouseDown
+    e.preventDefault();           // Muy importante
+   updateForm('location', item.value);  // o 'location'
+     setShowBeachDropdown(false);
+  }}
+  className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
+>
+  {item.label}
+</div>
           ))}
       </div>
     )}

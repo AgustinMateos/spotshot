@@ -170,11 +170,11 @@ useEffect(() => {
         </div>
 
         {/* Filtros */}
-<div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-
+<div className="bg-white rounded-3xl p-6 mb-8 shadow-sm h-[300px] md:h-auto">
+  {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"> */}
+<div className='flex w-full justify-between flex-wrap flex-col md:flex-row h-full'>
     {/* Toggle Free Surfers / Escuelas */}
-    <div className="flex bg-[#F1F7FE] p-1 rounded-3xl w-fit h-[50px]">
+    <div className="flex wrap  bg-[#F1F7FE]  p-1 rounded-3xl w-[250px] h-[50px]">
       <button
         onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
         className={`px-6 py-2.5 rounded-2xl text-[14px] font-medium transition-all ${
@@ -196,14 +196,14 @@ useEffect(() => {
         Escuelas
       </button>
     </div>
-
-    <input
+<div> <input
       type="text"
       placeholder="Buscar playa o escuela..."
       value={filters.search}
       onChange={(e) => handleFilterChange('search', e.target.value)}
-      className="lg:col-span-2 border border-gray-300 w-[250px] rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
-    />
+      className="lg:col-span-2 border border-gray-300 w-[280px] rounded-2xl px-5 py-3 focus:outline-none focus:border-gray-900"
+    /></div>
+   
 
     {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
     {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
