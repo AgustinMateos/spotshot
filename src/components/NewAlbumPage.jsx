@@ -12,8 +12,9 @@ const NewAlbumPage = () => {
   const { token, logout, loading } = useAuth();
 const [showDateModal, setShowDateModal] = useState(false);
   const [step, setStep] = useState(1);
+  const [sessionCreated, setSessionCreated] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]); // ← se mantiene
- 
+ const [showBackConfirmModal, setShowBackConfirmModal] = useState(false);
 const [showDurationDropdown, setShowDurationDropdown] = useState(false);
  const [formData, setFormData] = useState({
   type: 'free-surfers',
@@ -558,26 +559,23 @@ const handleNext = async () => {
   }
 };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
+ const handleBack = () => {
+  if (step === 2) {
+    // Mostrar modal de confirmación antes de volver al paso 1
+    setShowBackConfirmModal(true);
+    return;
+  }
+
+  // Para otros pasos (3 → 2 o 4 → 3) volvemos normalmente
+  if (step > 1) {
+    setStep(step - 1);
+  }
+};
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   }
-  const calculateEndTime = (startTime, duration) => {
-  if (!startTime || !duration) return '';
-
-  const [hours, minutes] = startTime.split(':').map(Number);
-  let endHours = hours;
-  let endMinutes = minutes + parseFloat(duration) * 60;
-
-  endHours += Math.floor(endMinutes / 60);
-  endMinutes %= 60;
-
-  // Si pasa de medianoche, lo dejamos igual (o podés manejar +1 día si querés)
-  return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
-};
+ 
 useEffect(() => {
   if (formData.startTime && formData.duration) {
     const newEndTime = calculateEndTime(formData.startTime, formData.duration);
@@ -595,7 +593,19 @@ const togglePack = (packId) => {
       : [...prev.selectedPacks, packId]
   }));
 };
+ const calculateEndTime = (startTime, duration) => {
+  if (!startTime || !duration) return '';
 
+  const [hours, minutes] = startTime.split(':').map(Number);
+  let endHours = hours;
+  let endMinutes = minutes + parseFloat(duration) * 60;
+
+  endHours += Math.floor(endMinutes / 60);
+  endMinutes %= 60;
+
+  // Si pasa de medianoche, lo dejamos igual (o podés manejar +1 día si querés)
+  return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+};
 const commissionRate = 0.20; // ← Cambiado a 20%
 const finalPrice = formData.basePrice > 0 
   ? (formData.basePrice * (1 - commissionRate)).toFixed(2) 
@@ -616,7 +626,7 @@ const finalPrice = formData.basePrice > 0
 
         {/* Stepper Mejorado - Con tick azul */}
 <div className="flex justify-center w-full mb-10">
-  <div className="flex items-center">
+  <div className="flex items-center justify-center w-[85%] md:w-[100%]">
     {[
       { label: 'Detalles', icon: '/icons/details.svg', activeIcon: '/icons/details-active.svg' },
       { label: 'Fotos',    icon: '/icons/photos.svg',    activeIcon: '/icons/photos-active.svg' },
@@ -1342,6 +1352,65 @@ const finalPrice = formData.basePrice > 0
       >
         Entendido
       </button>
+    </div>
+  </div>
+)}
+{/* ==================== MODAL CONFIRMAR VOLVER AL PASO 1 ==================== */}
+{/* ==================== MODAL CONFIRMAR VOLVER AL PASO 1 ==================== */}
+{showBackConfirmModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+      <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <span className="text-4xl">⚠️</span>
+      </div>
+      
+      <h3 className="text-2xl font-semibold mb-3">¿Volver al paso 1?</h3>
+      <p className="text-gray-600 mb-8">
+        Se borrarán todas las fotos subidas, el precio y los packs.<br />
+        ¿Estás seguro de que quieres empezar de nuevo?
+      </p>
+
+      <div className="flex gap-4">
+        <button
+          onClick={() => setShowBackConfirmModal(false)}
+          className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={() => {
+            // Primero cerramos el modal
+            setShowBackConfirmModal(false);
+
+            // Hacemos el reset completo
+            setUploadedImages([]);
+            setPhotos([]);
+            setSessionId(null);
+            setSessionCreated(false);
+
+            setFormData({
+              type: formData.type,
+              school: '',
+              location: '',
+              date: '',
+              startTime: '10:30',
+              endTime: '11:00',
+              duration: '0.5',
+              basePrice: 5,
+              selectedPacks: [],
+            });
+
+            // Forzamos el cambio de paso
+            setTimeout(() => {
+              console.log("Cambiando a paso 1...");
+setStep(1);
+            }, 50); // Pequeño delay para que React procese los otros estados
+          }}
+          className="flex-1 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-medium"
+        >
+          Sí, volver al paso 1
+        </button>
+      </div>
     </div>
   </div>
 )}

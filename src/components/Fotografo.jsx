@@ -6,9 +6,9 @@ const Fotografo = () => {
       <div className="max-w-6xl mx-auto">
 
         {/* Barra superior con beneficios */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 mb-16 text-center">
+        <div className="flex flex-col  md:flex-row justify-center items-center gap-8 md:gap-16 mb-16 text-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow p-2">
+            <div className="w-10 h-10 bg-white rounded-full flex md:items-center justify-center shadow p-2">
               <img src="/fotografo/100.svg" alt="Pago seguro" className="w-full h-full object-contain" />
             </div>
             <p className="font-medium text-gray-800">Pago 100% seguro</p>
@@ -33,11 +33,11 @@ const Fotografo = () => {
           
           {/* Columna izquierda - Texto */}
           <div>
-            <h1 className="text-5xl  text-gray-900 leading-tight mb-3">
+            <h1 className="text-[40px] md:text-5xl  text-[#1E3A5F] leading-tight mb-3">
               ¿Eres fotógrafo?
             </h1>
-            <p className="text-xl text-gray-600 mb-10">
-              Vendé tus sesiones sin complicaciones.
+            <p className="text-[20px] md:text-xl text-[#1E3A5F] mb-10">
+              Vendé tus fotos sin complicaciones.
             </p>
 
             <div className="space-y-8 mb-10">
@@ -46,8 +46,8 @@ const Fotografo = () => {
                   <img src="/fotografo/publica.svg" alt="Publicar sesión" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900">Publica tu sesión en minutos</h3>
-                  <p className="text-gray-600">Sube tu material y empieza a vender hoy mismo.</p>
+                  <h3 className="font-semibold text-lg text-[#1E3A5F]">Publica tu sesión en minutos</h3>
+                  <p className="text-[#1E3A5F]">Sube tu material y empieza a vender hoy mismo.</p>
                 </div>
               </div>
 
@@ -56,13 +56,13 @@ const Fotografo = () => {
                   <img src="/fotografo/monetiza.svg" alt="Monetizar" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900">Monetiza cada sesión sin esfuerzo</h3>
-                  <p className="text-gray-600">Convierte tus fotos en ventas automáticas.</p>
+                  <h3 className="font-semibold text-lg text-[#1E3A5F]">Monetiza cada sesión sin esfuerzo</h3>
+                  <p className="text-[#1E3A5F]">Convierte tus fotos en ventas automáticas.</p>
                 </div>
               </div>
             </div>
 
-            <Link href='/login' className="bg-[#C8A24D] hover:bg-[#c8a14dc8] transition-colors text-white font-medium px-8 py-3.5 rounded-2xl text-lg">
+            <Link href='/login' className="bg-[#C8A24D] hover:bg-[#c8a14dc8] transition-colors w-full text-white font-medium px-8 py-3.5 rounded-2xl text-lg">
               Comenzar a vender
             </Link>
           </div>

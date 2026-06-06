@@ -103,8 +103,8 @@ export default function SesionesPage() {
 
         {/* Título y contador */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">{title}</h1>
-          <p className="text-gray-600 mt-1">{pagination.total} álbumes encontrados</p>
+          <h1 className="text-[24px] font-medium text-[#10487C] pb-5 md:pb-0">{title}</h1>
+          <p className="text-gray-600 text-[16px] mt-1">{pagination.total} álbumes encontrados</p>
         </div>
 
         {/* Filtros */}

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function MisSesionDetail() {
+export default function xfMisSesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -372,42 +372,37 @@ if (loading) {
           <span className="text-gray-900">{session.title}</span>
         </div>
         <div className='w-full flex-col md:flex-row flex justify-between'>
-          <div><p className='md:text-center'>Detalle de la Sesión</p></div>
-          {/* Botones de acción */}
-         {/* Botones de acción */}
-<div className="flex justify-end gap-3 mb-8">
-  
-  {/* Copiar Link */}
-  {/* Copiar Link */}
-<button
-  onClick={() => {
-    const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setIsLinkCopied(true);
+          <div><p className='text-[24px] font-medium text-[#10487C] pb-5 md:pb-0'>Detalle de la Sesión</p></div>
+{/* Botones de acción */}
+<div className="flex justify-end gap-3 mb-8 flex-wrap">
 
-      // Vuelve al estado original después de 2.5 segundos
-      setTimeout(() => {
-        setIsLinkCopied(false);
-      }, 2500);
-    });
-  }}
-  className={`flex items-center gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
-    isLinkCopied 
-      ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
-      : 'border-gray-300 hover:bg-gray-50'
-  }`}
-  disabled={isLinkCopied}
->
-  <img 
-    src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'} 
-    alt="copiar" 
-    className="w-5 h-5" 
-  />
-  <span className="hidden md:inline font-medium">
-    {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
-  </span>
-</button>
+  {/* Copiar Link - Solo mostrar si NO es borrador */}
+  {session.status !== 'DRAFT' && (
+    <button
+      onClick={() => {
+        const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          setIsLinkCopied(true);
+          setTimeout(() => setIsLinkCopied(false), 2500);
+        });
+      }}
+      className={`flex items-center gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
+        isLinkCopied 
+          ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+          : 'border-gray-300 hover:bg-gray-50'
+      }`}
+      disabled={isLinkCopied}
+    >
+      <img 
+        src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'} 
+        alt="copiar" 
+        className="w-5 h-5" 
+      />
+      <span className="hidden md:inline font-medium">
+        {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
+      </span>
+    </button>
+  )}
 
   {/* Eliminar */}
   <button
@@ -426,6 +421,8 @@ if (loading) {
     <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
     <span className="hidden md:inline">Editar</span>
   </button>
+
+  {/* Publicar - Solo en DRAFT */}
   {session.status === 'DRAFT' && (
     <button
       onClick={handlePublish}
@@ -435,10 +432,7 @@ if (loading) {
       {publishing ? (
         <>Publicando<span className="animate-pulse">...</span></>
       ) : (
-        <>
-          
-          Publicar Sesión
-        </>
+        <>Publicar Sesión</>
       )}
     </button>
   )}
@@ -456,7 +450,7 @@ if (loading) {
           <img
             src={'/inicio/somo1.webp' || '/placeholder-surf.jpg'}
             alt={session.title}
-            fill
+           
             className="object-contain"
           />
           <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/70" />
