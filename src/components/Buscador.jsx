@@ -103,7 +103,7 @@ const slugify = (text) => {
 
                 {/* Dropdown */}
                 {showDropdown && searchLocation.length > 0 && suggestions.length > 0 && (
-                  <div className="absolute top-[78px] left-4 right-4 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-72 overflow-auto">
+                  <div className="absolute top-19.5 left-4 right-4 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-72 overflow-auto">
                     {suggestions.map((item, index) => (
                       <div
                         key={index}

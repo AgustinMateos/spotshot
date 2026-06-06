@@ -19,13 +19,12 @@ const FotosHoy = () => {
             ¿Todavía no tenés tus fotos de hoy?
           </h2>
 
-         <Link 
-            href="/sesiones"
-            className="bg-[#C8A24D] hover:bg-[#b38f3f] active:scale-95 transition-all flex justify-center items-center 
-                       text-white font-medium px-12 h-12 w-55 py-4 rounded-2xl text-lg shadow-lg"
-          >
-            Buscar sesión
-          </Link>
+         <Link
+  href="/sesiones"
+  className="bg-[#C8A24D] hover:bg-[#b38f3f] active:scale-95 transition-all flex justify-center items-center text-white font-medium px-12 h-12 w-55 py-4 rounded-2xl text-lg shadow-lg"
+>
+  Buscar sesión
+</Link>
         </div>
       </div>
     </div>

@@ -7,11 +7,9 @@ const Encontrar = () => {
       {/* Imagen de fondo CENTRADA en el medio */}
       <img
         src="/encontrar/curva.svg"
-        alt=""
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 
-                   w-208.25 h-auto max-w-[90%] md:max-w-none 
-                   opacity-30 pointer-events-none z-0"
-      />
+        alt="encontrar"
+     // ✅ BIEN
+className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 w-208 h-auto" />
 
       {/* Contenido principal */}
       <div className="relative z-10">
