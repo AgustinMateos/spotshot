@@ -28,7 +28,10 @@ const [filters, setFilters] = useState({
   status: '',
   location: '',
   sessionDate: '',
+  timeFrom: '',   // ← nuevo
+  timeTo: '',
 });
+const [showTimeDropdown, setShowTimeDropdown] = useState(false);
 const [isDeleting, setIsDeleting] = useState(false);        // ← Nuevo
 const [deleteSuccess, setDeleteSuccess] = useState(false);
 const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -86,58 +89,79 @@ useEffect(() => {
     }
   };
 
-  // Cargar sesiones
-  useEffect(() => {
-    const fetchMySessions = async () => {
-      if (!token) return;
-      setLoading(true);
+// Cargar sesiones
+useEffect(() => {
+  const fetchMySessions = async () => {
+    if (!token) return;
+    setLoading(true);
 
-      const params = new URLSearchParams();
-      if (filters.audience) params.append('audience', filters.audience);
-      if (filters.status) params.append('status', filters.status);
-      if (filters.location) params.append('location', filters.location);
-      if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
-      params.append('page', pagination.page);
+    const params = new URLSearchParams();
+    if (filters.audience) params.append('audience', filters.audience);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.location) params.append('location', filters.location);
+    if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
+    if (filters.timeFrom) params.append('timeFrom', filters.timeFrom);
+    if (filters.timeTo) params.append('timeTo', filters.timeTo);
 
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(
-          `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+    params.append('page', pagination.page);
 
-        const data = await res.json();
-        if (res.ok) {
-          setSessions(data.items || []);
-          setPagination({
-            page: data.page || 1,
-            total: data.total || 0,
-            totalPages: data.totalPages || 1,
-            hasPreviousPage: data.hasPreviousPage || false,
-            hasNextPage: data.hasNextPage || false,
-          });
-        }
-      } catch (err) {
-        console.error('Error al cargar sesiones:', err);
-      } finally {
-        setLoading(false);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(
+        `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        setSessions(data.items || []);
+        setPagination({
+          page: data.page || 1,
+          total: data.total || 0,
+          totalPages: data.totalPages || 1,
+          hasPreviousPage: data.hasPreviousPage || false,
+          hasNextPage: data.hasNextPage || false,
+        });
       }
-    };
+    } catch (err) {
+      console.error('Error al cargar sesiones:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchMySessions();
-  }, [token, filters, pagination.page]);
+  fetchMySessions();
+}, [token, filters, pagination.page]);
 
-  // Filtrado local por búsqueda
-  const filteredSessions = useMemo(() => {
-    if (!filters.search) return sessions;
+
+// Filtrado local por búsqueda + horario (MEJORADO)
+const filteredSessions = useMemo(() => {
+  let result = sessions;
+
+  // Filtro de búsqueda
+  if (filters.search) {
     const term = filters.search.toLowerCase();
-    return sessions.filter(s =>
+    result = result.filter(s =>
       s.title?.toLowerCase().includes(term) ||
       s.location?.toLowerCase().includes(term) ||
       s.schoolName?.toLowerCase().includes(term)
     );
-  }, [sessions, filters.search]);
+  }
 
+  // Filtro por horario - Solo sesiones que EMPIEZAN dentro del rango seleccionado
+  if (filters.timeFrom && filters.timeTo) {
+    result = result.filter(session => {
+      const sessionStart = session.startTime?.slice(0, 5); // "12:30:00" → "12:30"
+
+      if (!sessionStart) return false;
+
+      // Comparación: startTime está entre timeFrom y timeTo
+      return sessionStart >= filters.timeFrom && sessionStart <= filters.timeTo;
+    });
+  }
+
+  return result;
+}, [sessions, filters.search, filters.timeFrom, filters.timeTo]);
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -174,6 +198,50 @@ const handleDeleteSession = async (sessionId) => {
     setIsDeleting(false);
   }
 };
+const CustomTimeSelect = ({ value, onChange }) => {
+  const [open, setOpen] = useState(false);
+
+  const times = [];
+  for (let h = 6; h <= 23; h++) {
+    times.push(`${h.toString().padStart(2, '0')}:00`);
+    times.push(`${h.toString().padStart(2, '0')}:30`);
+  }
+
+  const handleSelect = (time) => {
+    onChange(time);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <div
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white cursor-pointer flex justify-between items-center"
+      >
+        <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+          {value || "Hs."}
+        </span>
+        <Image src='/icons/flechaabajo.svg' width={18} height={18} alt='↓' />
+      </div>
+
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto py-1">
+          {times.map((time) => (
+            <div
+              key={time}
+              onClick={() => handleSelect(time)}
+              className={`px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm ${
+                value === time ? 'bg-blue-50 font-medium text-[#0D2744]' : 'text-gray-700'
+              }`}
+            >
+              {time}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="mx-auto px-6 py-10">
@@ -198,115 +266,106 @@ const handleDeleteSession = async (sessionId) => {
           </Link>
         </div>
 
-        {/* Filtros */}
-<div className="bg-white rounded-3xl p-6 mb-8 shadow-sm md:h-[300px] md:h-auto">
-  {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"> */}
-<div className='flex w-full gap-6 flex-wrap flex-col md:flex-row h-full'>
+{/* Filtros */}
+<div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+  <div className='flex w-full gap-6 flex-wrap flex-col md:flex-row items-start'>
+
     {/* Toggle Free Surfers / Escuelas */}
-    <div className="flex wrap  bg-[#F1F7FE]  p-1 rounded-lg  w-auto h-[50px]">
-      <button
-        onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
+    <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-[50px]">
+      <button onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
         className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
-          filters.audience === 'FREE_SURFERS' 
-            ? 'bg-white shadow-sm text-gray-900' 
-            : 'bg-transparent text-gray-500 hover:text-gray-700'
-        }`}
-      >
+          filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}>
         Free Surfers
       </button>
-      <button
-        onClick={() => handleFilterChange('audience', 'SCHOOLS')}
+      <button onClick={() => handleFilterChange('audience', 'SCHOOLS')}
         className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
-          filters.audience === 'SCHOOLS' 
-            ? 'bg-white shadow-sm text-gray-900' 
-            : 'bg-transparent text-gray-500 hover:text-gray-700'
-        }`}
-      >
+          filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}>
         Escuelas
       </button>
     </div>
-<div className="relative lg:col-span-2 w-[280px]">
-  {/* Ícono de búsqueda */}
-  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-    <Image 
-      src="/icons/search.svg" 
-      alt="Buscar" 
-      width={15} 
-      height={15} 
-    />
-  </div>
 
-  <input
-    type="text"
-    placeholder="Buscar playa o escuela..."
-    value={filters.search}
-    onChange={(e) => handleFilterChange('search', e.target.value)}
-    className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
-  />
-</div>
-   
-
-    {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
-    {/* === DROPDOWN PERSONALIZADO DE ESTADOS === */}
-<div className="relative">
-  <div
-    onClick={(e) => {
-      e.stopPropagation();
-      setShowStatusDropdown(!showStatusDropdown);
-    }}
-    className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center focus:outline-none focus:border-blue-500"
-  >
-    <span className="text-gray-700">
-      {filters.status 
-        ? getStatusLabel(filters.status) 
-        : "Todos los estados"}
-    </span>
-  <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha abajo' />
-  </div>
-
-  {showStatusDropdown && (
-    <div 
-      onClick={(e) => e.stopPropagation()} 
-      className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-auto py-2 max-h-80"
-    >
-      <div
-        onClick={() => {
-          handleFilterChange('status', '');
-          setShowStatusDropdown(false);
-        }}
-        className={`px-5 py-3 hover:bg-blue-50 cursor-pointer ${!filters.status ? 'bg-blue-50 font-medium' : ''}`}
-      >
-        Todos los estados
+    {/* Buscador */}
+    <div className="relative w-[280px]">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+        <Image src="/icons/search.svg" alt="Buscar" width={15} height={15} />
       </div>
-      {[
-        { value: 'DRAFT', label: 'Borrador' },
-        { value: 'PROCESSING', label: 'En proceso' },
-        { value: 'ACTIVE', label: 'Publicada' },
-        { value: 'DISABLED', label: 'Desactivada' },
-      ].map((status) => (
-        <div
-          key={status.value}
-          onClick={() => {
-            handleFilterChange('status', status.value);
-            setShowStatusDropdown(false);
-          }}
-          className={`px-5 py-3 hover:bg-blue-50 cursor-pointer ${
-            filters.status === status.value ? 'bg-blue-50 font-medium' : ''
-          }`}
-        >
-          {status.label}
-        </div>
-      ))}
+      <input
+        type="text"
+        placeholder="Buscar playa o escuela..."
+        value={filters.search}
+        onChange={(e) => handleFilterChange('search', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
+      />
     </div>
-  )}
-</div>
 
+    {/* Dropdown Hora */}
+    <div className="relative w-full md:w-[220px]">
+      <div
+        onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+        className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
+      >
+        <span className="text-gray-700">
+          {filters.timeFrom && filters.timeTo 
+            ? `${filters.timeFrom} - ${filters.timeTo}` 
+            : "Seleccionar hora"}
+        </span>
+        <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha' />
+      </div>
+
+      {showTimeDropdown && (
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-xl p-5"
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+              <CustomTimeSelect
+                value={filters.timeFrom}
+                onChange={(value) => handleFilterChange('timeFrom', value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+              <CustomTimeSelect
+                value={filters.timeTo}
+                onChange={(value) => handleFilterChange('timeTo', value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => {
+                handleFilterChange('timeFrom', '');
+                handleFilterChange('timeTo', '');
+                setShowTimeDropdown(false);
+              }}
+              className="flex-1 py-2.5 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50"
+            >
+              Limpiar
+            </button>
+            <button
+              onClick={() => setShowTimeDropdown(false)}
+              className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35]"
+            >
+              Aplicar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Fecha */}
     <input
       type="date"
       value={filters.sessionDate}
       onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-      className="border border-gray-300 rounded-lg px-5 py-3 focus:outline-none focus:border-gray-900"
+      className="border border-gray-300 rounded-lg px-5 py-3 focus:outline-none focus:border-gray-900 w-full md:w-auto"
     />
+
   </div>
 </div>
 
