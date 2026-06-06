@@ -473,7 +473,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
     <Link 
       href={`/shot/sesion/${session.id}`} 
       onClick={() => setOpenMenuId(null)}
-      className="w-full text-left px-5 py-3 hover:bg-gray-50  items-center gap-3 text-gray-700 block"
+      className="w-full text-left px-5 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700 "
     >
       <Image src="/icons/editar2.svg" alt="editar" width={20} height={20} />
       <span>Editar sesión</span>
