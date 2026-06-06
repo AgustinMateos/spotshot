@@ -251,7 +251,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
 
           <Link
             href={isStripeReady ? "/shot/newAlbum" : "#"}
-            className={`px-6 py-3 rounded-lg flex items-center gap-2 h-[40px] transition font-medium ${isStripeReady
+            className={`px-6 py-3 rounded-lg flex items-center gap-2 h-10 transition font-medium ${isStripeReady
                 ? 'bg-[#0D2744] text-white hover:bg-[#0d2744e5]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
@@ -271,7 +271,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
   <div className='flex w-full gap-6 flex-wrap flex-col md:flex-row items-start'>
 
     {/* Toggle Free Surfers / Escuelas */}
-    <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-[50px]">
+    <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
       <button onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
         className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
           filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
@@ -287,7 +287,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
     </div>
 
     {/* Buscador */}
-    <div className="relative w-[280px]">
+    <div className="relative w-70">
       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
         <Image src="/icons/search.svg" alt="Buscar" width={15} height={15} />
       </div>
@@ -301,7 +301,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
     </div>
 
     {/* Dropdown Hora */}
-    <div className="relative w-full md:w-[220px]">
+    <div className="relative w-full md:w-55">
       <div
         onClick={() => setShowTimeDropdown(!showTimeDropdown)}
         className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
@@ -402,7 +402,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
               {session.photoCount} fotos
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
               <div className={`text-xs inline-block px-3 py-1 rounded-full mb-2 ${getStatusColor(session.status)}`}>
                 {getStatusLabel(session.status)}
               </div>
@@ -473,7 +473,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
     <Link 
       href={`/shot/sesion/${session.id}`} 
       onClick={() => setOpenMenuId(null)}
-      className="w-full text-left px-5 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700 block"
+      className="w-full text-left px-5 py-3 hover:bg-gray-50  items-center gap-3 text-gray-700 block"
     >
       <Image src="/icons/editar2.svg" alt="editar" width={20} height={20} />
       <span>Editar sesión</span>

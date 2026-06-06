@@ -626,7 +626,7 @@ const finalPrice = formData.basePrice > 0
 
         {/* Stepper Mejorado - Con tick azul */}
 <div className="flex justify-center w-full mb-10">
-  <div className="flex items-center justify-center w-[85%] md:w-[100%]">
+  <div className="flex items-center justify-center w-[85%] md:w-full">
     {[
       { label: 'Detalles', icon: '/icons/details.svg', activeIcon: '/icons/details-active.svg' },
       { label: 'Fotos',    icon: '/icons/photos.svg',    activeIcon: '/icons/photos-active.svg' },
@@ -714,7 +714,7 @@ const finalPrice = formData.basePrice > 0
 {/* Escuela o Ubicación */}
 {formData.type === 'escuelas' ? (
   <div className="mb-6 relative">
-    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+    <label className="block text-gray-700 mb-2 font-medium  items-center gap-2">
       <Image width={16} height={16} alt='school' src={'/icons/school.svg'}/> 
       Nombre de la Escuela
     </label>
@@ -759,7 +759,7 @@ const finalPrice = formData.basePrice > 0
   </div>
 ) : (
   <div className="mb-6 relative">
-    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+    <label className="block text-gray-700 mb-2 font-medium  items-center gap-2">
       <Image width={16} height={16} alt='playa' src={'/icons/playa.svg'}/> 
       Playa
     </label>
@@ -809,7 +809,7 @@ const finalPrice = formData.basePrice > 0
 {/* Fecha y Hora */}
 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
   <div className="md:col-span-1">
-    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+    <label className="block text-gray-700 mb-2 font-medium  items-center gap-2">
       <Image width={16} height={16} alt='fecha' src={'/icons/fecha.svg'}/> 
       Fecha
     </label>
@@ -824,7 +824,7 @@ const finalPrice = formData.basePrice > 0
 
   {/* Hora Inicio - Dropdown Personalizado */}
   <div className="relative">
-    <label className="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+    <label className="block text-gray-700 mb-2 font-medium  items-center gap-2">
       <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'}/> 
       Hora Inicio
     </label>
@@ -1135,7 +1135,7 @@ const finalPrice = formData.basePrice > 0
     {/* Banner de confirmación */}
     <div className="relative rounded-3xl overflow-hidden h-80">
       <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
       <div className="absolute bottom-8 left-8 text-white">
         <p className="text-4xl font-bold">
           {formData.date ? new Intl.DateTimeFormat('es-ES', { 

@@ -186,10 +186,10 @@ useEffect(() => {
                       <img
                         src={session.images[0].publicUrl}
                         alt={session.title}
-                        className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform"
+                        className="w-full aspect-16/10 object-cover group-hover:scale-105 transition-transform"
                       />
                     ) : (
-                      <div className="w-full aspect-[16/10] bg-gray-200 flex items-center justify-center">
+                      <div className="w-full aspect-16/10 bg-gray-200 flex items-center justify-center">
                         <span className="text-4xl">🌊</span>
                       </div>
                     )}
@@ -207,7 +207,7 @@ useEffect(() => {
                     
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
+                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
                       <p className="font-semibold text-lg">{session.title}</p>
                       
                         <p>{session.location || session.schoolName}</p>

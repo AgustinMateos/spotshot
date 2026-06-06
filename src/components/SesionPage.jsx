@@ -293,7 +293,7 @@ if (loading) {
         </div>
 
         {/* Banner Grande Skeleton */}
-        <div className="relative h-[420px] rounded-3xl overflow-hidden mb-10 bg-gray-200 animate-pulse">
+        <div className="relative h-105 rounded-3xl overflow-hidden mb-10 bg-gray-200 animate-pulse">
           <div className="absolute bottom-10 left-10 space-y-3">
             <div className="h-12 w-96 bg-gray-300/80 rounded-lg animate-pulse"></div>
             <div className="h-8 w-64 bg-gray-300/80 rounded-lg animate-pulse"></div>
