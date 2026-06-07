@@ -88,10 +88,24 @@ export default function SesionesPage() {
     }
   }, [filters.schoolName, filters.location]);
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
+ const handleFilterChange = (key, value) => {
+  setFilters(prev => {
+    const newFilters = { ...prev, [key]: value };
+    
+    // Si cambio de audience, limpio el filtro contrario
+    if (key === 'audience') {
+      if (value === 'FREE_SURFERS') {
+        newFilters.schoolName = '';
+      } else {
+        newFilters.location = '';
+      }
+    }
+    
+    return newFilters;
+  });
+  
+  setPagination(prev => ({ ...prev, page: 1 }));
+};
 
   const goToPage = (newPage) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -107,40 +121,58 @@ export default function SesionesPage() {
           <p className="text-gray-600 text-[16px] mt-1">{pagination.total} álbumes encontrados</p>
         </div>
 
-        {/* Filtros */}
+      {/* Filtros */}
 <div className="flex flex-wrap gap-4 mb-10 bg-white p-4 rounded-2xl shadow-sm">
 
-  {/* Toggle Free Surfers / Escuelas - Estilo como en tu imagen */}
-  <div className="flex bg-[#F1F7FE] p-1 rounded-3xl">
-    <button 
-      onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
-      className={`px-7 py-3 rounded-2xl font-medium transition-all text-sm ${
-        filters.audience === 'FREE_SURFERS' 
-          ? 'bg-white shadow-sm text-gray-900' 
-          : 'bg-transparent text-gray-500 hover:text-gray-700'
-      }`}
-    >
-      Free surfers
-    </button>
-    <button 
-      onClick={() => handleFilterChange('audience', 'SCHOOLS')}
-      className={`px-7 py-3 rounded-2xl font-medium transition-all text-sm ${
-        filters.audience === 'SCHOOLS' 
-          ? 'bg-white shadow-sm text-gray-900' 
-          : 'bg-transparent text-gray-500 hover:text-gray-700'
-      }`}
-    >
-      Escuelas
-    </button>
-  </div>
+  {/* Toggle Free Surfers / Escuelas */}
+  <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
+      <button onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
+        className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+          filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}>
+        Free Surfers
+      </button>
+      <button onClick={() => handleFilterChange('audience', 'SCHOOLS')}
+        className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+          filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+        }`}>
+        Escuelas
+      </button>
+    </div>
 
-  <input 
-    type="text" 
-    placeholder="Playa o ubicación..." 
-    value={filters.location} 
-    onChange={(e) => handleFilterChange('location', e.target.value)} 
-    className="flex-1 px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-gray-900" 
-  />
+  {/* Input dinámico */} <div className="relative w-70">
+  {filters.audience === 'FREE_SURFERS' ? (
+   <div><div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+        <Image src="/icons/search.svg" alt="Buscar" width={15} height={15} />
+      </div>
+       <input 
+      type="text" 
+      placeholder="Playa o ubicación..." 
+      value={filters.location} 
+      onChange={(e) => handleFilterChange('location', e.target.value)} 
+      className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white" 
+    /></div>
+      
+   
+  ) : (
+    <div>
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+        <Image src="/icons/school.svg" alt="Buscar" width={20} height={20} />
+      </div>
+       <input 
+      type="text" 
+      placeholder="Nombre de la escuela..." 
+      value={filters.schoolName} 
+      onChange={(e) => handleFilterChange('schoolName', e.target.value)} 
+     className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
+    /></div>
+   
+  )}
+ </div>
+
+
+
+
 
   <input 
     type="date" 
@@ -224,8 +256,8 @@ export default function SesionesPage() {
        {/* Paginación - Estilo Mis Ventas */}
 {pagination.totalPages > 1 && (
   <div className="bg-white rounded-3xl shadow-sm mt-12">
-    <div className="flex items-center justify-between px-8 py-6 ">
-      <p className="text-lg font-medium text-gray-900">
+    <div className="flex flex-col md:flex-row items-center justify-between px-8 py-6 ">
+      <p className="text-lg font-medium text-[#10487C]">
         Página {pagination.page} de {pagination.totalPages}
       </p>
 

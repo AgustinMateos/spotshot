@@ -1,13 +1,13 @@
 import Image from "next/image";
 
 const images = [
-  "/marquesina/1.svg",
-  "/marquesina/2.svg",
-  "/marquesina/3.svg",
-  "/marquesina/4.svg",
-  "/marquesina/5.svg",
-  "/marquesina/6.svg",
-  "/marquesina/7.svg",
+  "/marquesina/1.webp",
+  "/marquesina/2.webp",
+  "/marquesina/3.webp",
+  "/marquesina/4.webp",
+  "/marquesina/5.webp",
+  "/marquesina/6.webp",
+  "/marquesina/7.webp",
 ];
 
 export default function Marquesina() {
@@ -22,16 +22,14 @@ export default function Marquesina() {
               <div key={i} className="flex items-center gap-8 shrink-0">
                 {/* 3 Fotos + Texto + 3 Fotos */}
                 {images.slice(0, 3).map((src, idx) => (
-                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
-                    <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
+                  <div key={idx} className="w-[341px] h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-85.25 h-40 object-contain"
+                      className="w-full h-40 object-cover"
                     />
-                  </div>
                   </div>
                 ))}
 
@@ -40,13 +38,13 @@ export default function Marquesina() {
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (
-                 <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
+                 <div key={idx} className="w-[341px] h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-85.25 h-40 object-contain"
+                      className="w-full h-40 object-cover"
                     />
                   </div>
                 ))}
@@ -62,13 +60,13 @@ export default function Marquesina() {
               <div key={i} className="flex items-center gap-8 shrink-0">
                 {/* 3 Fotos + Texto + 3 Fotos */}
                 {images.slice(0, 3).map((src, idx) => (
-                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
+                  <div key={idx} className="w-[341px] h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-85.25 h-40 object-contain"
+                      className="w-full h-40 object-cover"
                     />
                   </div>
                 ))}
@@ -78,13 +76,13 @@ export default function Marquesina() {
                 </h3>
 
                 {images.slice(3, 6).map((src, idx) => (
-                  <div key={idx} className="w-85.25 h-40 rounded-3xl overflow-hidden shrink-0">
+                   <div key={idx} className="w-[341px] h-40 rounded-3xl overflow-hidden shrink-0">
                     <Image
                       src={src}
                       alt="Surf"
                       width={341}
                       height={97}
-                      className="w-85.25 h-40 object-contain"
+                      className="w-full h-40 object-cover"
                     />
                   </div>
                 ))}
