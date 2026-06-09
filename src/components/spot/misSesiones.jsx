@@ -221,7 +221,7 @@ export default function MisSesiones() {
           <span className={value ? 'text-gray-900' : 'text-gray-400'}>
             {value || "Hs."}
           </span>
-          <Image src='/icons/flechaabajo.svg' width={18} height={18} alt='↓' />
+          <Image src='/icons/flechaAbajo.svg' width={18} height={18} alt='↓' />
         </div>
 
         {open && (
@@ -308,7 +308,7 @@ export default function MisSesiones() {
                     ? `${filters.timeFrom} - ${filters.timeTo}`
                     : "Seleccionar hora"}
                 </span>
-                <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha' />
+                <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
               </div>
 
               {showTimeDropdown && (
@@ -364,7 +364,7 @@ export default function MisSesiones() {
                     ? getStatusLabel(filters.status)
                     : "Todos los estados"}
                 </span>
-                <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha' />
+                <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
               </div>
 
               {showStatusDropdown && (

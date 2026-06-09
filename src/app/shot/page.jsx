@@ -176,7 +176,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
         <span className={value ? 'text-gray-900' : 'text-gray-400'}>
           {value || "Hs."}
         </span>
-        <Image src='/icons/flechaabajo.svg' width={18} height={18} alt='↓' />
+        <Image src='/icons/flechaAbajo.svg' width={18} height={18} alt='↓' />
       </div>
 
       {open && (
@@ -334,7 +334,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
                         ? `${filters.timeFrom} - ${filters.timeTo}` 
                         : "Seleccionar hora"}
                     </span>
-                    <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha' />
+                    <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
                   </div>
 
                   {showTimeDropdown && (
@@ -375,7 +375,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
                     <span className="text-gray-700">
                       {filters.status ? getStatusLabel(filters.status) : "Todos los estados"}
                     </span>
-                    <Image src='/icons/flechaabajo.svg' width={20} height={20} alt='flecha' />
+                    <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
                   </div>
 
                   {showStatusDropdown && (
