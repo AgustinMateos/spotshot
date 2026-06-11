@@ -10,7 +10,7 @@ import { Oxygen, Manrope, Inter, Open_Sans, Roboto } from 'next/font/google';
 // Configura las fuentes
 const oxygen = Oxygen({
   subsets: ['latin'],
-  weight: ['300','400', '500', '700'], // elige los pesos que necesites
+  weight: ['300','400',  '700'], // elige los pesos que necesites
   variable: '--font-oxygen',
   display: 'swap',
 });
@@ -52,7 +52,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="es" >
       <body className="min-h-screen flex flex-col bg-white">
         <AuthProvider>
           <CartProvider> 

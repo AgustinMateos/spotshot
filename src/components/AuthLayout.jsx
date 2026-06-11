@@ -10,7 +10,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen  flex-col p-5 md:p-0 md:flex-row mt-12 bg-white flex">
       {/* LADO IZQUIERDO - Marketing (igual en ambas pantallas) */}
-      <div className="w-full lg:w-[60%] flex-col flex justify-between   ">
+      <div className="w-full lg:w-[60%] h-[80vh] md:h-auto flex-col flex justify-between   ">
         <div className="w-full md:pl-20 md:pt-20 ">
           <h1 className="text-5xl w-full font-bold text-gray-900 leading-tight">
             Convierte tus fotos de surf en ingresos reales.
@@ -61,7 +61,7 @@ export default function AuthLayout({
       </div>
 
       {/* LADO DERECHO - Formulario (cambia según login o register) */}
-      <div className="w-full lg:w-[40%] flex h-full items-center justify-center p-6 pt-20 lg:p-6">
+      <div className="w-full lg:w-[40%] flex h-full items-center justify-center md:p-6 pt-20 lg:p-6">
         <div className="w-full max-w-md">
           {children}
         </div>
