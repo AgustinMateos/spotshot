@@ -112,7 +112,7 @@ export default function SesionesRecientes() {
               <p className="text-sm mb-1 bg-white w-55 text-[#1E3A5F] p-1.5 text-center rounded-2xl">
                 Nuevas sesiones todos los días
               </p>
-              <h2 className="text-3xl pb-4 md:pb-0 md:text-4xl font-medium text-[#1E3A5F] pt-4">
+              <h2 className="text-2xl pb-4 md:pb-0 md:text-4xl font-medium text-[#1E3A5F] pt-4">
                 Sesiones recientes
               </h2>
             </div>
@@ -139,7 +139,7 @@ export default function SesionesRecientes() {
             <p className="text-sm mb-1 bg-white w-55 text-[#1E3A5F] p-1.5 text-center rounded-2xl">
               Nuevas sesiones todos los días
             </p>
-            <h2 className="font-manrope font-medium text-[48px] leading-[48px] tracking-[-1.2%] text-center text-3xl pb-4 md:pb-0 md:text-4xl  text-[#1E3A5F] pt-4">
+            <h2 className="font-manrope font-medium md:text-[48px] leading-[48px] tracking-[-1.2%] md:text-center text-3xl pb-4 md:pb-0 md:text-4xl  text-[#1E3A5F] pt-4">
               Sesiones recientes
             </h2>
           </div>
