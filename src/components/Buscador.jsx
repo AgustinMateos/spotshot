@@ -79,7 +79,7 @@ const slugify = (text) => {
 
           {/* Barra de búsqueda */}
           <form onSubmit={handleSubmit} className="p-6">
-            <div className="flex flex-col md:flex-row items-center gap-4 bg-white border border-gray-200 rounded-3xl p-2 shadow-sm relative">
+            <div className="flex flex-col md:flex-row items-center gap-4 bg-white border border-gray-200 rounded-3xl w-full relative">
               
               <div className="flex-1 flex items-center gap-3 px-5 py-4 relative">
                 <MapPin className="text-gray-400" size={22} />

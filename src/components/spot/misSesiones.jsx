@@ -8,7 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function MisSesiones() {
   const { token } = useAuth();
 
-  const [stripeConnect, setStripeConnect] = useState(null);
+  // Cambiá el valor inicial de stripeConnect
+const [stripeConnect, setStripeConnect] = useState(undefined); // undefined = todavía no sabe
   const [loadingStripe, setLoadingStripe] = useState(true);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -20,6 +21,9 @@ export default function MisSesiones() {
     hasPreviousPage: false,
     hasNextPage: false,
   });
+  // isStripeReady ahora tiene tres estados
+
+const stripeLoaded = stripeConnect !== undefined; // ya llegó la respuesta
   const [openMenuId, setOpenMenuId] = useState(null); // ID de la sesión cuyo menú está abierto
   // Filtros
   const [filters, setFilters] = useState({
@@ -37,27 +41,69 @@ export default function MisSesiones() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
-  // Cargar estado de Stripe
-  useEffect(() => {
-    const loadStripeStatus = async () => {
-      if (!token) return;
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${API_URL}/api/v1/photographers/me`, {
+useEffect(() => {
+  if (!token) return;
+
+  const loadAll = async () => {
+    setLoading(true);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    const params = new URLSearchParams();
+    if (filters.audience) params.append('audience', filters.audience);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.location) params.append('location', filters.location);
+    if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
+    if (filters.timeFrom) params.append('timeFrom', filters.timeFrom);
+    if (filters.timeTo) params.append('timeTo', filters.timeTo);
+    params.append('page', pagination.page);
+
+    try {
+      const [stripeRes, sessionsRes] = await Promise.all([
+        fetch(`${API_URL}/api/v1/photographers/me`, {
           headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const [stripeData, sessionsData] = await Promise.all([
+        stripeRes.json(),
+        sessionsRes.json(),
+      ]);
+
+      if (stripeRes.ok) setStripeConnect(stripeData.stripeConnect);
+      if (sessionsRes.ok) {
+        setSessions(sessionsData.items || []);
+        setPagination({
+          page: sessionsData.page || 1,
+          total: sessionsData.total || 0,
+          totalPages: sessionsData.totalPages || 1,
+          hasPreviousPage: sessionsData.hasPreviousPage || false,
+          hasNextPage: sessionsData.hasNextPage || false,
         });
-        const data = await res.json();
-        if (res.ok) {
-          setStripeConnect(data.stripeConnect);
-        }
-      } catch (err) {
-        console.error("Error cargando Stripe:", err);
-      } finally {
-        setLoadingStripe(false);
       }
-    };
-    loadStripeStatus();
-  }, [token]);
+    } catch (err) {
+      console.error('Error cargando datos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadAll();
+}, [token, filters, pagination.page]);
+
+// Este se queda igual
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.relative')) {
+      setShowStatusDropdown(false);
+    }
+  };
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.relative')) {  // evita cerrar al hacer clic dentro del dropdown
@@ -89,49 +135,6 @@ export default function MisSesiones() {
     }
   };
 
-  // Cargar sesiones
-  useEffect(() => {
-    const fetchMySessions = async () => {
-      if (!token) return;
-      setLoading(true);
-
-      const params = new URLSearchParams();
-      if (filters.audience) params.append('audience', filters.audience);
-      if (filters.status) params.append('status', filters.status);
-      if (filters.location) params.append('location', filters.location);
-      if (filters.sessionDate) params.append('sessionDate', filters.sessionDate);
-      if (filters.timeFrom) params.append('timeFrom', filters.timeFrom);
-      if (filters.timeTo) params.append('timeTo', filters.timeTo);
-
-      params.append('page', pagination.page);
-
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(
-          `${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const data = await res.json();
-        if (res.ok) {
-          setSessions(data.items || []);
-          setPagination({
-            page: data.page || 1,
-            total: data.total || 0,
-            totalPages: data.totalPages || 1,
-            hasPreviousPage: data.hasPreviousPage || false,
-            hasNextPage: data.hasNextPage || false,
-          });
-        }
-      } catch (err) {
-        console.error('Error al cargar sesiones:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMySessions();
-  }, [token, filters, pagination.page]);
 
 
   // Filtrado local por búsqueda + horario (MEJORADO)
@@ -248,21 +251,27 @@ export default function MisSesiones() {
         <div className="flex justify-between flex-col md:flex-row items-start md:items-center mb-8">
           <h1 className="text-[24px] font-medium text-[#10487C] pb-5 md:pb-0">Mis Sesiones</h1>
 
-          <Link
-            href={isStripeReady ? "/shot/newAlbum" : "#"}
-            className={`px-6 py-3 rounded-lg flex items-center gap-2 h-10 transition font-medium ${isStripeReady
-              ? 'bg-[#0D2744] text-white hover:bg-[#0d2744e5]'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            onClick={(e) => {
-              if (!isStripeReady) {
-                e.preventDefault();
-                alert("Debes conectar tu cuenta de Stripe para crear sesiones");
-              }
-            }}
-          >
-            <span className="text-xl">+</span> Crear Sesión
-          </Link>
+          {!stripeLoaded ? (
+  // Mientras no sabe → skeleton, no muestra botón deshabilitado
+  <div className="h-10 w-36 rounded-lg bg-gray-200 animate-pulse" />
+) : (
+  <Link
+    href={isStripeReady ? "/shot/newAlbum" : "#"}
+    className={`px-6 py-3 rounded-lg flex items-center gap-2 h-10 transition font-medium ${
+      isStripeReady
+        ? 'bg-[#0D2744] text-white hover:bg-[#0d2744e5]'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+    }`}
+    onClick={(e) => {
+      if (!isStripeReady) {
+        e.preventDefault();
+        alert("Debes conectar tu cuenta de Stripe para crear sesiones");
+      }
+    }}
+  >
+    <span className="text-xl">+</span> Crear Sesión
+  </Link>
+)}
         </div>
 
         {/* Filtros */}

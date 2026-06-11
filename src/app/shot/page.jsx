@@ -4,7 +4,33 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
+function CardSkeleton({ delay = 0 }) {
+  return (
+    <div
+      className="relative rounded-3xl overflow-hidden"
+      style={{ aspectRatio: '16/10', animationDelay: `${delay}ms` }}
+    >
+      <div className="absolute inset-0 bg-[#dce8f5]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+          backgroundSize: '200% 100%',
+          animation: 'waveSweep 1.6s ease-in-out infinite',
+          animationDelay: `${delay}ms`,
+        }}
+      />
+      <div className="absolute top-4 right-4 flex gap-2 z-10">
+        <div className="h-6 w-20 rounded-full bg-black/15" />
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2.5">
+        <div className="h-4 w-3/4 rounded bg-white/30" />
+        <div className="h-3 w-1/2 rounded bg-white/30" />
+        <div className="h-3 w-1/3 rounded bg-white/30" />
+      </div>
+    </div>
+  );
+}
 export default function ShotPage() {
   const { user, token, loading: authLoading } = useAuth();
 
@@ -198,8 +224,41 @@ const CustomTimeSelect = ({ value, onChange }) => {
   );
 };
   if (authLoading || loadingProfile || loadingInitial) {
-    return <div className="min-h-screen flex items-center justify-center"><p>Cargando...</p></div>;
-  }
+  return (
+    <div className="min-h-screen pt-20 bg-white">
+      <div className="max-w-full mx-auto px-6 py-8">
+
+        {/* Header skeleton */}
+        <div className="bg-[#F1F7FE] rounded-2xl p-8 mb-10">
+          <div className="h-9 w-48 rounded-xl bg-blue-100 animate-pulse mb-3" />
+          <div className="h-5 w-64 rounded-lg bg-blue-100 animate-pulse" />
+
+          {/* Pasos skeleton — misma estructura que los 3 pasos reales */}
+          <div className="grid md:grid-cols-3 gap-8 mt-10">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="border border-gray-200 bg-white rounded-xl p-6 flex flex-col gap-4">
+                <div className="h-3 w-16 rounded bg-gray-100 animate-pulse" />
+                <div className="h-7 w-3/4 rounded-lg bg-gray-100 animate-pulse" />
+                <div className="h-4 w-full rounded bg-gray-100 animate-pulse" />
+                <div className="h-4 w-5/6 rounded bg-gray-100 animate-pulse" />
+                <div className="h-11 w-40 rounded-xl bg-gray-100 animate-pulse mt-2" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Grid skeleton */}
+        <div className="h-7 w-48 rounded-lg bg-gray-100 animate-pulse mb-6" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <CardSkeleton key={i} delay={i * 100} />
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
   return (
     <div className="min-h-screen pt-20 bg-white">
       <div className="max-w-full mx-auto px-6 py-8">
@@ -409,42 +468,47 @@ const CustomTimeSelect = ({ value, onChange }) => {
             </div>
 
               {/* Grid de Sesiones */}
-              {filteredSessions.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredSessions.map((session) => (
-                    <Link href={`/shot/sesion/${session.id}`} key={session.id} className="group">
-                      <div className="relative rounded-3xl overflow-hidden bg-black shadow hover:shadow-xl transition">
-                        {session.images?.[0]?.publicUrl ? (
-                          <img
-                            src={session.images[0].publicUrl}
-                            alt={session.title}
-                            className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition"
-                          />
-                        ) : (
-                          <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
-                        )}
-
-                        <div className="absolute top-3 right-3 bg-[#0F172A] px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
-                          <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora' />{session.photoCount}
-                        </div>
-
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
-                          <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
-                            {session.status}
-                          </div>
-                          <p className="font-semibold">{session.title}</p>
-                          <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
-                          <p className="text-xs opacity-75">{session.startTime} - {session.endTime}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-20 border border-dashed border-gray-300 rounded-2xl">
-                  <p className="text-gray-500">No se encontraron sesiones con los filtros aplicados.</p>
-                </div>
-              )}
+              {/* Grid de Sesiones */}
+{loadingFilters ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[0, 1, 2, 3, 4, 5].map((i) => (
+      <CardSkeleton key={i} delay={i * 100} />
+    ))}
+  </div>
+) : filteredSessions.length > 0 ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredSessions.map((session) => (
+      <Link href={`/shot/sesion/${session.id}`} key={session.id} className="group">
+        <div className="relative rounded-3xl overflow-hidden bg-black shadow hover:shadow-xl transition">
+          {session.images?.[0]?.publicUrl ? (
+            <img
+              src={session.images[0].publicUrl}
+              alt={session.title}
+              className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition"
+            />
+          ) : (
+            <div className="w-full aspect-[16/10] bg-gray-800 flex items-center justify-center text-6xl">🌊</div>
+          )}
+          <div className="absolute top-3 right-3 bg-[#0F172A] px-3 py-1 rounded-full text-white text-xs flex items-center gap-1">
+            <Image src={'/icons/camara.svg'} width={16} height={16} alt='hora' />{session.photoCount}
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-5 text-white">
+            <div className="text-xs mt-2 inline-block px-3 py-1 bg-[#0F172A] rounded-full">
+              {session.status}
+            </div>
+            <p className="font-semibold">{session.title}</p>
+            <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
+            <p className="text-xs opacity-75">{session.startTime} - {session.endTime}</p>
+          </div>
+        </div>
+      </Link>
+    ))}
+  </div>
+) : (
+  <div className="text-center py-20 border border-dashed border-gray-300 rounded-2xl">
+    <p className="text-gray-500">No se encontraron sesiones con los filtros aplicados.</p>
+  </div>
+)}
 
               {/* Paginación */}
               {/* Paginación - Estilo idéntico a Mis Ventas */}

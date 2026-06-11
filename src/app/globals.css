@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-
+@theme {
+  --animate-marquesina: marquesina 40s linear infinite;
+  --animate-marquesina-reverse: marquesina-reverse 45s linear infinite;
+}
 
 body {
   background: var(--background);
@@ -8,36 +11,36 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
+/* Animaciones Marquesina */
 /* Animaciones Marquesina */
 @keyframes marquesina {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquesina {
-  animation: marquesina 40s linear infinite;
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 @keyframes marquesina-reverse {
-  from {
-    transform: translateX(-50%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquesina {
+  animation: marquesina 90s linear infinite;
+  display: flex;
+  width: max-content;   /* ← acá sí va, en el elemento que tiene la animación */
 }
 
 .animate-marquesina-reverse {
-  animation: marquesina-reverse 45s linear infinite;
+  animation: marquesina-reverse 50s linear infinite;
+  display: flex;
+  width: max-content;
 }
 
-/* Pausa al pasar el mouse */
 .animate-marquesina:hover,
 .animate-marquesina-reverse:hover {
   animation-play-state: paused;
+}
+
+@keyframes waveSweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

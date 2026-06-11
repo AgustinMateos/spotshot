@@ -3,7 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
+function CardSkeleton({ delay = 0 }) {
+  return (
+    <div
+      className="relative rounded-3xl overflow-hidden"
+      style={{ aspectRatio: '16/10', animationDelay: `${delay}ms` }}
+    >
+      <div className="absolute inset-0 bg-[#dce8f5]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)',
+          backgroundSize: '200% 100%',
+          animation: 'waveSweep 1.6s ease-in-out infinite',
+          animationDelay: `${delay}ms`,
+        }}
+      />
+      <div className="absolute top-4 right-4 flex gap-2 z-10">
+        <div className="h-6 w-20 rounded-full bg-black/15" />
+        <div className="h-6 w-20 rounded-full bg-black/15" />
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2.5">
+        <div className="h-4 w-3/4 rounded bg-white/30" />
+        <div className="h-3 w-1/2 rounded bg-white/30" />
+        <div className="h-3 w-2/5 rounded bg-white/30" />
+        <div className="h-3 w-1/3 rounded bg-white/30" />
+      </div>
+    </div>
+  );
+}
 export default function SesionesPage() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -281,9 +309,27 @@ const CustomTimeSelect = ({ value, onChange }) => {
 </div>
 
         {/* Grid de Sesiones */}
-        {loading ? (
-          <p className="text-center py-20 text-gray-500">Cargando sesiones...</p>
-        ) : (
+    {loading ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[0, 1, 2, 3, 4, 5].map((i) => (
+      <CardSkeleton key={i} delay={i * 100} />
+    ))}
+  </div>
+) : sessions.length === 0 ? (
+  <div className="text-center py-20">
+    <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+      <img src='/icons/logo.svg' width={40} height={40} alt='logo' />
+    </div>
+    <h3 className="text-xl font-medium text-gray-800 mb-2">
+      No se encontraron sesiones
+    </h3>
+    <p className="text-gray-500 max-w-md mx-auto">
+      {filters.search || filters.location || filters.schoolName || filters.sessionDate || filters.timeFrom
+        ? "Prueba con otros filtros o fechas diferentes."
+        : "Todavía no hay sesiones disponibles en esta categoría."}
+    </p>
+  </div>
+) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sessions.map((session) => {
               const daysLeft = getDaysRemaining(session.activeUntil);
@@ -301,7 +347,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
                       />
                     ) : (
                       <div className="w-full aspect-16/10 bg-gray-200 flex items-center justify-center">
-                        <span className="text-4xl">🌊</span>
+                        <img src='/icons/logo.svg' width={20} height={20} alt='logo'/>
                       </div>
                     )}
 
