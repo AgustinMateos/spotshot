@@ -689,7 +689,7 @@ const updateForm = (field, value) => {
             <h2 className="text-[18px]  text-[#0D2744] font-semibold mb-6">Completa los detalles de tu sesión</h2>
 
             {/* Tipo de sesión */}
-            <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-72.5 h-12.25 mb-8">
+            <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-73 h-12.25 mb-8">
               <button
                 onClick={() => updateForm('type', 'free-surfers')}
                 className={`px-8  rounded-lg font-medium transition-all ${formData.type === 'free-surfers'
@@ -1154,7 +1154,7 @@ const updateForm = (field, value) => {
 
             {/* Precio y Packs */}
             <div className="bg-white border border-gray-100 rounded-3xl p-8">
-              <h3 className="text-2xl font-semibold mb-2">Precio por foto</h3>
+              <h3 className="text-2xl font-semibold mb-2">Precio final para el fotógrafo por foto</h3>
               <p className="text-5xl font-bold text-gray-900">€{formData.basePrice}</p>
 
               <div className="mt-8">
@@ -1231,7 +1231,7 @@ const updateForm = (field, value) => {
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="px-8 py-3.5 rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium flex items-center gap-2"
+                className="px-8 py-3.5 cursor-pointer rounded-2xl border border-gray-300 hover:bg-gray-50 font-medium flex items-center gap-2"
               >
                 ← Atrás
               </button>
@@ -1245,7 +1245,7 @@ const updateForm = (field, value) => {
                 (step === 3 && updatingPrice) ||
                 (step === 4 && publishing)
               }
-              className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-8 py-3.5 rounded-2xl cursor-pointer  bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {step === 1 && creatingSession ? 'Creando sesión...' :
                 step === 2 && uploading ? 'Subiendo fotos...' :

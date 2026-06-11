@@ -8,11 +8,11 @@ const images = [
   "/marquesina/5.webp",
   "/marquesina/6.webp",
   "/marquesina/7.webp",
-  "/fondo.svg",
-  "/inicio/surf.png",
-  "/inicio/somo1.webp",
-  "/inicio/sesion.png",
-  "/inicio/section.svg",
+  "/marquesina/8.webp",
+  "/marquesina/9.webp",
+  "/marquesina/10.webp",
+    "/marquesina/11.webp",
+      "/marquesina/12.webp",
 ];
 
 // Fila 1: imágenes 0-5, Fila 2: imágenes 6-11
