@@ -1,21 +1,47 @@
-import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';   // ← Nuevo
 import NavbarComponent from "@/components/NavbarPage";
 import Footer from "@/components/Footer";
+import { Oxygen, Manrope, Inter, Open_Sans, Roboto } from 'next/font/google';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// Configura las fuentes
+const oxygen = Oxygen({
+  subsets: ['latin'],
+  weight: ['300','400', '500', '700'], // elige los pesos que necesites
+  variable: '--font-oxygen',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-manrope',
+  display: 'swap',
 });
 
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-open-sans',
+  display: 'swap',
+});
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
+});
 export const metadata = {
   title: "SpotShot",
   description: "Convierte tus fotos de surf en ingresos reales",

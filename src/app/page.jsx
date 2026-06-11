@@ -30,11 +30,11 @@ export default function Home() {
 
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
           <div className="max-w-4xl">
-            <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-light leading-tight tracking-tight">
+            <h1 className="text-white font-manrope text-5xl md:text-6xl lg:text-7xl font-light leading-tight tracking-tight">
               ¿Surfeaste hoy?
             </h1>
-            <p className="text-white text-4xl md:text-5xl lg:text-6xl mt-4 font-bold">
-              Encuentra tus fotos <span className="font-bold">en segundos</span>
+            <p className="text-white font-manrope text-4xl md:text-5xl lg:text-6xl mt-4 font-bold">
+              Encuentra tus fotos <br/> <span className="font-bold">en segundos</span>
             </p>
           </div>
         </div>

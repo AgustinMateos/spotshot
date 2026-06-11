@@ -139,14 +139,14 @@ export default function SesionesRecientes() {
             <p className="text-sm mb-1 bg-white w-55 text-[#1E3A5F] p-1.5 text-center rounded-2xl">
               Nuevas sesiones todos los días
             </p>
-            <h2 className="text-3xl pb-4 md:pb-0 md:text-4xl font-medium text-[#1E3A5F] pt-4">
+            <h2 className="font-manrope font-medium text-[48px] leading-[48px] tracking-[-1.2%] text-center text-3xl pb-4 md:pb-0 md:text-4xl  text-[#1E3A5F] pt-4">
               Sesiones recientes
             </h2>
           </div>
           <div className="flex justify-end h-full">
             <Link
               href="/sesiones"
-              className="flex h-full items-end justify-end md:items-center gap-2 text-[#1E3A5F] hover:text-black font-medium text-[14px]"
+              className="flex font-inter font-medium text-[14px] leading-[20px] h-full items-end tracking-normal justify-end md:items-center gap-2 text-[#1E3A5F] hover:text-black "
             >
               Ver todas{' '}
               <span className="text-xl">
@@ -173,12 +173,12 @@ export default function SesionesRecientes() {
                 <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                   {daysLeft && (
-                    <div className="bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
                       <Image src="/icons/hour.svg" width={16} height={16} alt="hora" />
                       {daysLeft}
                     </div>
                   )}
-                  <div className="bg-[#0F172A] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                  <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
                     <Image src="/icons/camara.svg" width={16} height={16} alt="cámara" />
                     {session.photoCount} fotos
                   </div>

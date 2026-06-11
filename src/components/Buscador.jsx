@@ -64,13 +64,13 @@ const slugify = (text) => {
             <div className="inline-flex bg-gray-100 rounded-2xl p-1">
               <button 
                 onClick={() => { setActiveTab('free'); setSearchLocation(''); }}
-                className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${activeTab === 'free' ? 'bg-white shadow text-black' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`px-6 py-2.5 font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'free' ? 'bg-white shadow text-black' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Free surfers
               </button>
               <button 
                 onClick={() => { setActiveTab('escuelas'); setSearchLocation(''); }}
-                className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white shadow text-black' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`px-6 font-inter py-2.5 text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white shadow text-black' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Escuelas
               </button>
@@ -81,10 +81,12 @@ const slugify = (text) => {
           <form onSubmit={handleSubmit} className="p-6">
             <div className="flex flex-col md:flex-row items-center gap-4 bg-white border border-gray-200 rounded-3xl  relative">
               
-              <div className="flex-1 flex items-center gap-3 px-5 py-4 relative w-full">
-                <MapPin className="text-gray-400" size={22} />
-                <div className="flex-1">
-                  <p className="text-xs text-gray-500 font-medium">
+              <div className="flex-1 flex-row flex items-center gap-3 px-5 py-4 relative w-full">
+                
+                <div className="flex w-full flex-row">
+                  <MapPin className="text-gray-400" size={18} />
+                  <div className='flex pl-2 w-full flex-col'>
+                    <p className="text-xs text-[#1E3A5F] font-bold">
                     {activeTab === 'free' ? 'Playa' : 'Escuela'}
                   </p>
                   <input
@@ -97,8 +99,10 @@ const slugify = (text) => {
                     }}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="w-full bg-transparent outline-none text-base placeholder:text-gray-400"
+                    className="w-full bg-transparent text-[14px] font-manrope outline-none text-[#778088] placeholder:text-[#778088"
                   />
+                  </div>
+                  
                 </div>
 
                 {/* Dropdown */}
@@ -122,7 +126,7 @@ const slugify = (text) => {
 
               <button 
                 type="submit"
-                className="w-full md:w-auto bg-[#DEB656] hover:bg-[#c99c3f] transition-all text-white font-semibold px-10 py-4 rounded-2xl whitespace-nowrap text-base active:scale-[0.97]"
+                className="w-full font-inter cursor-pointer md:w-auto bg-[#DEB656] hover:bg-[#c99c3f] transition-all text-white font-semibold px-10 py-4 text-[16px] rounded-2xl whitespace-nowrap text-base active:scale-[0.97]"
               >
                 Buscar fotos
               </button>
