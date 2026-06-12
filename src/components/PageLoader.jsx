@@ -34,7 +34,7 @@ export default function PageLoader({ children }) {
       {/* Loader Overlay */}
       {loading && (
         <div
-          className={`fixed inset-0 bg-[#0D2744] flex flex-col items-center justify-center z-[9999] transition-all duration-700 ease-out
+          className={`fixed inset-0 bg-[#103457] flex flex-col items-center justify-center z-[9999] transition-all duration-700 ease-out
             ${exiting ? 'opacity-0 -translate-y-12' : 'opacity-100 translate-y-0'}`}
         >
           <div className={`flex flex-col items-center gap-4 mb-12 transition-all duration-700 ${exiting ? 'opacity-0 -translate-y-8' : ''}`}>
