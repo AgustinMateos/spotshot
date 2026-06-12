@@ -1,4 +1,4 @@
-import MisSesiones from '@/components/spot/MisSesionesPage'
+import MisSesionesPage from '@/components/spot/MisSesionesPage'
 import React from 'react'
 
 const page = () => {
