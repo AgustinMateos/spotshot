@@ -7,7 +7,7 @@ const Footer = ({ isShotSection = false }) => {
 
   return (
     <footer className="bg-[#103457] text-white py-12 z-10">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className=" mx-auto px-6">
         
         {/* Contenido principal */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
