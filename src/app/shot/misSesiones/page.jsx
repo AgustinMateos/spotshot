@@ -1,4 +1,4 @@
-import MisSesiones from '@/components/spot/MisSesiones'
+import MisSesiones from '@/components/spot/misSesiones'
 import React from 'react'
 
 const page = () => {
@@ -7,4 +7,4 @@ const page = () => {
   )
 }
 
-export default page
+export default page 
