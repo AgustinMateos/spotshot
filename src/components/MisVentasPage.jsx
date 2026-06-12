@@ -104,7 +104,7 @@ const MisVentasPage = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-12">
-        <div className="max-w-6xl mx-auto px-6 pt-8">
+        <div className=" mx-auto px-6 pt-8">
           <div className="h-9 w-48 bg-gray-200 rounded-xl animate-pulse mb-8" />
 
           {/* Skeleton Resumen */}
@@ -165,7 +165,7 @@ const MisVentasPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-6xl mx-auto px-6 pt-8">
+      <div className=" mx-auto px-6 pt-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Mis ventas</h1>
 
         {/* Resumen */}

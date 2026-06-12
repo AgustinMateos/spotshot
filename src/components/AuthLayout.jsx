@@ -8,7 +8,7 @@ export default function AuthLayout({
   children
 }) {
   return (
-    <div className="min-h-screen  flex-col p-5 md:p-0 md:flex-row mt-12 bg-white flex">
+    <div className="min-h-screen  flex-col p-5 md:p-0 md:flex-row mt-9 bg-white flex">
       {/* LADO IZQUIERDO - Marketing (igual en ambas pantallas) */}
       <div className="w-full lg:w-[60%] h-[80vh] md:h-auto flex-col flex justify-between   ">
         <div className="w-full md:pl-20 md:pt-20 ">
