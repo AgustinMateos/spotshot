@@ -138,7 +138,7 @@ export default function MisSesionesTable({
               <button
                 key={aud}
                 onClick={() => onFilterChange('audience', aud)}
-                className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+                className={`px-6 py-2.5 rounded-lg text-[14px] cursor-pointer font-medium transition-all ${
                   filters.audience === aud ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >

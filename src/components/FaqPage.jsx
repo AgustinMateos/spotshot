@@ -67,7 +67,7 @@ export default function FaqPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-[40px] px-6 py-16">
+    <div className="bg-[#FAFBFF] mx-auto mt-[10px] px-6 py-16">
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold text-gray-900 mb-4">Preguntas Frecuentes</h1>
         <p className="text-xl text-gray-600">Todo lo que necesitas saber sobre SpotShot</p>

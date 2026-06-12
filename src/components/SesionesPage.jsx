@@ -206,7 +206,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
     <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
       <button 
         onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
-        className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+        className={`px-6 py-2.5 rounded-lg cursor-pointer text-[14px] font-medium transition-all ${
           filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
         }`}
       >
@@ -214,7 +214,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
       </button>
       <button 
         onClick={() => handleFilterChange('audience', 'SCHOOLS')}
-        className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+        className={`px-6 py-2.5 cursor-pointer rounded-lg text-[14px] font-medium transition-all ${
           filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
         }`}
       >
@@ -235,7 +235,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
           filters.audience === 'FREE_SURFERS' ? 'location' : 'schoolName', 
           e.target.value
         )}
-        className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
+        className="w-full border cursor-pointer border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
       />
     </div>
 

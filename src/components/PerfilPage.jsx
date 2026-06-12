@@ -460,7 +460,7 @@ Tamaño máximo: 5 MB.</p>
             <button
               onClick={handleConnectStripe}
               disabled={loadingStripe || stripeConnect?.isReady}
-              className="bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-black transition disabled:opacity-70"
+              className="bg-gray-900 cursor-pointer text-white px-6 py-3 rounded-2xl hover:bg-black transition disabled:opacity-70"
             >
               {loadingStripe ? 'Conectando...' : stripeConnect?.isReady ? '✅ Conectado' : 'Conectar cuenta →'}
             </button>
@@ -479,7 +479,7 @@ Tamaño máximo: 5 MB.</p>
           </div>
           <button 
             onClick={() => setShowPasswordModal(true)}
-            className="bg-gray-900 mt-8 md:mt-0 text-white px-6 py-3 rounded-2xl hover:bg-black transition"
+            className="bg-gray-900 cursor-pointer mt-8 md:mt-0 text-white px-6 py-3 rounded-2xl hover:bg-black transition"
           >
             Cambiar contraseña
           </button>
