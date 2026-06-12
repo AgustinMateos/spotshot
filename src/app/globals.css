@@ -4,7 +4,9 @@
   --animate-marquesina: marquesina 40s linear infinite;
   --animate-marquesina-reverse: marquesina-reverse 45s linear infinite;
 }
-
+html, body {
+  background-color: #0D2744;
+}
 
 
 /* Animaciones Marquesina */

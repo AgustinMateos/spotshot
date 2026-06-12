@@ -52,7 +52,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es" >
+    <html lang="es" className={`${oxygen.variable} ${manrope.variable} ${inter.variable} ${openSans.variable} ${roboto.variable} antialiased`} >
       <body className="min-h-screen flex flex-col bg-white">
         <AuthProvider>
           <CartProvider> 

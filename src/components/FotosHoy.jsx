@@ -2,7 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 const FotosHoy = () => {
   return (
-    <div className="w-[90%]  mx-auto px-4  py-8">
+    <div className='bg-[#FAFBFF]'>
+      <div className="w-[90%]  mx-auto px-4  py-8">
       <div className="relative rounded-3xl overflow-hidden h-122 shadow-2xl">
         
         <img
@@ -27,6 +28,7 @@ const FotosHoy = () => {
 </Link>
         </div>
       </div>
+    </div>
     </div>
   );
 };

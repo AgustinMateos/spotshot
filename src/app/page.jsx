@@ -5,7 +5,7 @@ import Marquesina from '@/components/Marquesina';
 import Encontrar from '@/components/Encontrar';
 import Fotografo from '@/components/Fotografo';
 import FotosHoy from '@/components/FotosHoy';
-
+import Barra from '@/components/Barra';
 export default function Home() {
   return (
     <PageLoader>
@@ -33,6 +33,7 @@ export default function Home() {
       <SesionesRecientes />
       <Marquesina />
       <Encontrar />
+      <Barra/>
       <Fotografo />
       <FotosHoy />
     </PageLoader>

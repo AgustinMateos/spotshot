@@ -5,29 +5,7 @@ const Fotografo = () => {
     <div className="w-full bg-[#F1F7FE] py-16 px-6">
       <div className="max-w-6xl mx-auto">
 
-        {/* Barra superior con beneficios */}
-        <div className="flex flex-col  md:flex-row justify-center items-center gap-8 md:gap-16 mb-16 text-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex md:items-center justify-center shadow p-2">
-              <img src="/fotografo/100.svg" alt="Pago seguro" className="w-full h-full object-contain" />
-            </div>
-            <p className="font-medium text-gray-800">Pago 100% seguro</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow p-2">
-              <img src="/fotografo/timer.svg" alt="Encuentra en segundos" className="w-full h-full object-contain" />
-            </div>
-            <p className="font-medium text-gray-800">Encuentra tu foto en segundos</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow p-2">
-              <img src="/fotografo/descarga.svg" alt="Descarga al instante" className="w-full h-full object-contain" />
-            </div>
-            <p className="font-medium text-gray-800">Descarga al instante</p>
-          </div>
-        </div>
+       
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
           
