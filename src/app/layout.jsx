@@ -56,7 +56,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen flex flex-col bg-white">
         <AuthProvider>
           <CartProvider> 
-            <NavbarComponent/>                   {/* ← Envolvemos aquí */}
+            <NavbarComponent/>                   
             <main className="flex-1">
               {children}
             </main>
