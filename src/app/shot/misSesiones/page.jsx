@@ -1,9 +1,9 @@
-import MisSesiones from '@/components/spot/MisSesiones'
+import MisSesiones from '@/components/spot/MisSesionesPage'
 import React from 'react'
 
 const page = () => {
   return (
-    <div className='pt-20'><MisSesiones/></div>
+    <div className='pt-20'><MisSesionesPage/></div>
   )
 }
 

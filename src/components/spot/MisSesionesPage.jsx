@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import MisSesionesTable from './MisSesionesShotTable';
 
-export default function MisSesiones() {
+export default function MisSesionesPage() {
   const { token } = useAuth();
 
   const [stripeConnect, setStripeConnect] = useState(undefined);
