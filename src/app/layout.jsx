@@ -48,11 +48,16 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  
+  other: {
+    'google-site-verification': 'U6OKkr4jUPHk7IGUVdtUiAl3JL3GfRVmkTaaiWM4Lec',
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${oxygen.variable} ${manrope.variable} ${inter.variable} ${openSans.variable} ${roboto.variable} antialiased`} >
+     
       <body className="min-h-screen flex flex-col bg-white">
         <AuthProvider>
           <CartProvider> 
