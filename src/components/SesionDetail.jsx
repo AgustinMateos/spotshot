@@ -408,35 +408,34 @@ const onTouchEnd = () => {
         </div>
       )}
 
-   {/* LIGHTBOX */}
+{/* LIGHTBOX */}
 {isLightboxOpen && session && (
-  <div className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center">
-    <div className="relative w-full max-w-5xl px-4">
-      <button 
-        onClick={closeLightbox} 
-        className="absolute -top-4 -right-4 bg-white text-black rounded-full p-3 shadow-lg z-10"
-      >
-        <X size={28} />
-      </button>
-
+  <div 
+    className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center"
+    onClick={closeLightbox}           // ← Cierra al tocar fuera
+  >
+    <div 
+      className="relative w-full max-w-5xl px-4"
+      onClick={(e) => e.stopPropagation()}   // ← Evita que se cierre al tocar adentro
+    >
+      {/* Contenedor de la foto */}
       <div 
         className="bg-white rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        // Soporte mouse (opcional pero muy útil)
         onMouseDown={(e) => setTouchStart(e.clientX)}
         onMouseUp={(e) => {
           setTouchEnd(e.clientX);
           const distance = touchStart - e.clientX;
-          if (distance > minSwipeDistance) goToNext();
-          if (distance < -minSwipeDistance) goToPrevious();
+          if (distance > 50) goToNext();
+          if (distance < -50) goToPrevious();
         }}
       >
         <img
           src={session.images[currentIndex].publicUrl}
           alt={`Foto ${currentIndex + 1}`}
-          className="w-full max-h-[75vh] object-contain mx-auto select-none"
+          className="w-full max-h-[75vh] object-cover mx-auto select-none"
           draggable={false}
         />
 
@@ -445,42 +444,50 @@ const onTouchEnd = () => {
           <span className="text-white/30 text-5xl font-bold -rotate-12 tracking-widest">SPOTSHOT</span>
         </div>
 
-        {/* Flechas - Ocultar en mobile si querés (recomiendo dejarlas) */}
+        {/* Flechas (solo visibles en desktop) */}
         <button 
-          onClick={goToPrevious} 
+          onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
           className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
         >
           <ChevronLeft size={36} />
         </button>
         <button 
-          onClick={goToNext} 
+          onClick={(e) => { e.stopPropagation(); goToNext(); }}
           className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
         >
           <ChevronRight size={36} />
         </button>
 
-        {/* Botón carrito */}
-        <div className="absolute bottom-1 md:bottom-8 left-1/2 -translate-x-1/2">
-          {isInCart(session.images[currentIndex].id) ? (
-            <button className="bg-emerald-600 text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl cursor-default">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-              Foto agregada
-            </button>
-          ) : (
-            <button
-              onClick={() => addToCart(session.images[currentIndex], session)}
-              className="bg-[#1F2937] hover:bg-black text-white px-10 py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition"
-            >
-              <ShoppingCart size={24} />
-              Agregar al carrito
-            </button>
-          )}
-        </div>
+        {/* Botón Agregar al carrito */}
+        {/* Botón Agregar al carrito - Versión optimizada para mobile */}
+<div className="absolute bottom-4 md:bottom-8 right-0 md:left-1/2 -translate-x-1/2 z-10">
+  {isInCart(session.images[currentIndex].id) ? (
+    <button
+      className="bg-emerald-600 text-white px-5 md:px-10 py-3 md:py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl cursor-default"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+      </svg>
+      <span className="hidden md:inline">Foto agregada</span>
+    </button>
+  ) : (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        addToCart(session.images[currentIndex], session);
+      }}
+      className="bg-[#1F2937] hover:bg-black text-white px-5 md:px-10 py-3 md:py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition active:scale-95"
+    >
+      <ShoppingCart size={26} />
+      <span className="hidden md:inline">Agregar al carrito</span>
+    </button>
+  )}
+</div>
       </div>
 
-      <div className="text-center text-white mt-4 text-sm">
+      {/* Indicador de foto */}
+      <div className="text-center text-white mt-4 text-sm pointer-events-none">
         {currentIndex + 1} / {session.images.length}
       </div>
     </div>
