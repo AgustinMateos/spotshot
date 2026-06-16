@@ -452,13 +452,13 @@ const onTouchEnd = () => {
         {/* Flechas (solo visibles en desktop) */}
         <button 
           onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
-          className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
+          className="hidden md:flex absolute cursor-pointer left-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
         >
           <ChevronLeft size={36} />
         </button>
         <button 
           onClick={(e) => { e.stopPropagation(); goToNext(); }}
-          className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
+          className="hidden cursor-pointer md:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
         >
           <ChevronRight size={36} />
         </button>
@@ -466,7 +466,7 @@ const onTouchEnd = () => {
         {/* Botón Agregar al carrito */}
         {/* Botón Agregar al carrito - Versión optimizada para mobile */}
 {/* Botón Agregar al carrito - Versión optimizada */}
-<div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-10">
+<div className="absolute bottom-4 md:bottom-8 left-[360px] md:left-1/2 -translate-x-1/2 z-10">
   {isInCart(session.images[currentIndex].id) ? (
     <button
       onClick={(e) => {
@@ -478,7 +478,7 @@ const onTouchEnd = () => {
       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
       </svg>
-      <span className="hidden md:inline">Quitar del carrito</span>
+      <span className="hidden md:inline cursor-pointer">Quitar del carrito</span>
     </button>
   ) : (
     <button
@@ -489,7 +489,7 @@ const onTouchEnd = () => {
       className="bg-[#1F2937] hover:bg-black text-white px-5 md:px-10 py-3 md:py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition active:scale-95"
     >
       <ShoppingCart size={26} />
-      <span className="hidden md:inline">Agregar al carrito</span>
+      <span className="hidden md:inline cursor-pointer">Agregar al carrito</span>
     </button>
   )}
 </div>
