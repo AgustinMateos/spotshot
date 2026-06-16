@@ -368,7 +368,7 @@ const CustomTimeSelect = ({ value, onChange }) => {
 
                     <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
                       
-                      <p className="font-semibold text-lg">{session.title}</p>
+                      <p className="font-semibold text-lg">{session.titleShort}</p>
                       
                         <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                       <p className="text-sm opacity-90">

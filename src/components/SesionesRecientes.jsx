@@ -184,14 +184,15 @@ export default function SesionesRecientes() {
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-10 text-white">
-                  <p className="text-sm opacity-90">
+                  
+                  <h3 className="text-2xl font-semibold mt-1 tracking-tight">{session.titleShort}</h3>
+                  <p className="text-sm mt-2 opacity-90">{session.location || session.schoolName}</p>
+               <p className="text-sm opacity-90">
                     by{' '}
                     {session.photographer?.firstName && session.photographer?.lastName
                       ? `${session.photographer.firstName} ${session.photographer.lastName}`
                       : session.photographer?.alias || 'Fotógrafo'}
                   </p>
-                  <h3 className="text-2xl font-semibold mt-1 tracking-tight">{session.title}</h3>
-                  <p className="text-sm mt-2 opacity-90">{session.location || session.schoolName}</p>
                 </div>
               </Link>
             );
