@@ -2,7 +2,7 @@ import React from 'react';
 
 const TerminosYCondicionesPage = () => {
   return (
-    <div className="max-w-4xl mx-auto mt-[90px] px-6 py-12 bg-white text-gray-800 leading-relaxed">
+    <div className=" mx-auto mt-[0px] px-6 py-12 bg-white text-gray-800 leading-relaxed">
       <h1 className="text-4xl font-bold mb-2">Términos y Condiciones de Uso</h1>
       <p className="text-gray-500 mb-10">SPOTSHOT.APP - Última actualización: 11/03/2026</p>
 

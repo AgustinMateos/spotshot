@@ -224,7 +224,7 @@ const onTouchEnd = () => {
         </div>
 
         <div className="absolute bottom-10 left-10 text-white">
-          <h1 className="text-5xl font-bold mb-2">{session.title}</h1>
+          <h1 className="text-5xl font-bold mb-2">{session.titleShort}</h1>
           <p className="text-xl opacity-90">{session.location || session.schoolName}</p>
           <p className="text-sm opacity-75 mt-1">by {photographerName}</p>
         </div>
@@ -466,7 +466,7 @@ const onTouchEnd = () => {
         {/* Botón Agregar al carrito */}
         {/* Botón Agregar al carrito - Versión optimizada para mobile */}
 {/* Botón Agregar al carrito - Versión optimizada */}
-<div className="absolute bottom-4 md:bottom-8 left-[360px] md:left-1/2 -translate-x-1/2 z-10">
+<div className="absolute bottom-4 md:bottom-8 left-[340px] md:left-1/2 -translate-x-1/2 z-10">
   {isInCart(session.images[currentIndex].id) ? (
     <button
       onClick={(e) => {
