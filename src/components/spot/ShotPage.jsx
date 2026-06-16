@@ -175,14 +175,15 @@ export default function ShotPage() {
 
                     {/* Pasos solo si NO tiene sesiones */}
                     {allSessions.length === 0 && (
-                        <div className="grid md:grid-cols-3 gap-8 mt-10">
+                        <div className="flex gap-8 justify-between  mt-10">
 
-                            {/* Paso 1 - Stripe */}
-                            <div className="border border-gray-200 bg-white rounded-xl p-6">
+                           <div className='flex justify-between  flex-col md:flex-row '>
+                             {/* Paso 1 - Stripe */}
+                            <div className="border md:w-[460px] border-gray-200 bg-white rounded-xl p-6">
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
                                         <div className="text-xs uppercase tracking-widest text-gray-500 mb-1">Paso 1</div>
-                                        <h3 className="text-2xl font-semibold">Conecta tu cuenta de pagos</h3>
+                                        <h3 className="text-2xl text-[#0F172A] font-semibold">Conecta tu cuenta de pagos</h3>
                                     </div>
                                     {isStripeReady && (
                                         <div className="bg-[#059669] text-white text-sm font-medium px-5 py-1.5 rounded-full">
@@ -201,15 +202,15 @@ export default function ShotPage() {
                                 ) : (
                                     <Link
                                         href="/shot/perfil"
-                                        className="inline-block bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-black transition"
+                                        className="inline-block bg-[#0D2744] text-white px-6 py-3 rounded-xl font-medium hover:bg-black transition"
                                     >
-                                        Conectar Stripe →
+                                        Conectar Stripe 
                                     </Link>
                                 )}
                             </div>
 
                             {/* Paso 2 - Crear Sesión */}
-                            <div className="border border-gray-200 bg-white rounded-xl p-6">
+                            <div className="p-6 md:w-[460px]">
                                 <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Paso 2</div>
                                 <h3 className="text-xl font-semibold mb-2">Crea tu primera sesión</h3>
                                 <p className="text-gray-600 mb-6">
@@ -226,9 +227,10 @@ export default function ShotPage() {
                                     <span className="text-xl">+</span> Crear sesión
                                 </Link>
                             </div>
+                           </div>
 
-                            <div className="hidden md:block">
-                                <Image height={183} width={280} alt="stripe steps" src="/icons/stripeSteps.svg" />
+                            <div className="hidden w-[240px] flex  md:block">
+                                <Image height={183} width={240} alt="stripe steps" src="/icons/stripeSteps.svg" />
                             </div>
                         </div>
                     )}

@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 export default function PerfilPage() {
-const { user, token, updateUser, updateToken, loading, logout } = useAuth();
+  const { user, token, updateUser, updateToken, loading, logout } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
@@ -33,11 +33,11 @@ const { user, token, updateUser, updateToken, loading, logout } = useAuth();
   // Stripe
   const [stripeConnect, setStripeConnect] = useState(null);
   const [loadingStripe, setLoadingStripe] = useState(false);
-useEffect(() => {
-  if (!token && !loading) {
-    router.push('/login');
-  }
-}, [token, loading]);
+  useEffect(() => {
+    if (!token && !loading) {
+      router.push('/login');
+    }
+  }, [token, loading]);
   // Cargar datos
   useEffect(() => {
     if (user) {
@@ -91,10 +91,10 @@ useEffect(() => {
       const data = await res.json();
 
       if (res.ok) {
-    setMessage('✅ Perfil actualizado correctamente');
-    updateUser(data.photographer);   // ← Actualiza navbar y todo
-    setIsEditing(false);
-} else {
+        setMessage('✅ Perfil actualizado correctamente');
+        updateUser(data.photographer);   // ← Actualiza navbar y todo
+        setIsEditing(false);
+      } else {
         setError(data.message || 'Error al actualizar');
       }
     } catch (err) {
@@ -124,10 +124,10 @@ useEffect(() => {
       const data = await res.json();
 
       if (res.ok) {
-    setMessage('✅ Avatar actualizado correctamente');
-    setAvatarPreview(data.photographer.avatarUrl);
-    updateUser(data.photographer);   // ← Actualiza navbar
-} else {
+        setMessage('✅ Avatar actualizado correctamente');
+        setAvatarPreview(data.photographer.avatarUrl);
+        updateUser(data.photographer);   // ← Actualiza navbar
+      } else {
         setError(data.message || 'Error al subir avatar');
       }
     } catch (err) {
@@ -150,10 +150,10 @@ useEffect(() => {
       });
 
       if (res.ok) {
-    setMessage('✅ Avatar eliminado correctamente');
-    setAvatarPreview(null);
-    updateUser({ ...user, avatarUrl: null });
-}
+        setMessage('✅ Avatar eliminado correctamente');
+        setAvatarPreview(null);
+        updateUser({ ...user, avatarUrl: null });
+      }
     } catch (err) {
       setError('Error al eliminar');
     } finally {
@@ -162,52 +162,52 @@ useEffect(() => {
   };
 
   // ====================== CAMBIAR CONTRASEÑA ======================
-// ====================== CAMBIAR CONTRASEÑA ======================
-const handleChangePassword = async (e) => {
-  e.preventDefault();
-  setPasswordError('');
-  setPasswordMessage('');
+  // ====================== CAMBIAR CONTRASEÑA ======================
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordMessage('');
 
-  if (newPassword !== confirmNewPassword) {
-    setPasswordError('Las nuevas contraseñas no coinciden');
-    return;
-  }
-  if (newPassword.length < 8) {
-    setPasswordError('La nueva contraseña debe tener al menos 8 caracteres');
-    return;
-  }
-
-  setLoadingPassword(true);
-
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${API_URL}/api/v1/photographers/auth/change-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ oldPassword, newPassword }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setPasswordMessage('✅ Contraseña actualizada correctamente. Vuelve a iniciar sesión.');
-
-      setTimeout(() => {
-        logout();           // ← Ahora sí está definido
-        router.push('/login');
-      }, 1800);
-    } else {
-      setPasswordError(data.message || 'Error al cambiar la contraseña');
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('Las nuevas contraseñas no coinciden');
+      return;
     }
-  } catch (err) {
-    setPasswordError('Error de conexión con el servidor');
-  } finally {
-    setLoadingPassword(false);
-  }
-};
+    if (newPassword.length < 8) {
+      setPasswordError('La nueva contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    setLoadingPassword(true);
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/photographers/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setPasswordMessage('✅ Contraseña actualizada correctamente. Vuelve a iniciar sesión.');
+
+        setTimeout(() => {
+          logout();           // ← Ahora sí está definido
+          router.push('/login');
+        }, 1800);
+      } else {
+        setPasswordError(data.message || 'Error al cambiar la contraseña');
+      }
+    } catch (err) {
+      setPasswordError('Error de conexión con el servidor');
+    } finally {
+      setLoadingPassword(false);
+    }
+  };
 
   // Iniciar / Reanudar Onboarding de Stripe
   const handleConnectStripe = async () => {
@@ -253,157 +253,157 @@ const handleChangePassword = async (e) => {
     .toUpperCase()
     .slice(0, 2);
 
- // ====================== SKELETON LOADING ======================
-if (loading) {
-  return (
-    <div className="max-w-full mx-auto px-6 py-10">
-      {/* Título */}
-      <div className="h-10 w-48 bg-gray-200 rounded-2xl animate-pulse mb-10"></div>
+  // ====================== SKELETON LOADING ======================
+  if (loading) {
+    return (
+      <div className="max-w-full mx-auto px-6 py-10">
+        {/* Título */}
+        <div className="h-10 w-48 bg-gray-200 rounded-2xl animate-pulse mb-10"></div>
 
-      {/* Sección Datos Personales */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-        <div className="flex justify-between items-center mb-8">
-          <div className="h-8 w-56 bg-gray-200 rounded-2xl animate-pulse"></div>
-          <div className="h-11 w-32 bg-gray-200 rounded-2xl animate-pulse"></div>
-        </div>
+        {/* Sección Datos Personales */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+          <div className="flex justify-between items-center mb-8">
+            <div className="h-8 w-56 bg-gray-200 rounded-2xl animate-pulse"></div>
+            <div className="h-11 w-32 bg-gray-200 rounded-2xl animate-pulse"></div>
+          </div>
 
-        {/* Avatar + Info */}
-        <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
-          <div className="w-24 h-24 bg-gray-200 rounded-3xl animate-pulse"></div>
-          
-          <div className="space-y-3">
-            <div className="h-7 w-64 bg-gray-200 rounded-xl animate-pulse"></div>
-            <div className="h-5 w-80 bg-gray-200 rounded-xl animate-pulse"></div>
-            <div className="h-4 w-96 bg-gray-200 rounded-xl animate-pulse"></div>
+          {/* Avatar + Info */}
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
+            <div className="w-24 h-24 bg-gray-200 rounded-3xl animate-pulse"></div>
+
+            <div className="space-y-3">
+              <div className="h-7 w-64 bg-gray-200 rounded-xl animate-pulse"></div>
+              <div className="h-5 w-80 bg-gray-200 rounded-xl animate-pulse"></div>
+              <div className="h-4 w-96 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Campos del formulario */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i}>
+                <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                <div className="h-14 w-full bg-gray-200 rounded-2xl animate-pulse"></div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Campos del formulario */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i}>
-              <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse"></div>
-              <div className="h-14 w-full bg-gray-200 rounded-2xl animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-      </div>
+        {/* Sección Método de Cobro */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+          <div className="h-8 w-52 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
 
-      {/* Sección Método de Cobro */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-        <div className="h-8 w-52 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
-        
-        <div className="bg-gray-50 rounded-2xl p-6 flex flex-col md:flex-row gap-6">
-          <div className="flex-1 flex items-center gap-4">
-            <div className="w-10 h-6 bg-gray-300 rounded animate-pulse"></div>
+          <div className="bg-gray-50 rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+            <div className="flex-1 flex items-center gap-4">
+              <div className="w-10 h-6 bg-gray-300 rounded animate-pulse"></div>
+              <div className="space-y-2">
+                <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+            <div className="h-12 w-44 bg-gray-200 rounded-2xl animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Sección Seguridad */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+          <div className="h-8 w-40 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div className="space-y-2">
-              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 w-36 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
             </div>
+            <div className="h-12 w-52 bg-gray-200 rounded-2xl animate-pulse mt-6 md:mt-0"></div>
           </div>
-          <div className="h-12 w-44 bg-gray-200 rounded-2xl animate-pulse"></div>
         </div>
       </div>
-
-      {/* Sección Seguridad */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-        <div className="h-8 w-40 bg-gray-200 rounded-2xl animate-pulse mb-6"></div>
-        
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          <div className="space-y-2">
-            <div className="h-6 w-36 bg-gray-200 rounded animate-pulse"></div>
-            <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-          <div className="h-12 w-52 bg-gray-200 rounded-2xl animate-pulse mt-6 md:mt-0"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="max-w-full mx-auto px-6 py-10">
-     
+
 
       {/* Datos Personales */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-         <h1 className="text-4xl font-bold text-gray-900 mb-10">Mi cuenta</h1>
+        <h1 className="text-[24px] font-medium text-[#0D2744] mb-10">Mi cuenta</h1>
         <div className="flex  justify-between items-center mb-8">
-          
-          <h2 className="text-2xl font-semibold">Datos personales</h2>
-   {/* Botón Editar / Guardar */}
-<button
-  onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
-  disabled={loadingSave}
-  className="flex items-center gap-2 px-5 py-2.5 text-[#0D2744] rounded-2xl border border-[#E4E4E7] cursor-pointer hover:bg-gray-50 transition"
->
-  {loadingSave ? (
-    'Guardando...'
-  ) : isEditing ? (
-    <>
-      <img src="/icons/guardar.svg" alt="Guardar" className="w-5 h-5" />
-      <span className="hidden md:inline">Guardar cambios</span>
-    </>
-  ) : (
-    <>
-      <img src="/icons/editar2.svg" alt="Editar" className="w-5 h-5" />
-      <span className="hidden md:inline">Editar</span>
-    </>
-  )}
-</button>
+
+          <h2 className="text-[18px] font-medium text-[#0D2744]">Datos personales</h2>
+          {/* Botón Editar / Guardar */}
+          <button
+            onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
+            disabled={loadingSave}
+            className="flex items-center gap-2 px-5 py-2.5 text-[#0D2744] rounded-2xl border border-[#E4E4E7] cursor-pointer hover:bg-gray-50 transition"
+          >
+            {loadingSave ? (
+              'Guardando...'
+            ) : isEditing ? (
+              <>
+                <img src="/icons/guardar.svg" alt="Guardar" className="w-5 h-5" />
+                <span className="hidden md:inline">Guardar cambios</span>
+              </>
+            ) : (
+              <>
+                <img src="/icons/editar2.svg" alt="Editar" className="w-5 h-5" />
+                <span className="hidden md:inline">Editar</span>
+              </>
+            )}
+          </button>
         </div>
 
-       {/* ====================== AVATAR ====================== */}
-<div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
-  <div className="relative group">
-    {avatarUrl ? (
-      <img
-        src={avatarUrl}
-        alt="Avatar"
-        className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md"
-      />
-    ) : (
-      <div className="w-24 h-24 bg-amber-400 rounded-2xl flex items-center justify-center text-4xl font-bold text-gray-800 border-4 border-white shadow-md">
-        {initials}
-      </div>
-    )}
+        {/* ====================== AVATAR ====================== */}
+        <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10">
+          <div className="relative group">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-amber-400 rounded-2xl flex items-center justify-center text-4xl font-bold text-gray-800 border-4 border-white shadow-md">
+                {initials}
+              </div>
+            )}
 
-    {/* Botones flotantes */}
-    <div className="absolute -bottom-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-      {/* Subir nueva foto */}
-      <label className="cursor-pointer bg-white hover:bg-gray-100 rounded-full p-2 shadow-md transition">
-        <input 
-          type="file" 
-          accept="image/jpeg,image/png,image/webp" 
-          onChange={handleUploadAvatar} 
-          className="hidden" 
-        />
-        📷
-      </label>
+            {/* Botones flotantes */}
+            <div className="absolute -bottom-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+              {/* Subir nueva foto */}
+              <label className="cursor-pointer bg-white hover:bg-gray-100 rounded-full p-2 shadow-md transition">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleUploadAvatar}
+                  className="hidden"
+                />
+                📷
+              </label>
 
-      {/* Eliminar foto */}
-      {avatarUrl && (
-        <button
-          onClick={handleDeleteAvatar}
-          disabled={loadingAvatar}
-          className="bg-white hover:bg-red-50 text-red-600 rounded-full p-2 shadow-md transition"
-        >
-          🗑️
-        </button>
-      )}
-    </div>
-  </div>
+              {/* Eliminar foto */}
+              {avatarUrl && (
+                <button
+                  onClick={handleDeleteAvatar}
+                  disabled={loadingAvatar}
+                  className="bg-white hover:bg-red-50 text-red-600 rounded-full p-2 shadow-md transition"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
+          </div>
 
-  <div>
-    <p className="text-2xl font-semibold">{alias || 'Sin alias'}</p>
-    <p className="text-gray-500">{user?.email}</p>
-    <p className="text-xs text-gray-400 mt-1">Haz clic en el icono de la cámara para cambiar tu foto</p>
- <p className="text-xs text-gray-400 mt-1">*Restricciones:
+          <div>
+            <p className="text-2xl text-[#0D2744] font-semibold">{alias || 'Sin alias'}</p>
+            <p className="text-gray-500">{user?.email}</p>
+            <p className="text-xs text-gray-400 mt-1">Haz clic en el icono de la cámara para cambiar tu foto</p>
+            <p className="text-xs text-gray-400 mt-1">*Restricciones:
 
-Tipos permitidos: image/jpeg, image/png, image/webp.
-Tamaño máximo: 5 MB.</p>
-  </div>
-</div>
+              Tipos permitidos: image/jpeg, image/png, image/webp.
+              Tamaño máximo: 5 MB.</p>
+          </div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
@@ -477,7 +477,7 @@ Tamaño máximo: 5 MB.</p>
             <p className="font-medium pt-5 md:pt-0">Contraseña</p>
             <p className="text-sm text-gray-500">Último cambio: hace poco</p>
           </div>
-          <button 
+          <button
             onClick={() => setShowPasswordModal(true)}
             className="bg-gray-900 cursor-pointer mt-8 md:mt-0 text-white px-6 py-3 rounded-2xl hover:bg-black transition"
           >
