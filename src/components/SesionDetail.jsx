@@ -303,29 +303,34 @@ const onTouchEnd = () => {
           </div>
 
           {/* BOTÓN AGREGAR AL CARRITO - Superior Derecho */}
-          <div className="absolute top-3 right-3 z-10">
-            {inCart ? (
-              <button
-                className="bg-emerald-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg cursor-default"
-                title="Ya está en el carrito"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // ← Importante: evita abrir el lightbox
-                  addToCart(img, session);
-                }}
-                className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
-                title="Agregar al carrito"
-              >
-                <ShoppingCart size={18} />
-              </button>
-            )}
-          </div>
+          {/* BOTÓN CARRITO - Superior Derecho */}
+<div className="absolute top-3 right-3 z-10">
+  {inCart ? (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        removeFromCart(img.id);
+      }}
+      className="bg-emerald-600 hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+      title="Quitar del carrito"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    </button>
+  ) : (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        addToCart(img, session);
+      }}
+      className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+      title="Agregar al carrito"
+    >
+      <ShoppingCart size={18} />
+    </button>
+  )}
+</div>
         </div>
       );
     })}
@@ -460,16 +465,20 @@ const onTouchEnd = () => {
 
         {/* Botón Agregar al carrito */}
         {/* Botón Agregar al carrito - Versión optimizada para mobile */}
-<div className="absolute bottom-4 md:bottom-8 right-0 md:left-1/2 -translate-x-1/2 z-10">
+{/* Botón Agregar al carrito - Versión optimizada */}
+<div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-10">
   {isInCart(session.images[currentIndex].id) ? (
     <button
-      className="bg-emerald-600 text-white px-5 md:px-10 py-3 md:py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl cursor-default"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        removeFromCart(session.images[currentIndex].id);
+      }}
+      className="bg-emerald-600 hover:bg-red-600 text-white px-5 md:px-10 py-3 md:py-4 rounded-2xl text-lg flex items-center gap-3 shadow-xl transition active:scale-95"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
       </svg>
-      <span className="hidden md:inline">Foto agregada</span>
+      <span className="hidden md:inline">Quitar del carrito</span>
     </button>
   ) : (
     <button

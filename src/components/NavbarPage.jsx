@@ -240,7 +240,7 @@ export default function NavbarComponent() {
                   disabled={loadingLogout}
                   className="flex items-center gap-3 text-red-400 text-lg mt-2"
                 >
-                  <img src="/icons/exit.svg" alt="" className="w-6 h-6" />
+                  <img src="/icons/logout.svg" alt="" className="w-6 h-6" />
                   {loadingLogout ? 'Cerrando sesión...' : 'Cerrar sesión'}
                 </button>
               </>
