@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { escuelas, playas } from '@/lib/constants/surfData';
 
@@ -11,7 +11,9 @@ export default function Buscador() {
   
   const [activeTab, setActiveTab] = useState('free');
   const [searchLocation, setSearchLocation] = useState('');
+  const [selectedValue, setSelectedValue] = useState(''); // ← (1) NUEVO ESTADO
   const [showDropdown, setShowDropdown] = useState(false);
+
 const slugify = (text) => {
   if (!text) return '';
   
@@ -19,12 +21,13 @@ const slugify = (text) => {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/ñ/g, 'n')                    // ← Volvemos a 'n' (más simple y estable)
+    .replace(/ñ/g, 'n')
     .replace(/[^a-z0-9\s-]/g, ' ')
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -32,13 +35,17 @@ const slugify = (text) => {
     let url = `/sesiones/buscar/${audienceSlug}`;
 
     if (searchLocation.trim()) {
-      // Buscamos coincidencia exacta para usar el "value" si existe
-      const items = activeTab === 'free' ? playas : escuelas;
-      const matched = items.find(item => 
-        item.label.toLowerCase() === searchLocation.toLowerCase()
-      );
-      
-      const textToSlug = matched ? matched.value : searchLocation.trim();
+      // ← (2) YA NO HACE FALTA EL find() FRÁGIL. Reemplaza todo el bloque viejo:
+      //
+      // const items = activeTab === 'free' ? playas : escuelas;
+      // const matched = items.find(item => 
+      //   item.label.toLowerCase() === searchLocation.toLowerCase()
+      // );
+      // const textToSlug = matched ? matched.value : searchLocation.trim();
+      //
+      // Por esta línea simple:
+      const textToSlug = selectedValue || searchLocation.trim();
+
       const locationSlug = slugify(textToSlug);
       url += `/${locationSlug}`;
     }
@@ -62,13 +69,13 @@ return (
       <div className="flex ">
         <div className="inline-flex bg-white rounded-t-2xl px-1 pt-1 ">
           <div className='bg-[#F1F7FE]  p-1'><button 
-            onClick={() => { setActiveTab('free'); setSearchLocation(''); }}
+            onClick={() => { setActiveTab('free'); setSearchLocation(''); setSelectedValue(''); }}
             className={`px-6 py-2.5 font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'free' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
           >
             Free surfers
           </button>
           <button 
-            onClick={() => { setActiveTab('escuelas'); setSearchLocation(''); }}
+            onClick={() => { setActiveTab('escuelas'); setSearchLocation(''); setSelectedValue(''); }}
             className={`px-6 py-2.5 font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
           >
             Escuelas
@@ -82,30 +89,45 @@ return (
           <div className="flex flex-col md:flex-row items-center gap-4 bg-white  rounded-3xl relative">
             
             <div className="flex-1 flex-row flex items-center gap-3 px-5 py-4 relative w-full">
-              <div className="flex w-full flex-row">
-                <MapPin className="text-gray-400" size={18} />
-                <div className='flex pl-2 w-full flex-col'>
-                  <p className="text-xs text-[#1E3A5F] font-bold">
-                    {activeTab === 'free' ? 'Playa' : 'Escuela'}
-                  </p>
-                  <input
-                    type="text"
-                    placeholder={activeTab === 'free' ? "Busca tu playa (Ej. Somo)" : "Busca escuela (Ej. Sunset...)"}
-                    value={searchLocation}
-                    onChange={(e) => { setSearchLocation(e.target.value); setShowDropdown(true); }}
-                    onFocus={() => setShowDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                    className="w-full bg-transparent text-[14px] font-manrope outline-none text-[#778088] placeholder:text-[#778088]"
-                  />
-                </div>
-              </div>
+            <div className="flex w-full flex-row">
+  {/* Ícono dinámico */}
+  {activeTab === 'free' ? (
+    <MapPin className="text-gray-400 mt-0.5" size={18} />
+  ) : (
+    <School className="text-gray-400 mt-0.5" size={18} />   
+  )}
+
+  <div className='flex pl-2 w-full flex-col'>
+    <p className="text-xs text-[#1E3A5F] font-bold">
+      {activeTab === 'free' ? 'Playa' : 'Escuela'}
+    </p>
+    <input
+      type="text"
+      placeholder={activeTab === 'free' ? "Busca tu playa (Ej. Somo)" : "Busca escuela (Ej. Sunset...)"}
+      value={searchLocation}
+      onChange={(e) => {
+        setSearchLocation(e.target.value);
+        setSelectedValue(''); 
+        setShowDropdown(true);
+      }}
+      onFocus={() => setShowDropdown(true)}
+      onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+      className="w-full bg-transparent text-[14px] font-manrope outline-none text-[#778088] placeholder:text-[#778088]"
+    />
+  </div>
+</div>
 
               {showDropdown && searchLocation.length > 0 && suggestions.length > 0 && (
                 <div className="absolute top-19.5 left-4 right-4 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-72 overflow-auto">
                   {suggestions.map((item, index) => (
                     <div
                       key={index}
-                      onMouseDown={() => { setSearchLocation(item.label); setShowDropdown(false); }}
+                     
+                      onMouseDown={() => {
+  setSearchLocation(item.label);
+  setSelectedValue(item.name); // ← antes era item.value
+  setShowDropdown(false);
+}}
                       className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none text-sm"
                     >
                       {item.label}

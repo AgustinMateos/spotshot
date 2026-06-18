@@ -341,7 +341,7 @@ export default function PerfilPage() {
               'Guardando...'
             ) : isEditing ? (
               <>
-                <img src="/icons/guardar.svg" alt="Guardar" className="w-5 h-5" />
+                <img src="/icons/disco2.svg" alt="Guardar" className="w-5 h-5" />
                 <span className="hidden md:inline">Guardar cambios</span>
               </>
             ) : (

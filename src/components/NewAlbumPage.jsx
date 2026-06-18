@@ -67,7 +67,7 @@ const NewAlbumPage = () => {
 
     loadPacks();
   }, [token]);
-const updateForm = (field, value) => {
+  const updateForm = (field, value) => {
     setFormData(prev => {
       let newValue = value;
 
@@ -85,7 +85,7 @@ const updateForm = (field, value) => {
       return { ...prev, [field]: newValue };
     });
   };
- const calculateEndTime = (startTime, duration) => {
+  const calculateEndTime = (startTime, duration) => {
     if (!startTime || !duration) return '';
 
     const [hours, minutes] = startTime.split(':').map(Number);
@@ -271,7 +271,7 @@ const updateForm = (field, value) => {
     }
   }, [token, logout, router, loading]);
 
-  
+
 
   // ==================== MANEJO DE FOTOS ====================
   const handleFiles = (files) => {
@@ -608,7 +608,7 @@ const updateForm = (field, value) => {
         : [...prev.selectedPacks, packId]
     }));
   };
- 
+
   const commissionRate = 0.20; // ← Cambiado a 20%
   const finalPrice = formData.basePrice > 0
     ? (formData.basePrice * (1 - commissionRate)).toFixed(2)
@@ -616,17 +616,17 @@ const updateForm = (field, value) => {
   return (
     <div className="min-h-screen w-full bg-gray-50 pb-12">
       {/* Header */}
-      
+
 
       <div className="mx-auto px-6 pt-8">
         <div>
-        <div className="w-full mx-auto pb-8  flex items-center gap-2 text-sm text-gray-600">
-          <span>Mis sesiones</span>
-          <span>›</span>
-          <span className="font-medium text-[#103457">Nueva sesión</span>
+          <div className="w-full mx-auto pb-8  flex items-center gap-2 text-sm text-gray-600">
+            <span>Mis sesiones</span>
+            <span>›</span>
+            <span className="font-medium text-[#103457">Nueva sesión</span>
+          </div>
         </div>
-      </div>
-      <h1 className="text-[24px] font-medium text-[#10487C] pb-5 md:pb-0 mb-8">Nuevo álbum</h1>
+        <h1 className="text-[24px] font-medium text-[#10487C] pb-5 md:pb-0 mb-8">Nuevo álbum</h1>
 
         {/* Stepper Mejorado - Con tick azul */}
         <div className="flex justify-center w-full mb-10">
@@ -645,10 +645,10 @@ const updateForm = (field, value) => {
                   <div className="flex flex-col items-center">
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${isCompleted
-                          ? 'bg-[#106BB9] border-[#106BB9]'     // Círculo azul completo
-                          : isCurrent
-                            ? 'border-[#106BB9] bg-white'        // Paso actual
-                            : 'border-gray-300 bg-white'        // Paso futuro
+                        ? 'bg-[#106BB9] border-[#106BB9]'     // Círculo azul completo
+                        : isCurrent
+                          ? 'border-[#106BB9] bg-white'        // Paso actual
+                          : 'border-gray-300 bg-white'        // Paso futuro
                         }`}
                     >
                       {isCompleted ? (
@@ -693,8 +693,8 @@ const updateForm = (field, value) => {
               <button
                 onClick={() => updateForm('type', 'free-surfers')}
                 className={`px-8  rounded-lg font-medium transition-all ${formData.type === 'free-surfers'
-                    ? 'bg-white text-[#1E3A5F] shadow-sm'
-                    : 'bg-transparent text-[#71717A] hover:text-gray-700'
+                  ? 'bg-white text-[#1E3A5F] shadow-sm'
+                  : 'bg-transparent text-[#71717A] hover:text-gray-700'
                   }`}
               >
                 Free surfers
@@ -702,8 +702,8 @@ const updateForm = (field, value) => {
               <button
                 onClick={() => updateForm('type', 'escuelas')}
                 className={`px-8  rounded-lg font-medium transition-all ${formData.type === 'escuelas'
-                    ? 'bg-white text-[#1E3A5F] shadow-sm'
-                    : 'bg-transparent text-[#71717A] hover:text-gray-700'
+                  ? 'bg-white text-[#1E3A5F] shadow-sm'
+                  : 'bg-transparent text-[#71717A] hover:text-gray-700'
                   }`}
               >
                 Escuelas
@@ -714,67 +714,73 @@ const updateForm = (field, value) => {
             {formData.type === 'escuelas' ? (
               <div className="mb-6 relative">
                 <div className='flex mb-2'> <Image width={16} height={16} alt='school' src={'/icons/school.svg'} /><label className="block pl-2 text-gray-700  font-medium  items-center gap-2">
-                 
+
                   Nombre de la Escuela
                 </label></div>
 
-                <input
-                  type="text"
-                  value={formData.school}
-                  onChange={(e) => {
-                    updateForm('school', e.target.value);
-                    setShowSchoolDropdown(true);
-                  }}
-                  onFocus={() => setShowSchoolDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowSchoolDropdown(false), 150)}
-                  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white"
-                  placeholder="Busca escuela (ej: Somo's, Sunset...)"
-                />
+              <input
+  type="text"
+  value={formData.school || ''}
+  onChange={(e) => {
+    updateForm('school', e.target.value);
+    setShowSchoolDropdown(true);
+  }}
+  onFocus={() => setShowSchoolDropdown(true)}
+  onBlur={() => setTimeout(() => setShowSchoolDropdown(false), 180)}
+  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#103457] bg-white"
+  placeholder="Busca escuela (ej: Somo's, Sunset...)"
+/>
 
-                {/* Dropdown */}
-                {showSchoolDropdown && formData.school.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto">
-                    {escuelas
-                      .filter(item =>
-                        item.label.toLowerCase().includes(formData.school.toLowerCase()) ||
-                        item.value.toLowerCase().includes(formData.school.toLowerCase())
-                      )
-                      .slice(0, 15)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          onMouseDown={(e) => {           // ← Cambiar a onMouseDown
-                            e.preventDefault();           // Muy importante
-                            updateForm('school', item.value);   // o 'location'
-                            setShowSchoolDropdown(false);
-                          }}
-                          className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
-                        >
-                          {item.label}
-                        </div>
-                      ))}
-                  </div>
-                )}
+              {/* Dropdown Escuelas */}
+{showSchoolDropdown && (formData.school || '').length > 0 && (
+  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto">
+    {escuelas
+      .filter(item => {
+        const search = (formData.school || '').toLowerCase().trim();
+        if (!search) return false;
+
+        return (
+          item.label?.toLowerCase().includes(search) ||
+          item.name?.toLowerCase().includes(search) ||   // ← más importante
+          item.region?.toLowerCase().includes(search)
+        );
+      })
+      .slice(0, 15)
+      .map((item, index) => (
+        <div
+          key={index}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            updateForm('school', item.name); // ← Usamos `name` (el valor real para el backend)
+            setShowSchoolDropdown(false);
+          }}
+          className="px-5 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-none"
+        >
+          {item.label}
+        </div>
+      ))}
+  </div>
+)}
               </div>
             ) : (
               <div className="mb-6 relative">
-               <div className='flex mb-2'><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'} /> <label className="block text-gray-700 pl-2  font-medium  items-center gap-2">
-                  
+                <div className='flex mb-2'><Image width={16} height={16} alt='playa' src={'/icons/playa.svg'} /> <label className="block text-gray-700 pl-2  font-medium  items-center gap-2">
+
                   Playa
                 </label></div>
 
                 <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => {
-                    updateForm('location', e.target.value);
-                    setShowBeachDropdown(true);
-                  }}
-                  onFocus={() => setShowBeachDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowBeachDropdown(false), 150)}
-                  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#103457] bg-white"
-                  placeholder="Busca playa (ej: Somo, Zurriola, Langre...)"
-                />
+  type="text"
+  value={formData.location || ''}
+  onChange={(e) => {
+    updateForm('location', e.target.value);
+    setShowBeachDropdown(true);
+  }}
+  onFocus={() => setShowBeachDropdown(true)}
+  onBlur={() => setTimeout(() => setShowBeachDropdown(false), 150)}
+  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-[#103457] bg-white"
+  placeholder="Busca playa (ej: Somo, Zurriola, Langre...)"
+/>
 
                 {/* Dropdown de playas */}
                 {showBeachDropdown && formData.location.length > 0 && (
@@ -809,7 +815,7 @@ const updateForm = (field, value) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1">
                 <div className="flex mb-2"><Image width={16} height={16} alt='fecha' src={'/icons/fecha.svg'} /> <label className="block pl-2 text-gray-700 font-medium  items-center gap-2">
-                  
+
                   Fecha
                 </label></div>
                 <input
@@ -825,9 +831,9 @@ const updateForm = (field, value) => {
               <div className="relative">
                 <div className="flex mb-2"> <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'} />
                   <label className="block text-gray-700 pl-2  font-medium  items-center gap-2">
-                 
-                  Hora Inicio
-                </label></div>
+
+                    Hora Inicio
+                  </label></div>
 
                 <div
                   onClick={() => setShowStartTimeDropdown(!showStartTimeDropdown)}
@@ -854,7 +860,7 @@ const updateForm = (field, value) => {
                           </div>
                           <div
                             onClick={() => {
-                              const newStart = `${hour}:00`;   // o :30
+                              const newStart = `${hour}:30`;   // ← corregido: antes decía `${hour}:00`
                               updateForm('startTime', newStart);
                               setShowStartTimeDropdown(false);
                             }}
@@ -1268,14 +1274,14 @@ const updateForm = (field, value) => {
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowPublishModal(false)}
-                  className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+                  className="flex-1 py-3.5 border cursor-pointer border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={confirmPublish}
                   disabled={publishing}
-                  className="flex-1 py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
+                  className="flex-1 py-3.5 bg-[#103457] cursor-pointer text-white rounded-2xl font-medium hover:bg-[#103457] disabled:opacity-70"
                 >
                   {publishing ? 'Publicando...' : 'Publicar'}
                 </button>
@@ -1301,7 +1307,7 @@ const updateForm = (field, value) => {
 
               <button
                 onClick={handleGoToMySessions}
-                className="w-full py-4 bg-[#106BB9] hover:bg-blue-700 text-white font-semibold rounded-2xl transition"
+                className="w-full py-4 cursor-pointer bg-[#103457] hover:bg-[#103457] text-white font-semibold rounded-2xl transition"
               >
                 Ver mis sesiones
               </button>
@@ -1318,13 +1324,13 @@ const updateForm = (field, value) => {
 
               <h3 className="text-2xl font-semibold mb-3">Faltan datos importantes</h3>
               <p className="text-gray-600 mb-8">
-                Por favor completa la <strong>fecha</strong> y los <strong>horarios</strong>
+                Por favor completa la <strong>fecha</strong> y los <strong> horarios </strong>
                 de la sesión para continuar.
               </p>
 
               <button
                 onClick={() => setShowDateModal(false)}
-                className="w-full py-3.5 bg-[#106BB9] text-white rounded-2xl font-medium hover:bg-blue-700 transition"
+                className="w-full py-3.5 bg-[#103457] text-white rounded-2xl cursor-pointer font-medium hover:bg-[#103457] transition"
               >
                 Completar ahora
               </button>

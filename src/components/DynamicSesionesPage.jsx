@@ -191,24 +191,39 @@ useEffect(() => {
           <div className="flex flex-wrap gap-4 items-start">
         
             {/* Toggle Free Surfers / Escuelas */}
-            <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
-              <button 
-                onClick={() => handleFilterChange('audience', 'FREE_SURFERS')}
-                className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
-                  filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Free Surfers
-              </button>
-              <button 
-                onClick={() => handleFilterChange('audience', 'SCHOOLS')}
-                className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
-                  filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Escuelas
-              </button>
-            </div>
+           <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
+  <button 
+    onClick={() => {
+      setFilters(prev => ({
+        ...prev,
+        audience: 'FREE_SURFERS',
+        schoolName: '',   // limpiamos el filtro de escuelas
+      }));
+      setPagination(prev => ({ ...prev, page: 1 }));
+    }}
+    className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+      filters.audience === 'FREE_SURFERS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+    }`}
+  >
+    Free Surfers
+  </button>
+
+  <button 
+    onClick={() => {
+      setFilters(prev => ({
+        ...prev,
+        audience: 'SCHOOLS',
+        location: '',   // limpiamos el filtro de free surfers
+      }));
+      setPagination(prev => ({ ...prev, page: 1 }));
+    }}
+    className={`px-6 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+      filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
+    }`}
+  >
+    Escuelas
+  </button>
+</div>
         
             {/* Buscador */}
             <div className="relative flex-1 min-w-[280px]">

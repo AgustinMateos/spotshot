@@ -50,16 +50,15 @@ const fileInputRef = useRef(null);
         const data = await res.json();
         if (res.ok) {
           setSession(data);
-          // Inicializar form
-          // Inicializar form (corregido)
-          setFormData({
+          
+    setFormData({
   audience: data.audience || 'FREE_SURFERS',
   location: data.location || '',
   schoolName: data.schoolName || '',
   startTime: data.startTime ? data.startTime.slice(0, 5) : '',
   endTime: data.endTime ? data.endTime.slice(0, 5) : '',
   unitPriceCustomerEur: data.pricing?.unitPriceCustomerEur || 
-                       data.pricing?.unitPricePhotographerEur || 5,  // fallback por si acaso
+                       data.pricing?.unitPricePhotographerEur || 5,
 });
         } else {
           router.push('/shot/misSesiones');
@@ -678,16 +677,19 @@ if (loading) {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="1"
-                  value={formData.unitPricePhotographerEur}
-                  onChange={(e) => setFormData({ ...formData, unitPricePhotographerEur: e.target.value })}
-                  className="w-full border border-gray-300 rounded-xl p-3"
-                />
-              </div>
+  <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
+  <input
+    type="number"
+    step="0.5"
+    min="1"
+    value={formData.unitPriceCustomerEur ?? ''}   // ← Corregido
+    onChange={(e) => setFormData({ 
+      ...formData, 
+      unitPriceCustomerEur: e.target.value 
+    })}
+    className="w-full border border-gray-300 rounded-xl p-3"
+  />
+</div>
             </div>
 
             <div className="flex gap-4 mt-8">
