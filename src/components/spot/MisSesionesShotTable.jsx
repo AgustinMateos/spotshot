@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -108,6 +108,25 @@ export default function MisSesionesTable({
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
+
+// Refs para detectar clics fuera
+const timeDropdownRef = useRef(null);
+const statusDropdownRef = useRef(null);
+
+ // Cerrar dropdowns al hacer clic fuera
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (timeDropdownRef.current && !timeDropdownRef.current.contains(event.target)) {
+      setShowTimeDropdown(false);
+    }
+    if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+      setShowStatusDropdown(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
   const filteredSessions = useMemo(() => {
     let result = sessions;
     if (filters.search?.trim()) {
@@ -160,16 +179,16 @@ export default function MisSesionesTable({
             />
           </div>
 
-          <div className="relative w-full md:w-55">
-            <div
-              onClick={() => setShowTimeDropdown(!showTimeDropdown)}
-              className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
-            >
-              <span className="text-gray-700">
-                {filters.timeFrom && filters.timeTo ? `${filters.timeFrom} - ${filters.timeTo}` : 'Seleccionar hora'}
-              </span>
-              <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
-            </div>
+          <div className="relative w-full md:w-55" ref={timeDropdownRef}>
+  <div
+    onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+    className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
+  >
+    <span className="text-gray-700">
+      {filters.timeFrom && filters.timeTo ? `${filters.timeFrom} - ${filters.timeTo}` : 'Seleccionar hora'}
+    </span>
+    <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
+  </div>
             {showTimeDropdown && (
               <div onClick={(e) => e.stopPropagation()} className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-xl p-5">
                 <div className="grid grid-cols-2 gap-4">
@@ -183,22 +202,23 @@ export default function MisSesionesTable({
                   </div>
                 </div>
                 <div className="flex gap-3 mt-6">
-                  <button onClick={() => { onFilterChange('timeFrom', ''); onFilterChange('timeTo', ''); setShowTimeDropdown(false); }} className="flex-1 py-2.5 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50">Limpiar</button>
-                  <button onClick={() => setShowTimeDropdown(false)} className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35]">Aplicar</button>
+                  <button onClick={() => { onFilterChange('timeFrom', ''); onFilterChange('timeTo', ''); setShowTimeDropdown(false); }} className="flex-1 py-2.5 text-gray-600 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50">Limpiar</button>
+                  <button onClick={() => setShowTimeDropdown(false)} className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35] cursor-pointer">Aplicar</button>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="relative w-full md:w-56">
-            <div
-              onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-              className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
-            >
-              <span className="text-gray-700">{filters.status ? getStatusLabel(filters.status) : 'Todos los estados'}</span>
-              <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
-            </div>
-            {showStatusDropdown && (
+          <div className="relative w-full md:w-56" ref={statusDropdownRef}>
+  <div
+    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+    className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
+  >
+    <span className="text-gray-700">{filters.status ? getStatusLabel(filters.status) : 'Todos los estados'}</span>
+    <Image src='/icons/flechaAbajo.svg' width={20} height={20} alt='flecha' />
+  </div>
+
+  {showStatusDropdown && (
               <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-xl py-2" onClick={(e) => e.stopPropagation()}>
                 {['', 'DRAFT', 'PROCESSING', 'ACTIVE', 'DISABLED'].map((s) => (
                   <div
@@ -269,7 +289,7 @@ export default function MisSesionesTable({
                       <div className={`text-xs inline-block px-3 py-1 rounded-full mb-2 ${getStatusColor()}`}>
                         {getStatusLabel(session.status)}
                       </div>
-                      <p className="font-semibold text-lg">{session.title}</p>
+                      <p className="font-semibold text-lg">{session.titleShort}</p>
                       <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
                       <p className="text-xs opacity-75 mt-1">{session.startTime} - {session.endTime}</p>
                     </div>

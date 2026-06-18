@@ -166,27 +166,27 @@ const MisVentasPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className=" mx-auto px-6 pt-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Mis ventas</h1>
+        <h1 className="text-[24px] font-medium text-[#10487C] mb-8">Mis ventas</h1>
 
         {/* Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
             <p className="text-gray-600 text-sm">Ventas totales</p>
-            <p className="text-5xl font-semibold text-gray-900 mt-2">
+            <p className="text-5xl font-semibold text-[#10487C] mt-2">
               {formatAmount(summary.totalPayoutMinor)}
             </p>
           </div>
 
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
             <p className="text-gray-600 text-sm">Fotos vendidas</p>
-            <p className="text-5xl font-semibold text-gray-900 mt-2">
+            <p className="text-5xl font-semibold text-[#10487C] mt-2">
               {summary.totalPhotosSold}
             </p>
           </div>
 
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
             <p className="text-gray-600 text-sm">Órdenes</p>
-            <p className="text-5xl font-semibold text-gray-900 mt-2">
+            <p className="text-5xl font-semibold text-[#10487C] mt-2">
               {summary.totalSalesCount}
             </p>
           </div>

@@ -9,7 +9,7 @@ import { escuelas, playas } from '@/lib/constants/surfData';
 
 const NewAlbumPage = () => {
   const router = useRouter();
-  const { token, logout, loading } = useAuth();
+  const { token, logout, loading, handleAuthError } = useAuth();   // ← Agrega handleAuthError
   const [showDateModal, setShowDateModal] = useState(false);
   const [step, setStep] = useState(1);
   const [sessionCreated, setSessionCreated] = useState(false);
@@ -48,22 +48,25 @@ const NewAlbumPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   // Cargar catálogo de packs
   useEffect(() => {
-    const loadPacks = async () => {
-      if (!token) return;
-      setIsLoadingPacks(true);
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${API_URL}/api/v1/photo-sessions/packs/catalog`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) setPacksCatalog(data);
-      } catch (err) {
-        console.error("Error cargando packs:", err);
-      } finally {
-        setIsLoadingPacks(false);
-      }
-    };
+   const loadPacks = async () => {
+  if (!token) return;
+  setIsLoadingPacks(true);
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const res = await fetch(`${API_URL}/api/v1/photo-sessions/packs/catalog`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (await handleAuthError(res)) return;   // ← Agregado
+
+    const data = await res.json();
+    if (res.ok) setPacksCatalog(data);
+  } catch (err) {
+    console.error("Error cargando packs:", err);
+  } finally {
+    setIsLoadingPacks(false);
+  }
+};
 
     loadPacks();
   }, [token]);
@@ -232,7 +235,7 @@ const NewAlbumPage = () => {
         },
         body: JSON.stringify(payload),
       });
-
+if (await handleAuthError(res)) return;
       const data = await res.json();
 
       if (res.ok) {
@@ -827,53 +830,58 @@ const NewAlbumPage = () => {
                 />
               </div>
 
-              {/* Hora Inicio - Dropdown Personalizado */}
-              <div className="relative">
-                <div className="flex mb-2"> <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'} />
-                  <label className="block text-gray-700 pl-2  font-medium  items-center gap-2">
+              {/* Hora Inicio - Dropdown Personalizado (6:00 a 23:00) */}
+<div className="relative">
+  <div className="flex mb-2"> 
+    <Image width={16} height={16} alt='hora' src={'/icons/hora.svg'} />
+    <label className="block text-gray-700 pl-2 font-medium items-center gap-2">
+      Hora Inicio
+    </label>
+  </div>
 
-                    Hora Inicio
-                  </label></div>
+  <div
+    onClick={() => setShowStartTimeDropdown(!showStartTimeDropdown)}
+    className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white cursor-pointer flex justify-between items-center"
+  >
+    <span className="text-lg">{formData.startTime || "Seleccionar hora"}</span>
+    <span className="text-gray-400">▼</span>
+  </div>
 
-                <div
-                  onClick={() => setShowStartTimeDropdown(!showStartTimeDropdown)}
-                  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 bg-white cursor-pointer flex justify-between items-center"
-                >
-                  <span className="text-lg">{formData.startTime || "Seleccionar hora"}</span>
-                  <span className="text-gray-400">▼</span>
-                </div>
+  {showStartTimeDropdown && (
+    <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto py-2">
+      {Array.from({ length: 18 }, (_, i) => {   // 18 horas → de 6 a 23
+        const hour = (6 + i).toString().padStart(2, '0');
+        return (
+          <React.Fragment key={hour}>
+            {/* Hora en punto */}
+            <div
+              onClick={() => {
+                updateForm('startTime', `${hour}:00`);
+                setShowStartTimeDropdown(false);
+              }}
+              className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:00` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
+            >
+              {`${hour}:00`}
+            </div>
 
-                {showStartTimeDropdown && (
-                  <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-lg max-h-80 overflow-auto py-2">
-                    {Array.from({ length: 24 }, (_, i) => {
-                      const hour = i.toString().padStart(2, '0');
-                      return (
-                        <React.Fragment key={i}>
-                          <div
-                            onClick={() => {
-                              updateForm('startTime', `${hour}:00`);
-                              setShowStartTimeDropdown(false);
-                            }}
-                            className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:00` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
-                          >
-                            {`${hour}:00`}
-                          </div>
-                          <div
-                            onClick={() => {
-                              const newStart = `${hour}:30`;   // ← corregido: antes decía `${hour}:00`
-                              updateForm('startTime', newStart);
-                              setShowStartTimeDropdown(false);
-                            }}
-                            className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:30` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
-                          >
-                            {`${hour}:30`}
-                          </div>
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-                )}
+            {/* Media hora (excepto si es 23:30) */}
+            {hour !== '23' && (
+              <div
+                onClick={() => {
+                  updateForm('startTime', `${hour}:30`);
+                  setShowStartTimeDropdown(false);
+                }}
+                className={`px-5 py-3 hover:bg-blue-50 cursor-pointer text-lg ${formData.startTime === `${hour}:30` ? 'bg-blue-50 font-medium text-blue-600' : ''}`}
+              >
+                {`${hour}:30`}
               </div>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  )}
+</div>
 
               {/* Duración - Dropdown Personalizado */}
               <div className="relative">

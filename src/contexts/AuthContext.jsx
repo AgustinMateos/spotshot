@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext();
 
@@ -8,6 +9,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -44,6 +46,26 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('photographer');
         setToken(null);
         setUser(null);
+        router.replace('/login');   // ← Redirige automáticamente
+    };
+
+    // Función global para manejar errores de autenticación
+    const handleAuthError = async (response) => {
+        if (response.status === 401) {
+            const errorData = await response.json().catch(() => ({}));
+            
+            const message = errorData.message || '';
+            if (
+                message.toLowerCase().includes('token inválido') ||
+                message.toLowerCase().includes('token invalid') ||
+                message.toLowerCase().includes('unauthorized')
+            ) {
+                alert("Tu sesión ha expirado o el token es inválido.");
+                logout();   // ← Expulsa al usuario
+                return true;
+            }
+        }
+        return false;
     };
 
     return (
@@ -53,8 +75,9 @@ export function AuthProvider({ children }) {
             login, 
             logout, 
             updateUser,
-            updateToken,     // ← Nuevo
-            loading 
+            updateToken,
+            loading,
+            handleAuthError   // ← Nueva función exportada
         }}>
             {children}
         </AuthContext.Provider>

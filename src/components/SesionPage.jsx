@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function xfMisSesionDetail() {
+export default function MisSesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -368,7 +368,9 @@ if (loading) {
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Link href="/shot/misSesiones" className="hover:text-gray-900">Mis sesiones</Link>
           <span>›</span>
-          <span className="text-gray-900">{session.title}</span>
+          <span className="text-gray-900">{session.titleShort}</span>
+          <span>›</span>
+          <span className="text-gray-900">{session.location || session.schoolName}</span>
         </div>
         <div className='w-full flex-col md:flex-row flex justify-between'>
           <div><p className='text-[24px] font-medium text-[#10487C] pb-5 md:pb-0'>Detalle de la Sesión</p></div>
@@ -385,7 +387,7 @@ if (loading) {
           setTimeout(() => setIsLinkCopied(false), 2500);
         });
       }}
-      className={`flex items-center gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
+      className={`flex items-center cursor-pointer gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
         isLinkCopied 
           ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
           : 'border-gray-300 hover:bg-gray-50'
@@ -406,7 +408,7 @@ if (loading) {
   {/* Eliminar */}
   <button
     onClick={() => setShowDeleteModal(true)}
-    className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700 transition"
+    className="flex items-center cursor-pointer gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700 transition"
   >
     <img src='/icons/trashwhite.svg' alt="eliminar" className="w-5 h-5" />
     <span className="hidden md:inline">Eliminar</span>
@@ -415,7 +417,7 @@ if (loading) {
   {/* Editar */}
   <button
     onClick={() => setShowEditModal(true)}
-    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition"
+    className="flex items-center cursor-pointer gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition"
   >
     <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
     <span className="hidden md:inline">Editar</span>
@@ -426,7 +428,7 @@ if (loading) {
     <button
       onClick={handlePublish}
       disabled={publishing}
-      className="flex items-center gap-2 bg-[#103457] hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition font-medium disabled:opacity-70"
+      className="flex cursor-pointer items-center gap-2 bg-[#103457] hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition font-medium disabled:opacity-70"
     >
       {publishing ? (
         <>Publicando<span className="animate-pulse">...</span></>
@@ -439,25 +441,20 @@ if (loading) {
 </div>
           </div>
         {/* Banner grande */}
-        <div className="relative h-105 rounded-3xl overflow-hidden mb-10">
+       
           {/* <img
             src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
             className="object-cover"
           /> */}
-          <img
-            src={'/inicio/somo1.webp' || '/placeholder-surf.jpg'}
-            alt={session.title}
-           
-            className="object-contain"
-          />
-          <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/70" />
-
-          <div className="absolute bottom-10 left-10 text-white">
-            <h1 className="text-5xl font-bold mb-2">{session.title}</h1>
+         \<div className="relative rounded-3xl overflow-hidden h-80 mb-10">
+              <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-8 left-8 text-white">
+            <h1 className="text-5xl font-bold mb-2">{session.titleShort}</h1>
             <p className="text-2xl opacity-90">{session.location || session.schoolName}</p>
-
+<p className="text-sm opacity-90 mt-1">{session.startTime} - {session.endTime}</p>
           </div>
         </div>
 
@@ -538,7 +535,7 @@ if (loading) {
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
-        className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl transition disabled:opacity-70"
+        className="flex  items-center cursor-pointer gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl transition disabled:opacity-70"
       >
         {uploading ? (
           <>Subiendo fotos...</>
@@ -581,7 +578,7 @@ if (loading) {
             setImageToDelete(img);
             setShowDeleteImageModal(true);
           }}
-          className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
+          className="absolute top-3 cursor-pointer right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
         >
           <img src='/icons/trashwhite.svg' alt="eliminar" className="w-4 h-4" />
         </button>
@@ -604,14 +601,14 @@ if (loading) {
             <div className="flex gap-4">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+                className="flex-1 py-3 border cursor-pointer border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-3 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+                className="flex-1 py-3 bg-red-600 cursor-pointer text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
               >
                 {deleting ? 'Eliminando...' : 'Sí, eliminar sesión'}
               </button>
@@ -702,7 +699,7 @@ if (loading) {
               <button
                 onClick={handleUpdate}
                 disabled={updating}
-                className="flex-1 py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
+                className="flex-1 py-3 bg-gray-900 cursor-pointer text-white rounded-2xl font-medium hover:bg-black disabled:opacity-70"
               >
                 {updating ? 'Guardando...' : 'Guardar cambios'}
               </button>
@@ -737,7 +734,7 @@ if (loading) {
         <button
           onClick={handleDeleteImage}
           disabled={deletingImageId}
-          className="flex-1 py-3 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+          className="flex-1 py-3 bg-red-600 cursor-pointer text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
         >
           {deletingImageId ? 'Eliminando...' : 'Sí, eliminar foto'}
         </button>

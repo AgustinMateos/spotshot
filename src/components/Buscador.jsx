@@ -139,7 +139,7 @@ return (
 
             <button 
               type="submit"
-              className="w-full font-inter cursor-pointer md:w-auto bg-[#DEB656] hover:bg-[#c99c3f] transition-all text-white font-semibold px-10 py-4 text-[16px] rounded-2xl whitespace-nowrap text-base active:scale-[0.97]"
+              className="w-full transition-all active:scale-95 font-inter cursor-pointer md:w-auto bg-[#DEB656] hover:bg-[#c99c3f] transition-all text-white font-semibold px-10 py-4 text-[16px] rounded-2xl whitespace-nowrap text-base active:scale-[0.97]"
             >
               Buscar fotos
             </button>

@@ -217,7 +217,7 @@ const onTouchEnd = () => {
         <div className="absolute top-6 left-6">
           <button 
             onClick={() => router.back()} 
-            className="bg-white/90 hover:bg-white text-black px-5 py-2 rounded-full flex items-center gap-2 transition"
+            className="bg-white/90 cursor-pointer hover:bg-white text-black px-5 py-2 rounded-full flex items-center gap-2 transition"
           >
             ← Volver
           </button>
@@ -226,8 +226,9 @@ const onTouchEnd = () => {
         <div className="absolute bottom-10 left-10 text-white">
           <h1 className="text-5xl font-bold mb-2">{session.titleShort}</h1>
           <p className="text-xl opacity-90">{session.location || session.schoolName}</p>
-          <p className="text-sm opacity-75 mt-1">by {photographerName}</p>
-        </div>
+          
+          <p className="text-sm opacity-90 mt-1">{session.startTime} - {session.endTime}</p>
+       <p className="text-sm opacity-75 mt-1">by {photographerName}</p> </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -311,7 +312,7 @@ const onTouchEnd = () => {
         e.stopPropagation();
         removeFromCart(img.id);
       }}
-      className="bg-emerald-600 hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+      className="bg-emerald-600 cursor-pointer hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
       title="Quitar del carrito"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
@@ -324,7 +325,7 @@ const onTouchEnd = () => {
         e.stopPropagation();
         addToCart(img, session);
       }}
-      className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+      className="bg-white/95 cursor-poiter hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
       title="Agregar al carrito"
     >
       <ShoppingCart size={18} />
@@ -361,7 +362,7 @@ const onTouchEnd = () => {
           <div className="bg-white w-full max-w-md h-full overflow-auto">
             <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
               <h3 className="text-2xl font-semibold">Tu selección ({totalPhotos})</h3>
-              <button onClick={() => setIsCartOpen(false)}>
+              <button className='cursor-pointer ' onClick={() => setIsCartOpen(false)}>
                 <X size={28} />
               </button>
             </div>
@@ -375,7 +376,7 @@ const onTouchEnd = () => {
                     <p className="text-sm text-gray-500">{img.sessionTitle}</p>
                     <p className="text-xs text-gray-400">{img.location}</p>
                   </div>
-                  <button onClick={() => removeFromCart(img.id)} className="text-red-500">
+                  <button onClick={() => removeFromCart(img.id)} className="text-red-500 cursor-pointer">
                     <Trash2 size={20} />
                   </button>
                 </div>
@@ -404,7 +405,7 @@ const onTouchEnd = () => {
 
   <button 
     onClick={() => setIsCheckoutModalOpen(true)}
-    className="w-full bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
+    className="w-full cursor-pointer transition-all active:scale-95 bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
   >
     Finalizar compra
   </button>
@@ -509,13 +510,13 @@ const onTouchEnd = () => {
             <div className="flex justify-between items-center p-6 border-b">
               <button 
                 onClick={() => setIsCheckoutModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1"
+                className="text-gray-500 cursor-pointer hover:text-gray-700 text-sm flex items-center gap-1"
               >
                 ← Volver a la selección de fotos
               </button>
               <button 
                 onClick={() => setIsCheckoutModalOpen(false)} 
-                className="text-gray-400 hover:text-black"
+                className="text-gray-400 cursor-pointer hover:text-black"
               >
                 <X size={24} />
               </button>
@@ -538,7 +539,7 @@ const onTouchEnd = () => {
               <button
                 onClick={handleCheckout}
                 disabled={isSubmitting}
-                className="w-full bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium transition"
+                className="w-full transition-all active:scale-95 cursor-pointer bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium transition"
               >
                 {isSubmitting ? 'Procesando...' : 'Ir a pagar'}
               </button>

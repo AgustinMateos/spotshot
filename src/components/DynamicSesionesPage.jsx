@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,7 +54,30 @@ const CustomTimeSelect = ({ value, onChange }) => {
     onChange(time);
     setOpen(false);
   };
+  // ← FILTRADO CLIENTE (igual que en MisSesionesTable)
+  const filteredSessions = useMemo(() => {
+    let result = sessions;
 
+    // Filtro de búsqueda (si tenés)
+    if (filters.search?.trim()) {
+      const term = filters.search.toLowerCase().trim();
+      result = result.filter(s =>
+        s.title?.toLowerCase().includes(term) ||
+        s.location?.toLowerCase().includes(term) ||
+        s.schoolName?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtro de horario
+    if (filters.timeFrom && filters.timeTo) {
+      result = result.filter(s => {
+        const start = s.startTime?.slice(0, 5);
+        return start && start >= filters.timeFrom && start <= filters.timeTo;
+      });
+    }
+
+    return result;
+  }, [sessions, filters.search, filters.timeFrom, filters.timeTo]);
   return (
     <div className="relative">
       <div
@@ -92,6 +116,30 @@ const CustomTimeSelect = ({ value, onChange }) => {
   });
 
   const [title, setTitle] = useState('Sesiones');
+    // FILTRADO EN CLIENTE - Igual que en MisSesionesTable
+  const filteredSessions = useMemo(() => {
+    let result = sessions;
+
+    // Filtro de búsqueda (si tenés)
+    if (filters.search?.trim()) {
+      const term = filters.search.toLowerCase().trim();
+      result = result.filter(s =>
+        s.title?.toLowerCase().includes(term) ||
+        s.location?.toLowerCase().includes(term) ||
+        s.schoolName?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtro de horario
+    if (filters.timeFrom && filters.timeTo) {
+      result = result.filter(s => {
+        const start = s.startTime?.slice(0, 5);
+        return start && start >= filters.timeFrom && start <= filters.timeTo;
+      });
+    }
+
+    return result;
+  }, [sessions, filters.search, filters.timeFrom, filters.timeTo]);
 
   const getDaysRemaining = (activeUntil) => {
     if (!activeUntil) return null;
@@ -314,9 +362,9 @@ useEffect(() => {
         {/* Grid y Paginación (mantén igual) */}
         {loading ? (
           <p className="text-center py-20 text-gray-500">Cargando sesiones...</p>
-        ) : sessions.length > 0 ? (
+        ) : filteredSessions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sessions.map((session) => {
+           {filteredSessions.map((session) => { 
               const daysLeft = getDaysRemaining(session.activeUntil);
               return (
                 <Link href={`/sesiones/${session.id}`} key={session.id} className="group">

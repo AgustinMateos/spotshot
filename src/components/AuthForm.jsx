@@ -143,7 +143,7 @@ export default function AuthForm({ mode = 'login' }) {
         {error && <p className="text-red-600 text-center bg-red-50 py-3 rounded-xl">{error}</p>}
         {success && <p className="text-green-600 text-center bg-green-50 py-3 rounded-xl">{success}</p>}
 
-        <button type="submit" disabled={loading} className="w-full cursor-pointer bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition disabled:opacity-70">
+        <button type="submit" disabled={loading} className="w-full cursor-pointer transition-all active:scale-95 bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg transition disabled:opacity-70">
           {loading ? 'Procesando...' : isRegister ? 'Crear cuenta' : isForgot ? 'Enviar enlace' : 'Iniciar sesión'}
         </button>
       </form>
