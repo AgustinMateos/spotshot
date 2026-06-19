@@ -164,7 +164,7 @@ export default function CustomDatePicker({
                   key={date.toISOString()}
                   disabled={disabled}
                   onClick={() => selectDay(date)}
-                  className={`h-9 w-9 rounded-full text-sm flex items-center justify-center transition cursor-pointer
+                  className={`h-9 w-9  rounded-full text-sm flex items-center justify-center transition cursor-pointer
                     ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-blue-50 text-gray-700'}
                     ${selected ? 'bg-[#0D2744] text-white hover:bg-[#0D2744]' : ''}
                     ${today && !selected ? 'border border-[#0D2744] text-[#0D2744] font-medium' : ''}
@@ -185,13 +185,13 @@ export default function CustomDatePicker({
             >
               Limpiar
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={() => setOpen(false)}
               className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35] cursor-pointer text-sm"
             >
               Aplicar
-            </button>
+            </button> */}
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-
+import CustomDatePicker from '@/components/CustomDatePicker';
 export default function DynamicSesionesPage() {
   const params = useParams();
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
@@ -230,7 +230,7 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-[24px] font-medium text-[#10487C] pb-5 md:pb-0">{title}</h1>
           <p className="text-gray-600 mt-1">{pagination.total} álbumes encontrados</p>
         </div>
 
@@ -337,24 +337,24 @@ useEffect(() => {
                     >
                       Limpiar
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => setShowTimeDropdown(false)}
                       className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35]"
                     >
                       Aplicar
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               )}
             </div>
         
             {/* Fecha */}
-            <input 
-              type="date" 
-              value={filters.sessionDate} 
-              onChange={(e) => handleFilterChange('sessionDate', e.target.value)} 
-              className="px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 w-full md:w-auto" 
-            />
+            <CustomDatePicker
+  value={filters.sessionDate}
+  onChange={(date) => onFilterChange('sessionDate', date)}
+  placeholder="Seleccionar fecha"
+  className="w-full md:w-56"
+/>
         
           </div>
         </div>

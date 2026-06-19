@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import ImageWithLoader from '@/components/ImageWithLoader';
 import { escuelas, playas } from '@/lib/constants/surfData';
-
+import CustomDatePicker from '@/components/CustomDatePicker';
 const NewAlbumPage = () => {
   const router = useRouter();
   const { token, logout, loading, handleAuthError } = useAuth();   // ← Agrega handleAuthError
@@ -813,17 +813,22 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
             {/* Fecha y Hora */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1">
-                <div className="flex mb-2"><Image width={16} height={16} alt='fecha' src={'/icons/fecha.svg'} /> <label className="block pl-2 text-gray-700 font-medium  items-center gap-2">
-
-                  Fecha
-                </label></div>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => updateForm('date', e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-5 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500"
-                />
+               <div className="md:col-span-1">
+  <div className="flex mb-2">
+    <Image width={16} height={16} alt='fecha' src={'/icons/fecha.svg'} />
+    <label className="block pl-2 text-gray-700 font-medium items-center gap-2">
+      Fecha
+    </label>
+  </div>
+  <CustomDatePicker
+    value={formData.date}
+    onChange={(date) => updateForm('date', date)}
+    maxDate={new Date().toISOString().split('T')[0]}
+    placeholder="Seleccionar fecha"
+    className="[&>div]:py-4 [&>div]:rounded-2xl"
+  />
+</div>
+              
               </div>
 
               {/* Hora Inicio - Dropdown Personalizado (6:00 a 23:00) */}
