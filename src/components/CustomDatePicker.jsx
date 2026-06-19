@@ -56,13 +56,13 @@ export default function CustomDatePicker({
     if (value) setViewDate(parseLocalDate(value));
   }, [value]);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+ useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+  };
+  document.addEventListener('click', handleClickOutside, true);
+  return () => document.removeEventListener('click', handleClickOutside, true);
+}, []);
 
   const min = minDate ? parseLocalDate(minDate) : null;
   const max = maxDate ? parseLocalDate(maxDate) : null;
@@ -164,8 +164,8 @@ export default function CustomDatePicker({
                   key={date.toISOString()}
                   disabled={disabled}
                   onClick={() => selectDay(date)}
-                  className={`h-9 w-9  rounded-full text-sm flex items-center justify-center transition cursor-pointer
-                    ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-blue-50 text-gray-700'}
+                  className={`h-9 w-9 rounded-full text-sm flex items-center justify-center transition cursor-pointer pointer-events-auto
+                    ${disabled ? 'text-gray-300 cursor-not-allowed pointer-events-none' : 'hover:bg-blue-50 text-gray-700'}
                     ${selected ? 'bg-[#0D2744] text-white hover:bg-[#0D2744]' : ''}
                     ${today && !selected ? 'border border-[#0D2744] text-[#0D2744] font-medium' : ''}
                   `}
