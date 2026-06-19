@@ -150,9 +150,9 @@ export default function AuthForm({ mode = 'login' }) {
 
       {/* Links inferiores */}
       <p className="text-center mt-8 text-gray-600">
-        {isLogin && <>¿No tienes cuenta? <a href="/register" className="text-blue-600 font-medium hover:underline">Creá una cuenta</a></>}
-        {isRegister && <>¿Ya tienes una cuenta? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
-        {isForgot && <>¿Recordaste tu contraseña? <a href="/login" className="text-blue-600 font-medium hover:underline">Inicia sesión</a></>}
+        {isLogin && <>¿No tienes cuenta? <a href="/register" className="text-[#0D2744] hover:text-[#0D2744]  font-medium hover:underline">Crea una cuenta</a></>}
+        {isRegister && <>¿Ya tienes una cuenta? <a href="/login" className="text-[#0D2744] hover:text-[#0D2744] hover:underline font-medium ">Inicia sesión</a></>}
+        {isForgot && <>¿Recordaste tu contraseña? <a href="/login" className="text-[#0D2744] hover:text-[#0D2744] hover:underline font-medium ">Inicia sesión</a></>}
       </p>
     </div>
   );

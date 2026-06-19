@@ -56,11 +56,11 @@ export default function Login() {
           <ul className="mt-10 space-y-4">
             <li className="flex items-center gap-3 text-gray-700">
               <span className="text-green-500 text-xl">✓</span>
-              Mantené el control de tus precios
+              Mantén el control de tus precios
             </li>
             <li className="flex items-center gap-3 text-gray-700">
               <span className="text-green-500 text-xl">✓</span>
-              Llegá a surfistas que buscan activamente tus fotos
+              Llega a surfistas que buscan activamente tus fotos
             </li>
             <li className="flex items-center gap-3 text-gray-700">
               <span className="text-green-500 text-xl">✓</span>
@@ -130,7 +130,7 @@ export default function Login() {
             <p className="text-gray-600">
               ¿No tenés cuenta?{' '}
               <a href="/register" className="text-blue-600 hover:underline font-medium">
-                Creá una cuenta
+                Crea una cuenta
               </a>
             </p>
           </div>

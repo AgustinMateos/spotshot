@@ -26,7 +26,7 @@ export default function AuthLayout({
                 alt="check"
                 className="w-6 h-6 mt-1 shrink-0"
               />
-              <span>Mantené el control de tus precios</span>
+              <span>Mantén el control de tus precios</span>
             </li>
 
             <li className="flex items-start gap-4 text-gray-700">
@@ -35,7 +35,7 @@ export default function AuthLayout({
                 alt="check"
                 className="w-6 h-6 mt-1 shrink-0"
               />
-              <span>Llegá a surfistas que buscan activamente tus fotos</span>
+              <span>Llega a surfistas que buscan activamente tus fotos</span>
             </li>
 
             <li className="flex items-start gap-4 text-gray-700">
