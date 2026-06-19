@@ -2,15 +2,15 @@
 import "./globals.css";
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { CartProvider } from '@/contexts/CartContext';   // ← Nuevo
+import { CartProvider } from '@/contexts/CartContext';  
 import NavbarComponent from "@/components/NavbarPage";
 import Footer from "@/components/Footer";
 import { Oxygen, Manrope, Inter, Open_Sans, Roboto } from 'next/font/google';
 
-// Configura las fuentes
+
 const oxygen = Oxygen({
   subsets: ['latin'],
-  weight: ['300','400',  '700'], // elige los pesos que necesites
+  weight: ['300','400',  '700'], 
   variable: '--font-oxygen',
   display: 'swap',
 });
@@ -48,10 +48,16 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  
   other: {
     'google-site-verification': 'U6OKkr4jUPHk7IGUVdtUiAl3JL3GfRVmkTaaiWM4Lec',
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {

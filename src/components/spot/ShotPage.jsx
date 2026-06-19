@@ -36,13 +36,18 @@ function CardSkeleton({ delay = 0 }) {
 
 export default function ShotPage() {
     const { user, token, loading: authLoading } = useAuth();
-
+ 
     const [stripeConnect, setStripeConnect] = useState(null);
     const [allSessions, setAllSessions] = useState([]);
     const [loadingInitial, setLoadingInitial] = useState(true);
     const [loadingFilters, setLoadingFilters] = useState(false);
     const [openMenuId, setOpenMenuId] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
+    
+      const [isDeleting, setIsDeleting] = useState(false);
+const [deleteSuccess, setDeleteSuccess] = useState(false);
+const [sessionToDelete, setSessionToDelete] = useState(null);
+const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
     const [filters, setFilters] = useState({
         search: '',
         audience: 'FREE_SURFERS',
@@ -161,7 +166,49 @@ export default function ShotPage() {
             </div>
         );
     }
+const handleDeleteSession = async (sessionId) => {
+    if (!token || !sessionId) return;
 
+    setIsDeleting(true);
+    setDeleteSuccess(false);
+
+    try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        
+        const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}`, {
+            method: 'DELETE',
+            headers: { 
+                Authorization: `Bearer ${token}` 
+            },
+        });
+
+        if (res.status === 401) {
+            logout?.();
+            router?.replace('/login');
+            return;
+        }
+
+        if (res.ok) {
+            // Actualizar lista localmente
+            setAllSessions(prev => prev.filter(s => s.id !== sessionId));
+            
+            setDeleteSuccess(true);
+            
+            // Actualizar contador
+            setPagination(prev => ({
+                ...prev,
+                total: Math.max(0, prev.total - 1)
+            }));
+        } else {
+            alert('No se pudo eliminar la sesión');
+        }
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        alert('Error de conexión');
+    } finally {
+        setIsDeleting(false);
+    }
+};
     return (
         <div className="min-h-screen pt-20 bg-white">
             <div className="max-w-full mx-auto px-6 py-8">
@@ -260,6 +307,10 @@ export default function ShotPage() {
                             onPageChange={goToPage}
                             openMenuId={openMenuId}        // ← esto faltaba
                             setOpenMenuId={setOpenMenuId}
+                             onDelete={(session) => {
+            setSessionToDelete(session);
+            setShowDeleteConfirmModal(true);
+          }}
                             onCopyLink={(sessionId) => {
                                 const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${sessionId}`;
                                 navigator.clipboard.writeText(shareUrl).then(() => {
@@ -293,6 +344,63 @@ export default function ShotPage() {
                 )}
 
             </div>
+            {showDeleteConfirmModal && sessionToDelete && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+            {!deleteSuccess ? (
+              <>
+                <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                  <span className="text-4xl">🗑️</span>
+                </div>
+                <h3 className="text-2xl font-semibold mb-3">¿Eliminar esta sesión?</h3>
+                <p className="text-gray-600 mb-8">
+                  Se eliminará permanentemente la sesión:<br />
+                  <strong>"{sessionToDelete.title}"</strong>
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirmModal(false);
+                      setSessionToDelete(null);
+                      setDeleteSuccess(false);
+                    }}
+                    className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSession(sessionToDelete.id)}
+                    disabled={isDeleting}
+                    className="flex-1 py-3.5 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+                  >
+                    {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                  <span className="text-4xl">✅</span>
+                </div>
+                <h3 className="text-2xl font-semibold mb-3 text-green-600">¡Sesión eliminada correctamente!</h3>
+                <p className="text-gray-600 mb-8">
+                  La sesión "{sessionToDelete.title}" ha sido eliminada.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirmModal(false);
+                    setSessionToDelete(null);
+                    setDeleteSuccess(false);
+                  }}
+                  className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black"
+                >
+                  Cerrar
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
         </div>
     );
 }
