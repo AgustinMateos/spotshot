@@ -342,12 +342,18 @@ console.log("Filtros enviados:", {
 </div>
 
             {/* Fecha */}
-            <input
-              type="date"
-              value={filters.sessionDate}
-              onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
-              className="px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 w-full md:w-auto"
-            />
+            {/* Fecha */}
+<div className="relative w-full md:w-auto">
+  <input
+    type="date"
+    value={filters.sessionDate || ''}
+    onChange={(e) => handleFilterChange('sessionDate', e.target.value)}
+    className="w-full text-base border border-gray-300 rounded-lg pl-5 pr-11 py-3 focus:outline-none focus:border-gray-900 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+  />
+  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+    <Image src="/icons/calendario.svg" width={18} height={18} alt="fecha" />
+  </div>
+</div>
 
           </div>
         </div>

@@ -35,15 +35,7 @@ const slugify = (text) => {
     let url = `/sesiones/buscar/${audienceSlug}`;
 
     if (searchLocation.trim()) {
-      // ← (2) YA NO HACE FALTA EL find() FRÁGIL. Reemplaza todo el bloque viejo:
-      //
-      // const items = activeTab === 'free' ? playas : escuelas;
-      // const matched = items.find(item => 
-      //   item.label.toLowerCase() === searchLocation.toLowerCase()
-      // );
-      // const textToSlug = matched ? matched.value : searchLocation.trim();
-      //
-      // Por esta línea simple:
+      
       const textToSlug = selectedValue || searchLocation.trim();
 
       const locationSlug = slugify(textToSlug);
@@ -70,13 +62,13 @@ return (
         <div className="inline-flex bg-white rounded-t-2xl px-1 pt-1 ">
           <div className='bg-[#F1F7FE]  p-1'><button 
             onClick={() => { setActiveTab('free'); setSearchLocation(''); setSelectedValue(''); }}
-            className={`px-6 py-2.5 font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'free' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
+            className={`px-6 py-2.5 cursor-pointer font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'free' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
           >
             Free surfers
           </button>
           <button 
             onClick={() => { setActiveTab('escuelas'); setSearchLocation(''); setSelectedValue(''); }}
-            className={`px-6 py-2.5 font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
+            className={`px-6 py-2.5 cursor-pointer font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
           >
             Escuelas
           </button></div>
