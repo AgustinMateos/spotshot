@@ -17,7 +17,7 @@ const FotosHoy = () => {
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
           <h2 className="text-white text-3xl   leading-tight max-w-2xl mb-8 drop-shadow-md">
-            ¿Todavía no tenés tus fotos de hoy?
+            ¿Todavía no tienes tus fotos de hoy?
           </h2>
 
          <Link
