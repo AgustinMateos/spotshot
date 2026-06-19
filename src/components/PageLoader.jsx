@@ -39,7 +39,7 @@ export default function PageLoader({ children }) {
         >
           <div className={`flex flex-col items-center gap-4 mb-12 transition-all duration-700 ${exiting ? 'opacity-0 -translate-y-8' : ''}`}>
             <Image
-              src="/icons/logo.svg"
+              src="/icons/logo.webp"
               alt="SpotShot"
               width={72}
               height={72}

@@ -20,7 +20,7 @@ const Footer = ({ isShotSection = false }) => {
             >
               <div className="w-7 h-7 flex items-center justify-center">
                 <Image 
-                  src="/icons/logo.svg"
+                  src="/icons/logo.webp"
                   alt="SpotShot"
                   width={400}
                   height={220}

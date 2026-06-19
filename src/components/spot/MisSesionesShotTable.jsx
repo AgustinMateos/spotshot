@@ -203,7 +203,7 @@ useEffect(() => {
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { onFilterChange('timeFrom', ''); onFilterChange('timeTo', ''); setShowTimeDropdown(false); }} className="flex-1 py-2.5 text-gray-600 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50">Limpiar</button>
-                  {/* <button onClick={() => setShowTimeDropdown(false)} className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35] cursor-pointer">Aplicar</button> */}
+                  {/* <button onClick={() => setShowTimeDropdown(false)} className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35] cursor-pointer">r</button> */}
                 </div>
               </div>
             )}

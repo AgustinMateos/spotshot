@@ -39,7 +39,7 @@ function EmptyCard() {
     <div className="relative rounded-3xl overflow-hidden h-105 bg-[#dee9f5] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3 opacity-30">
         <Image
-          src="/icons/logo.svg"   // ← tu logo, ajustá la ruta si es distinta
+          src="/icons/logo.webp"   // ← tu logo, ajustá la ruta si es distinta
           width={72}
           height={66}
           alt="SpotShot"

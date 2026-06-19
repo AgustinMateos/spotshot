@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
+
 export default function SesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { cart, addToCart, removeFromCart } = useCart();
-
+const [showPhotographerModal, setShowPhotographerModal] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -103,8 +104,7 @@ useEffect(() => {
 }, [isLightboxOpen, currentIndex, session?.images?.length]); // Dependencias importantes
 
   const closeLightbox = () => setIsLightboxOpen(false);
-// Función para formatear precios correctamente
-// Función para formatear precios (mejorada)
+// Función para formatear precios 
 const formatPrice = (price) => {
   if (price == null) return '0';
 
@@ -127,7 +127,7 @@ const formatPrice = (price) => {
     setCurrentIndex((prev) => (prev === session.images.length - 1 ? 0 : prev + 1));
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl"><Image src='/icons/logo.svg' width={120} alt='logo' height={120} /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl"><Image src='/icons/logo.webp' width={120} alt='logo' height={120} /></div>;
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
 
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
@@ -321,15 +321,22 @@ const onTouchEnd = () => {
     </button>
   ) : (
     <button
-      onClick={(e) => {
-        e.stopPropagation();
-        addToCart(img, session);
-      }}
-      className="bg-white/95 cursor-poiter hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
-      title="Agregar al carrito"
-    >
-      <ShoppingCart size={18} />
-    </button>
+  onClick={(e) => {
+    e.stopPropagation();
+    
+    // Verificar si ya hay fotos de otro fotógrafo
+    if (cart.length > 0 && cart[0].photographerId !== session.photographer?.id) {
+      setShowPhotographerModal(true);
+      return;
+    }
+
+    addToCart(img, session);
+  }}
+  className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+  title="Agregar al carrito"
+>
+  <ShoppingCart size={18} />
+</button>
   )}
 </div>
         </div>
@@ -357,62 +364,76 @@ const onTouchEnd = () => {
       )}
 
       {/* DRAWER DEL CARRITO */}
-      {isCartOpen && (
-        <div className="fixed inset-0 bg-black/70 z-200 flex justify-end">
-          <div className="bg-white w-full max-w-md h-full overflow-auto">
-            <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="text-2xl font-semibold">Tu selección ({totalPhotos})</h3>
-              <button className='cursor-pointer ' onClick={() => setIsCartOpen(false)}>
-                <X size={28} />
-              </button>
-            </div>
+      {/* DRAWER DEL CARRITO */}
+<div
+  className={`fixed inset-0 z-200 flex justify-end transition-opacity duration-300 ${
+    isCartOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+  }`}
+>
+  {/* Overlay oscuro */}
+  <div
+    className="absolute inset-0 bg-black/70"
+    onClick={() => setIsCartOpen(false)}
+  />
 
-            <div className="p-6 space-y-4">
-              {cart.map((img, idx) => (
-                <div key={img.id} className="flex gap-4 bg-gray-50 rounded-2xl p-3">
-                  <img src={img.publicUrl} className="w-20 h-20 object-cover rounded-xl" alt="" />
-                  <div className="flex-1">
-                    <p className="font-medium">Foto {idx + 1}</p>
-                    <p className="text-sm text-gray-500">{img.sessionTitle}</p>
-                    <p className="text-xs text-gray-400">{img.location}</p>
-                  </div>
-                  <button onClick={() => removeFromCart(img.id)} className="text-red-500 cursor-pointer">
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-6 border-t bg-gray-50">
-  <div className="space-y-3">
-    <div className="flex justify-between">
-      <span>Subtotal ({totalPhotos} fotos)</span>
-      <span>€{formatPrice(subtotal)}</span>
+  {/* Panel del carrito */}
+  <div
+    className={`relative bg-white w-full max-w-md h-full overflow-auto transition-transform duration-300 ease-out ${
+      isCartOpen ? 'translate-x-0' : 'translate-x-full'
+    }`}
+  >
+    <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
+      <h3 className="text-2xl font-semibold">Tu selección ({totalPhotos})</h3>
+      <button className='cursor-pointer ' onClick={() => setIsCartOpen(false)}>
+        <X size={28} />
+      </button>
     </div>
-    
-    {discount > 0 && (
-      <div className="flex justify-between text-emerald-600">
-        <span>{packName}</span>
-        <span>-€{formatPrice(discount)}</span>
+
+    <div className="p-6 space-y-4">
+      {cart.map((img, idx) => (
+        <div key={img.id} className="flex gap-4 bg-gray-50 rounded-2xl p-3">
+          <img src={img.publicUrl} className="w-20 h-20 object-cover rounded-xl" alt="" />
+          <div className="flex-1">
+            <p className="font-medium">Foto {idx + 1}</p>
+            <p className="text-sm text-gray-500">{img.sessionTitle}</p>
+            <p className="text-xs text-gray-400">{img.location}</p>
+          </div>
+          <button onClick={() => removeFromCart(img.id)} className="text-red-500 cursor-pointer">
+            <Trash2 size={20} />
+          </button>
+        </div>
+      ))}
+    </div>
+
+    <div className="p-6 border-t bg-gray-50">
+      <div className="space-y-3">
+        <div className="flex justify-between">
+          <span>Subtotal ({totalPhotos} fotos)</span>
+          <span>€{formatPrice(subtotal)}</span>
+        </div>
+
+        {discount > 0 && (
+          <div className="flex justify-between text-emerald-600">
+            <span>{packName}</span>
+            <span>-€{formatPrice(discount)}</span>
+          </div>
+        )}
+
+        <div className="flex justify-between text-xl font-bold pt-4 border-t">
+          <span>Total a pagar</span>
+          <span>€{formatPrice(totalToPay)}</span>
+        </div>
       </div>
-    )}
-    
-    <div className="flex justify-between text-xl font-bold pt-4 border-t">
-      <span>Total a pagar</span>
-      <span>€{formatPrice(totalToPay)}</span>
+
+      <button
+        onClick={() => setIsCheckoutModalOpen(true)}
+        className="w-full cursor-pointer transition-all active:scale-95 bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
+      >
+        Finalizar compra
+      </button>
     </div>
   </div>
-
-  <button 
-    onClick={() => setIsCheckoutModalOpen(true)}
-    className="w-full cursor-pointer transition-all active:scale-95 bg-[#1F2937] hover:bg-black text-white py-4 rounded-2xl mt-6 font-medium text-lg transition"
-  >
-    Finalizar compra
-  </button>
 </div>
-          </div>
-        </div>
-      )}
 
 {/* LIGHTBOX */}
 {isLightboxOpen && session && (
@@ -551,6 +572,39 @@ const onTouchEnd = () => {
           </div>
         </div>
       )}
+      {/* MODAL - RESTRICCIÓN DE FOTÓGRAFO */}
+{showPhotographerModal && (
+  <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
+    <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+      <div className="p-8 text-center">
+        <div className="mx-auto w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+          <span className="text-5xl">⚠️</span>
+        </div>
+
+        <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+          Atención
+        </h3>
+        
+        <p className="text-gray-600 leading-relaxed">
+          En esta versión solo podés comprar fotos de un mismo fotógrafo en un solo pago.
+        </p>
+        
+        <p className="text-sm text-gray-500 mt-4">
+          Para comprar fotos de otro fotógrafo, primero finalizá esta compra.
+        </p>
+      </div>
+
+      <div className="border-t border-gray-100 p-4">
+        <button
+          onClick={() => setShowPhotographerModal(false)}
+          className="w-full py-4 bg-[#1F2937] text-white rounded-2xl font-medium hover:bg-black transition"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

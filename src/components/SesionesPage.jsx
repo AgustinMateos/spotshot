@@ -331,12 +331,12 @@ console.log("Filtros enviados:", {
         >
           Limpiar
         </button>
-        <button 
+        {/* <button 
           onClick={() => setShowTimeDropdown(false)} 
           className="flex-1 py-2.5 bg-[#0D2744] text-white rounded-xl hover:bg-[#0a1f35] cursor-pointer"
         >
           Aplicar
-        </button>
+        </button> */}
       </div>
     </div>
   )}
@@ -366,7 +366,7 @@ console.log("Filtros enviados:", {
        ) : filteredSessions.length === 0 ? (
           <div className="text-center py-20">
             <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-              <img src='/icons/logo.svg' width={40} height={40} alt='logo' />
+              <img src='/icons/logo.webp' width={40} height={40} alt='logo' />
             </div>
             <h3 className="text-xl font-medium text-gray-800 mb-2">
               No se encontraron sesiones
@@ -395,7 +395,7 @@ console.log("Filtros enviados:", {
                       />
                     ) : (
                       <div className="w-full aspect-16/10 bg-gray-200 flex items-center justify-center">
-                        <img src='/icons/logo.svg' width={20} height={20} alt='logo' />
+                        <img src='/icons/logo.webp' width={20} height={20} alt='logo' />
                       </div>
                     )}
 
