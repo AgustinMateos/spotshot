@@ -7,14 +7,15 @@ import { useSearchParams, useRouter } from 'next/navigation';
 const Downloads = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const accessCode = searchParams.get('code');
 
   const [orderData, setOrderData] = useState(null);
-  const [downloads, setDownloads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(null);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://spotshot-api-six.vercel.app';
 
   // 1. Obtener información de la orden (previews)
   useEffect(() => {
@@ -27,7 +28,7 @@ const Downloads = () => {
 
       try {
         const res = await fetch(
-          `https://spotshot-api-six.vercel.app/api/v1/purchases/access/${accessCode}`,
+          `${API_URL}/api/v1/purchases/access/${accessCode}`,
           { method: 'GET' }
         );
 
@@ -55,18 +56,23 @@ const Downloads = () => {
 
     setDownloading(true);
     try {
+      const imageIds = orderData.images?.map(img => img.id) || [];
+
       const res = await fetch(
-        `https://spotshot-api-six.vercel.app/api/v1/purchases/access/${accessCode}/downloads`,
+        `${API_URL}/api/v1/purchases/access/${accessCode}/downloads`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageIds: [] }) // vacío = todas
+          body: JSON.stringify({ imageIds })
         }
       );
 
       if (!res.ok) {
+        const errorBody = await res.json().catch(() => null);
+        console.error('Status:', res.status, 'Body:', errorBody);
+
         if (res.status === 410) throw new Error("Las imágenes ya no están disponibles");
-        throw new Error("Error al generar descargas");
+        throw new Error(errorBody?.message || `Error al generar descargas (${res.status})`);
       }
 
       const { downloads: downloadLinks } = await res.json();
@@ -79,11 +85,18 @@ const Downloads = () => {
       const folder = zip.folder("SpotShot-Mis-Imágenes");
 
       const promises = downloadLinks.map(async (item, index) => {
-        const response = await fetch(item.signedUrl);
-        const blob = await response.blob();
-        
-        const fileName = `imagen-${String(index + 1).padStart(3, '0')}-${item.imageId.slice(0, 8)}.jpg`;
-        folder.file(fileName, blob);
+        try {
+          const response = await fetch(item.signedUrl);
+          if (!response.ok) {
+            console.error(`Fallo al descargar imagen ${item.imageId}:`, response.status);
+            return;
+          }
+          const blob = await response.blob();
+          const fileName = `imagen-${String(index + 1).padStart(3, '0')}-${item.imageId.slice(0, 8)}.jpg`;
+          folder.file(fileName, blob);
+        } catch (err) {
+          console.error(`Error de red en imagen ${item.imageId}:`, err);
+        }
       });
 
       await Promise.all(promises);
