@@ -7,7 +7,9 @@
 html, body {
   background-color: #103457;
 }
-
+a button {
+  cursor: pointer;
+}
 
 /* Animaciones Marquesina */
 /* Animaciones Marquesina */

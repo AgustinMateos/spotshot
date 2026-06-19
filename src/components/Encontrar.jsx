@@ -22,7 +22,7 @@ className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 w-208 h-
         <div className="relative flex flex-col md:flex-row justify-center items-center md:items-start gap-10 md:gap-8">
           
           {/* Card 1 */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 w-94 h-61.25 p-8 flex flex-col items-center md:items-start  z-10">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 w-[90%] md:w-94 h-61.25 p-8 flex flex-col items-center md:items-start  z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/lupa.svg" 
@@ -39,7 +39,7 @@ className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 w-208 h-
           </div>
 
           {/* Card 2 */}
-            <div className="bg-white rounded-3xl shadow-sm border items-center md:items-start border-gray-100 w-94 h-61.25 p-8 flex flex-col z-10">
+            <div className="bg-white rounded-3xl shadow-sm border items-center md:items-start border-gray-100 w-[90%] md:w-94 h-61.25 p-8 flex flex-col z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/elige.svg" 
@@ -56,7 +56,7 @@ className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-28.5 w-208 h-
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white rounded-3xl shadow-sm items-center md:items-start border border-gray-100 p-8 flex  flex-col w-94 h-61.25 z-10">
+          <div className="bg-white rounded-3xl shadow-sm items-center md:items-start border border-gray-100 p-8 flex  flex-col w-[90%] md:w-94 h-61.25 z-10">
             <div className="w-12 h-12 flex justify-center items-center mb-6 border-transparent rounded-xl bg-[#DEEBFB]">
               <img 
                 src="/encontrar/descargar.svg" 
