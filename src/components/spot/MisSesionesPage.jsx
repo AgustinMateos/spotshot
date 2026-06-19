@@ -184,7 +184,7 @@ if (stripeRes.status === 401 || sessionsRes.status === 401) {
             setShowDeleteConfirmModal(true);
           }}
           onCopyLink={(sessionId) => {
-            const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${sessionId}`;
+            const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
             navigator.clipboard.writeText(shareUrl).then(() => {
               setCopiedId(sessionId);
               setTimeout(() => {

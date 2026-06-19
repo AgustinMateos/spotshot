@@ -36,18 +36,18 @@ function CardSkeleton({ delay = 0 }) {
 
 export default function ShotPage() {
     const { user, token, loading: authLoading } = useAuth();
-
+ 
     const [stripeConnect, setStripeConnect] = useState(null);
     const [allSessions, setAllSessions] = useState([]);
     const [loadingInitial, setLoadingInitial] = useState(true);
     const [loadingFilters, setLoadingFilters] = useState(false);
     const [openMenuId, setOpenMenuId] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
-
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deleteSuccess, setDeleteSuccess] = useState(false);
-    const [sessionToDelete, setSessionToDelete] = useState(null);
-    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    
+      const [isDeleting, setIsDeleting] = useState(false);
+const [deleteSuccess, setDeleteSuccess] = useState(false);
+const [sessionToDelete, setSessionToDelete] = useState(null);
+const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
     const [filters, setFilters] = useState({
         search: '',
         audience: 'FREE_SURFERS',
@@ -166,49 +166,49 @@ export default function ShotPage() {
             </div>
         );
     }
-    const handleDeleteSession = async (sessionId) => {
-        if (!token || !sessionId) return;
+const handleDeleteSession = async (sessionId) => {
+    if (!token || !sessionId) return;
 
-        setIsDeleting(true);
-        setDeleteSuccess(false);
+    setIsDeleting(true);
+    setDeleteSuccess(false);
 
-        try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        
+        const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}`, {
+            method: 'DELETE',
+            headers: { 
+                Authorization: `Bearer ${token}` 
+            },
+        });
 
-            const res = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            });
-
-            if (res.status === 401) {
-                logout?.();
-                router?.replace('/login');
-                return;
-            }
-
-            if (res.ok) {
-                // Actualizar lista localmente
-                setAllSessions(prev => prev.filter(s => s.id !== sessionId));
-
-                setDeleteSuccess(true);
-
-                // Actualizar contador
-                setPagination(prev => ({
-                    ...prev,
-                    total: Math.max(0, prev.total - 1)
-                }));
-            } else {
-                alert('No se pudo eliminar la sesión');
-            }
-        } catch (err) {
-            console.error('Error al eliminar:', err);
-            alert('Error de conexión');
-        } finally {
-            setIsDeleting(false);
+        if (res.status === 401) {
+            logout?.();
+            router?.replace('/login');
+            return;
         }
-    };
+
+        if (res.ok) {
+            // Actualizar lista localmente
+            setAllSessions(prev => prev.filter(s => s.id !== sessionId));
+            
+            setDeleteSuccess(true);
+            
+            // Actualizar contador
+            setPagination(prev => ({
+                ...prev,
+                total: Math.max(0, prev.total - 1)
+            }));
+        } else {
+            alert('No se pudo eliminar la sesión');
+        }
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        alert('Error de conexión');
+    } finally {
+        setIsDeleting(false);
+    }
+};
     return (
         <div className="min-h-screen pt-20 bg-white">
             <div className="max-w-full mx-auto px-6 py-8">
@@ -224,57 +224,57 @@ export default function ShotPage() {
                     {allSessions.length === 0 && (
                         <div className="flex gap-8 justify-between  mt-10">
 
-                            <div className='flex justify-between  flex-col md:flex-row '>
-                                {/* Paso 1 - Stripe */}
-                                <div className="border md:w-[460px] border-gray-200 bg-white rounded-xl p-6">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <div className="text-xs uppercase tracking-widest text-gray-500 mb-1">Paso 1</div>
-                                            <h3 className="text-2xl text-[#0F172A] font-semibold">Conecta tu cuenta de pagos</h3>
-                                        </div>
-                                        {isStripeReady && (
-                                            <div className="bg-[#059669] text-white text-sm font-medium px-5 py-1.5 rounded-full">
-                                                Completo
-                                            </div>
-                                        )}
+                           <div className='flex justify-between  flex-col md:flex-row '>
+                             {/* Paso 1 - Stripe */}
+                            <div className="border md:w-[460px] border-gray-200 bg-white rounded-xl p-6">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <div className="text-xs uppercase tracking-widest text-gray-500 mb-1">Paso 1</div>
+                                        <h3 className="text-2xl text-[#0F172A] font-semibold">Conecta tu cuenta de pagos</h3>
                                     </div>
-                                    <p className="text-gray-600 mb-6">
-                                        Vinculá Stripe para poder publicar tus sesiones y recibir pagos automáticamente.
-                                    </p>
-                                    {isStripeReady ? (
-                                        <div className="flex items-center gap-2 text-[#71717A] font-medium">
-                                            <div className="w-2 h-2 bg-green-600 rounded-full" />
-                                            Stripe Conectado
+                                    {isStripeReady && (
+                                        <div className="bg-[#059669] text-white text-sm font-medium px-5 py-1.5 rounded-full">
+                                            Completo
                                         </div>
-                                    ) : (
-                                        <Link
-                                            href="/shot/perfil"
-                                            className="inline-block bg-[#0D2744] text-white px-6 py-3 rounded-xl font-medium hover:bg-black transition"
-                                        >
-                                            Conectar Stripe
-                                        </Link>
                                     )}
                                 </div>
-
-                                {/* Paso 2 - Crear Sesión */}
-                                <div className="p-6 md:w-[460px]">
-                                    <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Paso 2</div>
-                                    <h3 className="text-xl font-semibold mb-2">Crea tu primera sesión</h3>
-                                    <p className="text-gray-600 mb-6">
-                                        Sube tus fotos, configurá precios y publica para que los surfistas te encuentren.
-                                    </p>
+                                <p className="text-gray-600 mb-6">
+                                    Vinculá Stripe para poder publicar tus sesiones y recibir pagos automáticamente.
+                                </p>
+                                {isStripeReady ? (
+                                    <div className="flex items-center gap-2 text-[#71717A] font-medium">
+                                        <div className="w-2 h-2 bg-green-600 rounded-full" />
+                                        Stripe Conectado
+                                    </div>
+                                ) : (
                                     <Link
-                                        href="/shot/newAlbum"
-                                        className={`px-6 py-3 rounded-xl font-medium transition inline-flex items-center gap-3 ${isStripeReady
-                                            ? 'bg-gray-900 text-white hover:bg-black'
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            }`}
-                                        onClick={(e) => { if (!isStripeReady) e.preventDefault(); }}
+                                        href="/shot/perfil"
+                                        className="inline-block bg-[#0D2744] text-white px-6 py-3 rounded-xl font-medium hover:bg-black transition"
                                     >
-                                        <span className="text-xl">+</span> Crear sesión
+                                        Conectar Stripe 
                                     </Link>
-                                </div>
+                                )}
                             </div>
+
+                            {/* Paso 2 - Crear Sesión */}
+                            <div className="p-6 md:w-[460px]">
+                                <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">Paso 2</div>
+                                <h3 className="text-xl font-semibold mb-2">Crea tu primera sesión</h3>
+                                <p className="text-gray-600 mb-6">
+                                    Sube tus fotos, configurá precios y publica para que los surfistas te encuentren.
+                                </p>
+                                <Link
+                                    href="/shot/newAlbum"
+                                    className={`px-6 py-3 rounded-xl font-medium transition inline-flex items-center gap-3 ${isStripeReady
+                                        ? 'bg-gray-900 text-white hover:bg-black'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                    onClick={(e) => { if (!isStripeReady) e.preventDefault(); }}
+                                >
+                                    <span className="text-xl">+</span> Crear sesión
+                                </Link>
+                            </div>
+                           </div>
 
                             <div className="hidden w-[240px] flex  md:block">
                                 <Image height={183} width={240} alt="stripe steps" src="/icons/stripeSteps.svg" />
@@ -307,12 +307,12 @@ export default function ShotPage() {
                             onPageChange={goToPage}
                             openMenuId={openMenuId}        // ← esto faltaba
                             setOpenMenuId={setOpenMenuId}
-                            onDelete={(session) => {
-                                setSessionToDelete(session);
-                                setShowDeleteConfirmModal(true);
-                            }}
+                             onDelete={(session) => {
+            setSessionToDelete(session);
+            setShowDeleteConfirmModal(true);
+          }}
                             onCopyLink={(sessionId) => {
-                                const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${sessionId}`;
+                                const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
                                 navigator.clipboard.writeText(shareUrl).then(() => {
                                     setCopiedId(sessionId);
                                     setTimeout(() => {
@@ -344,63 +344,63 @@ export default function ShotPage() {
                 )}
 
             </div>
-           {showDeleteConfirmModal && sessionToDelete && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center max-h-[90vh] overflow-y-auto">
-                        {!deleteSuccess ? (
-                            <>
-                                <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
-                                    <span className="text-4xl">🗑️</span>
-                                </div>
-                                <h3 className="text-2xl font-semibold mb-3">¿Eliminar esta sesión?</h3>
-                                <p className="text-gray-600 mb-8">
-                                    Se eliminará permanentemente la sesión:<br />
-                                    <strong>"{sessionToDelete.title}"</strong>
-                                </p>
-                                <div className="flex gap-4">
-                                    <button
-                                        onClick={() => {
-                                            setShowDeleteConfirmModal(false);
-                                            setSessionToDelete(null);
-                                            setDeleteSuccess(false);
-                                        }}
-                                        className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteSession(sessionToDelete.id)}
-                                        disabled={isDeleting}
-                                        className="flex-1 py-3.5 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
-                                    >
-                                        {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                                    <span className="text-4xl">✅</span>
-                                </div>
-                                <h3 className="text-2xl font-semibold mb-3 text-green-600">¡Sesión eliminada correctamente!</h3>
-                                <p className="text-gray-600 mb-8">
-                                    La sesión "{sessionToDelete.title}" ha sido eliminada.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteConfirmModal(false);
-                                        setSessionToDelete(null);
-                                        setDeleteSuccess(false);
-                                    }}
-                                    className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black"
-                                >
-                                    Cerrar
-                                </button>
-                            </>
-                        )}
-                    </div>
+            {showDeleteConfirmModal && sessionToDelete && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+            {!deleteSuccess ? (
+              <>
+                <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                  <span className="text-4xl">🗑️</span>
                 </div>
+                <h3 className="text-2xl font-semibold mb-3">¿Eliminar esta sesión?</h3>
+                <p className="text-gray-600 mb-8">
+                  Se eliminará permanentemente la sesión:<br />
+                  <strong>"{sessionToDelete.title}"</strong>
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirmModal(false);
+                      setSessionToDelete(null);
+                      setDeleteSuccess(false);
+                    }}
+                    className="flex-1 py-3.5 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSession(sessionToDelete.id)}
+                    disabled={isDeleting}
+                    className="flex-1 py-3.5 bg-red-600 text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+                  >
+                    {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                  <span className="text-4xl">✅</span>
+                </div>
+                <h3 className="text-2xl font-semibold mb-3 text-green-600">¡Sesión eliminada correctamente!</h3>
+                <p className="text-gray-600 mb-8">
+                  La sesión "{sessionToDelete.title}" ha sido eliminada.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirmModal(false);
+                    setSessionToDelete(null);
+                    setDeleteSuccess(false);
+                  }}
+                  className="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-medium hover:bg-black"
+                >
+                  Cerrar
+                </button>
+              </>
             )}
+          </div>
+        </div>
+      )}
         </div>
     );
 }
