@@ -10,7 +10,7 @@ export default function MisSesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
-const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -21,11 +21,12 @@ const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [deletingImageId, setDeletingImageId] = useState(null);
-const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
-const [imageToDelete, setImageToDelete] = useState(null);
-const [successMessage, setSuccessMessage] = useState('');
-const [uploading, setUploading] = useState(false);
-const fileInputRef = useRef(null);
+  const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [selectedPacks, setSelectedPacks] = useState([]);
   // Form data para editar
   const [formData, setFormData] = useState({
     audience: '',
@@ -33,7 +34,7 @@ const fileInputRef = useRef(null);
     schoolName: '',
     startTime: '',
     endTime: '',
-    unitPriceCustomerEur: 0,
+    unitPriceCustomer: 0,
   });
 
   // Cargar detalle
@@ -50,16 +51,15 @@ const fileInputRef = useRef(null);
         const data = await res.json();
         if (res.ok) {
           setSession(data);
-          
-    setFormData({
-  audience: data.audience || 'FREE_SURFERS',
-  location: data.location || '',
-  schoolName: data.schoolName || '',
-  startTime: data.startTime ? data.startTime.slice(0, 5) : '',
-  endTime: data.endTime ? data.endTime.slice(0, 5) : '',
-  unitPriceCustomerEur: data.pricing?.unitPriceCustomerEur || 
-                       data.pricing?.unitPricePhotographerEur || 5,
-});
+
+          setFormData({
+            audience: data.audience || 'FREE_SURFERS',
+            location: data.location || '',
+            schoolName: data.schoolName || '',
+            startTime: data.startTime ? data.startTime.slice(0, 5) : '',
+            endTime: data.endTime ? data.endTime.slice(0, 5) : '',
+            unitPriceCustomer: data.pricing?.unitPriceCustomer ?? 5,
+          });
         } else {
           router.push('/shot/misSesiones');
         }
@@ -73,49 +73,56 @@ const fileInputRef = useRef(null);
 
     fetchSession();
   }, [id, token, router]);
-const handlePublish = async () => {
-  if (!session) return;
+  const handlePublish = async () => {
+    if (!session) return;
 
-  setPublishing(true);
-  setErrorMessage('');
+    setPublishing(true);
+    setErrorMessage('');
 
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/publish`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    if (res.ok) {
-  const updatedSession = await res.json();
-  setSession(updatedSession);
-  
-  setSuccessMessage("¡Sesión publicada correctamente!");
-  setShowSuccess(true);
+      if (res.ok) {
+        const updatedSession = await res.json();
+        setSession(updatedSession);
 
-  // Opcional: ocultar el mensaje después de 4 segundos
-  setTimeout(() => setShowSuccess(false), 4000);
-} else {
-      const errorData = await res.json().catch(() => ({}));
-      
-      if (res.status === 409) {
-        alert('Esta sesión ya fue publicada.');
-      } else if (res.status === 400) {
-        alert(errorData.message || 'Faltan requisitos: precio o fotos mínimas.');
+        setSuccessMessage("¡Sesión publicada correctamente!");
+        setShowSuccess(true);
+
+        // Opcional: ocultar el mensaje después de 4 segundos
+        setTimeout(() => setShowSuccess(false), 4000);
       } else {
-        alert(errorData.message || 'No se pudo publicar la sesión');
+        const errorData = await res.json().catch(() => ({}));
+
+        if (res.status === 409) {
+          alert('Esta sesión ya fue publicada.');
+        } else if (res.status === 400) {
+          alert(errorData.message || 'Faltan requisitos: precio o fotos mínimas.');
+        } else {
+          alert(errorData.message || 'No se pudo publicar la sesión');
+        }
       }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al publicar');
+    } finally {
+      setPublishing(false);
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error de conexión al publicar');
-  } finally {
-    setPublishing(false);
-  }
+  };
+  const togglePack = (packId) => {
+  setSelectedPacks(prev =>
+    prev.includes(packId)
+      ? prev.filter(id => id !== packId)
+      : [...prev, packId]
+  );
 };
   // Eliminar sesión
   const handleDelete = async () => {
@@ -128,14 +135,14 @@ const handlePublish = async () => {
       });
 
       if (res.ok) {
-  setShowDeleteModal(false);
-  setSuccessMessage("Sesión eliminada correctamente");
-  setShowSuccess(true);
+        setShowDeleteModal(false);
+        setSuccessMessage("Sesión eliminada correctamente");
+        setShowSuccess(true);
 
-  setTimeout(() => {
-    router.push('/shot/misSesiones');
-  }, 1800);
-} else {
+        setTimeout(() => {
+          router.push('/shot/misSesiones');
+        }, 1800);
+      } else {
         alert('No se pudo eliminar la sesión');
       }
     } catch (err) {
@@ -146,91 +153,91 @@ const handlePublish = async () => {
     }
   };
   const handleDeleteImage = async () => {
-  if (!imageToDelete) return;
+    if (!imageToDelete) return;
 
-  setDeletingImageId(imageToDelete.id);
+    setDeletingImageId(imageToDelete.id);
 
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-    const res = await fetch(
-      `${API_URL}/api/v1/photo-sessions/${id}/images/${imageToDelete.id}`,
-      {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(
+        `${API_URL}/api/v1/photo-sessions/${id}/images/${imageToDelete.id}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.ok) {
+        // Actualizar la sesión localmente (sin recargar toda la página)
+        setSession(prev => ({
+          ...prev,
+          images: prev.images.filter(img => img.id !== imageToDelete.id),
+          photoCount: prev.photoCount - 1,
+        }));
+
+        setShowDeleteImageModal(false);
+      } else {
+        alert('No se pudo eliminar la foto');
       }
-    );
-
-    if (res.ok) {
-      // Actualizar la sesión localmente (sin recargar toda la página)
-      setSession(prev => ({
-        ...prev,
-        images: prev.images.filter(img => img.id !== imageToDelete.id),
-        photoCount: prev.photoCount - 1,
-      }));
-
-      setShowDeleteImageModal(false);
-    } else {
-      alert('No se pudo eliminar la foto');
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar la foto');
+    } finally {
+      setDeletingImageId(null);
+      setImageToDelete(null);
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error al eliminar la foto');
-  } finally {
-    setDeletingImageId(null);
-    setImageToDelete(null);
-  }
-};
-const handleUploadImages = async (e) => {
-  const files = Array.from(e.target.files);
-  if (files.length === 0) return;
+  };
+  const handleUploadImages = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-  if (files.length > 20) {
-    alert("Máximo 20 fotos por subida");
-    return;
-  }
-
-  setUploading(true);
-
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const formData = new FormData();
-
-    files.forEach(file => {
-      formData.append('files', file);   // ← Campo correcto según tu API
-    });
-
-    const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/images`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (res.ok) {
-      const updatedSession = await res.json();
-      
-      setSession(updatedSession); // Actualizamos toda la sesión con la respuesta
-      
-      setSuccessMessage(`${files.length} foto(s) subidas correctamente`);
-      setShowSuccess(true);
-      
-      // Ocultar mensaje después de 4 segundos
-      setTimeout(() => setShowSuccess(false), 4000);
-
-    } else {
-      const errorData = await res.json().catch(() => ({}));
-      alert(errorData.message || "Error al subir las fotos");
+    if (files.length > 20) {
+      alert("Máximo 20 fotos por subida");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Error de conexión al subir las fotos");
-  } finally {
-    setUploading(false);
-    e.target.value = ''; // Limpiar input
-  }
-};
+
+    setUploading(true);
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const formData = new FormData();
+
+      files.forEach(file => {
+        formData.append('files', file);   // ← Campo correcto según tu API
+      });
+
+      const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}/images`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const updatedSession = await res.json();
+
+        setSession(updatedSession); // Actualizamos toda la sesión con la respuesta
+
+        setSuccessMessage(`${files.length} foto(s) subidas correctamente`);
+        setShowSuccess(true);
+
+        // Ocultar mensaje después de 4 segundos
+        setTimeout(() => setShowSuccess(false), 4000);
+
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.message || "Error al subir las fotos");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión al subir las fotos");
+    } finally {
+      setUploading(false);
+      e.target.value = ''; // Limpiar input
+    }
+  };
  const handleUpdate = async () => {
   setUpdating(true);
   setErrorMessage('');
@@ -238,13 +245,20 @@ const handleUploadImages = async (e) => {
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+    const allPackIds = session.pricing?.packs?.map(p => p.packId) || [];
+    const packsPayload = allPackIds.map(packId => ({
+      packId,
+      enabled: selectedPacks.includes(packId),
+    }));
+
     const payload = {
       audience: formData.audience,
       location: formData.location || null,
       schoolName: formData.schoolName || null,
       startTime: formData.startTime,
       endTime: formData.endTime,
-      unitPriceCustomerEur: Number(formData.unitPriceCustomerEur),   // ← Cambiado aquí
+      unitPriceCustomerEur: Number(formData.unitPriceCustomer),
+      packs: packsPayload,
     };
 
     const res = await fetch(`${API_URL}/api/v1/photo-sessions/${id}`, {
@@ -272,73 +286,73 @@ const handleUploadImages = async (e) => {
     setUpdating(false);
   }
 };
-if (loading) {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6 py-8">
 
-        {/* Breadcrumb Skeleton */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-          <span className="text-gray-300">›</span>
-          <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-
-        {/* Botones Skeleton */}
-        <div className="flex justify-end gap-3 mb-8">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-11 w-32 bg-gray-200 rounded-xl animate-pulse"></div>
-          ))}
-        </div>
-
-        {/* Banner Grande Skeleton */}
-        <div className="relative h-105 rounded-3xl overflow-hidden mb-10 bg-gray-200 animate-pulse">
-          <div className="absolute bottom-10 left-10 space-y-3">
-            <div className="h-12 w-96 bg-gray-300/80 rounded-lg animate-pulse"></div>
-            <div className="h-8 w-64 bg-gray-300/80 rounded-lg animate-pulse"></div>
+          {/* Breadcrumb Skeleton */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+            <span className="text-gray-300">›</span>
+            <div className="h-4 w-52 bg-gray-200 rounded animate-pulse"></div>
           </div>
-        </div>
 
-        {/* Info publicación */}
-        <div className="flex justify-between mb-10">
-          <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-5 w-48 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-
-        {/* Precio y Packs Skeleton */}
-        <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
-          <div className="h-8 w-40 bg-gray-200 rounded animate-pulse mb-8"></div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2].map(i => (
-              <div key={i} className="border border-gray-200 rounded-2xl p-5 bg-white">
-                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-              </div>
+          {/* Botones Skeleton */}
+          <div className="flex justify-end gap-3 mb-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-11 w-32 bg-gray-200 rounded-xl animate-pulse"></div>
             ))}
           </div>
-        </div>
 
-        {/* Galería Skeleton */}
-        <div>
-          <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-6"></div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
-              >
-                {/* Número falso */}
-                <div className="absolute bottom-3 right-3 h-5 w-5 bg-gray-300/70 rounded-full"></div>
-              </div>
-            ))}
+          {/* Banner Grande Skeleton */}
+          <div className="relative h-105 rounded-3xl overflow-hidden mb-10 bg-gray-200 animate-pulse">
+            <div className="absolute bottom-10 left-10 space-y-3">
+              <div className="h-12 w-96 bg-gray-300/80 rounded-lg animate-pulse"></div>
+              <div className="h-8 w-64 bg-gray-300/80 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Info publicación */}
+          <div className="flex justify-between mb-10">
+            <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-5 w-48 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+
+          {/* Precio y Packs Skeleton */}
+          <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
+            <div className="h-8 w-40 bg-gray-200 rounded animate-pulse mb-8"></div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2].map(i => (
+                <div key={i} className="border border-gray-200 rounded-2xl p-5 bg-white">
+                  <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Galería Skeleton */}
+          <div>
+            <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-6"></div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
+                >
+                  {/* Número falso */}
+                  <div className="absolute bottom-3 right-3 h-5 w-5 bg-gray-300/70 rounded-full"></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
   if (!session) return <div className="min-h-screen flex items-center justify-center">Sesión no encontrada</div>;
 
   const photographerName = session.photographer?.firstName && session.photographer?.lastName
@@ -374,87 +388,100 @@ if (loading) {
         </div>
         <div className='w-full flex-col md:flex-row flex justify-between'>
           <div><p className='text-[24px] font-medium text-[#10487C] pb-5 md:pb-0'>Detalle de la Sesión</p></div>
-{/* Botones de acción */}
-<div className="flex justify-end gap-3 mb-8 flex-wrap">
+          {/* Botones de acción */}
+          <div className="flex justify-end gap-3 mb-8 flex-wrap">
 
-  {/* Copiar Link - Solo mostrar si NO es borrador */}
-  {session.status !== 'DRAFT' && (
-    <button
-      onClick={() => {
-        const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          setIsLinkCopied(true);
-          setTimeout(() => setIsLinkCopied(false), 2500);
-        });
-      }}
-      className={`flex items-center cursor-pointer gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${
-        isLinkCopied 
-          ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
-          : 'border-gray-300 hover:bg-gray-50'
-      }`}
-      disabled={isLinkCopied}
-    >
-      <img 
-        src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'} 
-        alt="copiar" 
-        className="w-5 h-5" 
-      />
-      <span className="hidden md:inline font-medium">
-        {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
-      </span>
-    </button>
-  )}
+            {/* Copiar Link - Solo mostrar si NO es borrador */}
+            {session.status !== 'DRAFT' && (
+              <button
+                onClick={() => {
+                  const shareUrl = `https://spotshot-rho.vercel.app/sesiones/${id}`;
+                  navigator.clipboard.writeText(shareUrl).then(() => {
+                    setIsLinkCopied(true);
+                    setTimeout(() => setIsLinkCopied(false), 2500);
+                  });
+                }}
+                className={`flex items-center cursor-pointer gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${isLinkCopied
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                disabled={isLinkCopied}
+              >
+                <img
+                  src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'}
+                  alt="copiar"
+                  className="w-5 h-5"
+                />
+                <span className="hidden md:inline font-medium">
+                  {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
+                </span>
+              </button>
+            )}
 
-  {/* Eliminar */}
-  <button
-    onClick={() => setShowDeleteModal(true)}
-    className="flex items-center cursor-pointer gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700 transition"
-  >
-    <img src='/icons/trashwhite.svg' alt="eliminar" className="w-5 h-5" />
-    <span className="hidden md:inline">Eliminar</span>
-  </button>
+            {/* Eliminar */}
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="flex items-center cursor-pointer gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl hover:bg-red-700 transition"
+            >
+              <img src='/icons/trashwhite.svg' alt="eliminar" className="w-5 h-5" />
+              <span className="hidden md:inline">Eliminar</span>
+            </button>
 
-  {/* Editar */}
-  <button
-    onClick={() => setShowEditModal(true)}
-    className="flex items-center cursor-pointer gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition"
-  >
-    <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
-    <span className="hidden md:inline">Editar</span>
-  </button>
+           <button
+  onClick={() => {
+    setFormData({
+      audience: session.audience || 'FREE_SURFERS',
+      location: session.location || '',
+      schoolName: session.schoolName || '',
+      startTime: session.startTime ? session.startTime.slice(0, 5) : '',
+      endTime: session.endTime ? session.endTime.slice(0, 5) : '',
+      unitPriceCustomer: session.pricing?.unitPriceCustomer ?? 5,
+    });
+    setSelectedPacks(
+      session.pricing?.packs
+        ?.filter(p => p.enabledByPhotographer)
+        .map(p => p.packId) || []
+    );
+    setShowEditModal(true);
+  }}
+  className="flex items-center cursor-pointer gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition"
+>
+  <img src='/icons/editar.svg' alt="editar" className="w-5 h-5" />
+  <span className="hidden md:inline">Editar</span>
+</button>
 
-  {/* Publicar - Solo en DRAFT */}
-  {session.status === 'DRAFT' && (
-    <button
-      onClick={handlePublish}
-      disabled={publishing}
-      className="flex cursor-pointer items-center gap-2 bg-[#103457] hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition font-medium disabled:opacity-70"
-    >
-      {publishing ? (
-        <>Publicando<span className="animate-pulse">...</span></>
-      ) : (
-        <>Publicar Sesión</>
-      )}
-    </button>
-  )}
+            {/* Publicar - Solo en DRAFT */}
+            {session.status === 'DRAFT' && (
+              <button
+                onClick={handlePublish}
+                disabled={publishing}
+                className="flex cursor-pointer items-center gap-2 bg-[#103457] hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition font-medium disabled:opacity-70"
+              >
+                {publishing ? (
+                  <>Publicando<span className="animate-pulse">...</span></>
+                ) : (
+                  <>Publicar Sesión</>
+                )}
+              </button>
+            )}
 
-</div>
           </div>
+        </div>
         {/* Banner grande */}
-       
-          {/* <img
+
+        {/* <img
             src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
             alt={session.title}
             fill
             className="object-cover"
           /> */}
-         <div className="relative rounded-3xl overflow-hidden h-80 mb-10">
-              <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-8 left-8 text-white">
+        <div className="relative rounded-3xl overflow-hidden h-80 mb-10">
+          <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+          <div className="absolute bottom-8 left-8 text-white">
             <h1 className="text-5xl font-bold mb-2">{session.titleShort}</h1>
             <p className="text-2xl opacity-90">{session.location || session.schoolName}</p>
-<p className="text-sm opacity-90 mt-1">{session.startTime} - {session.endTime}</p>
+            <p className="text-sm opacity-90 mt-1">{session.startTime} - {session.endTime}</p>
           </div>
         </div>
 
@@ -484,9 +511,10 @@ if (loading) {
           <div className="flex justify-between items-start mb-8">
             <div>
               <p className="text-gray-500">Precio por foto</p>
-           <p className="text-5xl font-bold">
-  €{session.pricing?.unitPriceCustomerEur || session.pricing?.unitPriceCustomer || 0}
-</p>  </div>
+              <p className="text-5xl font-bold">
+                €{session.pricing?.unitPriceCustomer ?? 0}
+              </p>
+            </div>
           </div>
 
           <div>
@@ -524,68 +552,68 @@ if (loading) {
 
         {/* Galería de fotos */}
         {/* Galería de fotos */}
-<div>
-  <div className="flex justify-between items-center mb-6">
-    <h3 className="text-2xl font-semibold">
-      {session.photoCount} fotos en esta sesión
-    </h3>
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-semibold">
+              {session.photoCount} fotos en esta sesión
+            </h3>
 
-    {/* Botón Subir más fotos - Solo en DRAFT */}
-    {session.status === 'DRAFT' && (
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="flex  items-center cursor-pointer gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl transition disabled:opacity-70"
-      >
-        {uploading ? (
-          <>Subiendo fotos...</>
-        ) : (
-          <>
-            <img src="/icons/trashwhite.svg" alt="subir" className="w-5 h-5" />
-            Subir más fotos
-          </>
-        )}
-      </button>
-    )}
+            {/* Botón Subir más fotos - Solo en DRAFT */}
+            {session.status === 'DRAFT' && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex  items-center cursor-pointer gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl transition disabled:opacity-70"
+              >
+                {uploading ? (
+                  <>Subiendo fotos...</>
+                ) : (
+                  <>
+                    <img src="/icons/trashwhite.svg" alt="subir" className="w-5 h-5" />
+                    Subir más fotos
+                  </>
+                )}
+              </button>
+            )}
 
-    {/* Input oculto */}
-    <input
-      ref={fileInputRef}
-      type="file"
-      multiple
-      accept="image/jpeg,image/png,image/webp"
-      className="hidden"
-      onChange={handleUploadImages}
-    />
-  </div>
+            {/* Input oculto */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleUploadImages}
+            />
+          </div>
 
-  {/* Grid de imágenes */}
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-    {session.images.map((img, index) => (
-      <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
-        <img
-          src={img.publicUrl}
-          alt={`Foto ${index + 1}`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-        />
+          {/* Grid de imágenes */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {session.images.map((img, index) => (
+              <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
+                <img
+                  src={img.publicUrl}
+                  alt={`Foto ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
 
-        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-          {index + 1}
+                <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+                  {index + 1}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setImageToDelete(img);
+                    setShowDeleteImageModal(true);
+                  }}
+                  className="absolute top-3 cursor-pointer right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
+                >
+                  <img src='/icons/trashwhite.svg' alt="eliminar" className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-
-        <button
-          onClick={() => {
-            setImageToDelete(img);
-            setShowDeleteImageModal(true);
-          }}
-          className="absolute top-3 cursor-pointer right-3 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700"
-        >
-          <img src='/icons/trashwhite.svg' alt="eliminar" className="w-4 h-4" />
-        </button>
-      </div>
-    ))}
-  </div>
-</div>
       </div>
 
       {/* ==================== MODAL DE CONFIRMACIÓN ==================== */}
@@ -674,25 +702,69 @@ if (loading) {
               </div>
 
               <div>
-  <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
-  <input
-    type="number"
-    step="0.5"
-    min="1"
-    value={formData.unitPriceCustomerEur ?? ''}   // ← Corregido
-    onChange={(e) => setFormData({ 
-      ...formData, 
-      unitPriceCustomerEur: e.target.value 
-    })}
-    className="w-full border border-gray-300 rounded-xl p-3"
-  />
+                <label className="block text-sm text-gray-600 mb-1">Precio por foto (€)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="1"
+                  value={formData.unitPriceCustomer ?? ''}   // ← Corregido
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    unitPriceCustomer: e.target.value
+                  })}
+                  className="w-full border border-gray-300 rounded-xl p-3"
+                />
+              </div>
+              {/* Packs por volumen */}
+<div>
+  <div className="flex items-center justify-between mb-3">
+    <label className="block text-sm text-gray-600">Packs por volumen</label>
+    <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+      {session.photoCount} fotos en esta sesión
+    </span>
+  </div>
+
+  {session.photoCount < 5 ? (
+    <p className="text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded-xl p-3">
+      Necesitás al menos 5 fotos para activar packs
+    </p>
+  ) : (
+    <div className="space-y-2">
+      {session.pricing?.packs
+        ?.filter(pack => pack.photoQuantity <= session.photoCount)
+        .map(pack => (
+          <div
+            key={pack.packId}
+            className="flex items-center justify-between bg-gray-50 rounded-xl p-3 border border-gray-100"
+          >
+            <div>
+              <p className="font-medium text-sm">{pack.label}</p>
+              <p className="text-xs text-gray-500">
+                {pack.discountPercent}% OFF • {pack.photoQuantity} fotos
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedPacks.includes(pack.packId)}
+                onChange={() => togglePack(pack.packId)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-[#0D2744] transition"></div>
+              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5"></div>
+            </label>
+          </div>
+        ))}
+    </div>
+  )}
 </div>
             </div>
 
             <div className="flex gap-4 mt-8">
               <button
                 onClick={() => { setShowEditModal(false); setErrorMessage(''); }}
-                className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+                className="flex-1 cursor-pointer py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
               >
                 Cancelar
               </button>
@@ -708,40 +780,40 @@ if (loading) {
         </div>
       )}
       {/* ==================== MENSAJE DE ÉXITO ==================== */}
-    {/* MENSAJE DE ÉXITO DINÁMICO */}
-{showSuccess && (
-  <div className="fixed bottom-8 right-8 bg-[#103457] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
-    <span className="text-2xl">✅</span>
-    <span className="font-medium">{successMessage}</span>
-  </div>
-)}
+      {/* MENSAJE DE ÉXITO DINÁMICO */}
+      {showSuccess && (
+        <div className="fixed bottom-8 right-8 bg-[#103457] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
+          <span className="text-2xl">✅</span>
+          <span className="font-medium">{successMessage}</span>
+        </div>
+      )}
       {/* Modal Eliminar Foto Individual */}
-{showDeleteImageModal && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
-      <h3 className="text-2xl font-semibold mb-4">¿Eliminar esta foto?</h3>
-      <p className="text-gray-600 mb-8">
-        Esta acción no se puede deshacer.
-      </p>
+      {showDeleteImageModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-2xl font-semibold mb-4">¿Eliminar esta foto?</h3>
+            <p className="text-gray-600 mb-8">
+              Esta acción no se puede deshacer.
+            </p>
 
-      <div className="flex gap-4">
-        <button
-          onClick={() => setShowDeleteImageModal(false)}
-          className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleDeleteImage}
-          disabled={deletingImageId}
-          className="flex-1 py-3 bg-red-600 cursor-pointer text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
-        >
-          {deletingImageId ? 'Eliminando...' : 'Sí, eliminar foto'}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowDeleteImageModal(false)}
+                className="flex-1 py-3 border border-gray-300 rounded-2xl font-medium hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteImage}
+                disabled={deletingImageId}
+                className="flex-1 py-3 bg-red-600 cursor-pointer text-white rounded-2xl font-medium hover:bg-red-700 disabled:opacity-70"
+              >
+                {deletingImageId ? 'Eliminando...' : 'Sí, eliminar foto'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

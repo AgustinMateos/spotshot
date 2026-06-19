@@ -467,19 +467,15 @@ if (await handleAuthError(res)) return;
       const data = await res.json();
       console.log("📥 Respuesta PATCH:", { status: res.status, data });
 
-      // Verificamos el precio real guardado
-      const serverPrice = data?.pricing?.unitPricePhotographerEur ||
-        data?.pricing?.unitPriceCustomerEur;
+      const serverCustomerPrice = data?.pricing?.unitPriceCustomerEur;
 
-      console.log("💰 Precio según backend:", serverPrice);
-
-      if (serverPrice && serverPrice > 0) {
-        setFormData(prev => ({ ...prev, basePrice: Number(serverPrice) }));
-        // alert("✅ Precio guardado correctamente");
-        setStep(4);
-      } else {
-        alert("Error: El precio no se guardó. Revisa la consola.");
-      }
+if (serverCustomerPrice && serverCustomerPrice > 0) {
+  setFormData(prev => ({ ...prev, basePrice: Number(serverCustomerPrice) }));
+  setStep(4);
+} else {
+  // si el backend no devuelve unitPriceCustomerEur, no toques basePrice
+  setStep(4);
+}
     } catch (err) {
       console.error(err);
       alert('Error de conexión');
@@ -612,7 +608,7 @@ if (await handleAuthError(res)) return;
     }));
   };
 
-  const commissionRate = 0.20; // ← Cambiado a 20%
+  const commissionRate = 0.20; 
   const finalPrice = formData.basePrice > 0
     ? (formData.basePrice * (1 - commissionRate)).toFixed(2)
     : '—';
@@ -1082,7 +1078,7 @@ if (await handleAuthError(res)) return;
               <div className="flex justify-between items-center">
                 <p className="font-medium">Comisión Spotshot (20%)</p>
                 <div className="text-right">
-                  <p className="font-medium">Precio final para el fotógrafo por foto</p>
+                  <p className="font-medium">Precio final por foto</p>
                   <p className="text-2xl font-semibold text-emerald-600">€{finalPrice}</p>
                 </div>
               </div>
