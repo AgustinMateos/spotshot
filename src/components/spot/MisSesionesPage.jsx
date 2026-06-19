@@ -5,10 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import MisSesionesTable from './MisSesionesShotTable';
-
+import { useRouter } from 'next/navigation';
 export default function MisSesionesPage() {
-  const { token } = useAuth();
-
+  const router = useRouter();
+  const { token, logout, loading: authLoading } = useAuth();
   const [stripeConnect, setStripeConnect] = useState(undefined);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -20,6 +20,7 @@ export default function MisSesionesPage() {
     hasPreviousPage: false,
     hasNextPage: false,
   });
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -58,14 +59,19 @@ export default function MisSesionesPage() {
 
       try {
         const [stripeRes, sessionsRes] = await Promise.all([
-          fetch(`${API_URL}/api/v1/photographers/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+  fetch(`${API_URL}/api/v1/photographers/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+  fetch(`${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+]);
 
+// Dentro del loadAll, después de los fetch:
+if (stripeRes.status === 401 || sessionsRes.status === 401) {
+  setShowExpiredModal(true);
+  return;
+}
         const [stripeData, sessionsData] = await Promise.all([
           stripeRes.json(),
           sessionsRes.json(),
@@ -90,7 +96,7 @@ export default function MisSesionesPage() {
     };
 
     loadAll();
-  }, [token, filters, pagination.page]);
+  }, [token, filters,logout, pagination.page]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -252,6 +258,33 @@ export default function MisSesionesPage() {
           </div>
         </div>
       )}
+      {/* MODAL SESIÓN EXPIRADA */}
+{showExpiredModal && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+      <div className="mx-auto w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
+        <span className="text-5xl">⏰</span>
+      </div>
+
+      <h3 className="text-2xl font-semibold mb-3">Tu sesión ha expirado</h3>
+      <p className="text-gray-600 mb-8">
+        Por seguridad, hemos cerrado tu sesión.<br />
+        Por favor inicia sesión nuevamente.
+      </p>
+
+      <button
+        onClick={() => {
+          setShowExpiredModal(false);
+          logout();
+          router.replace('/login');
+        }}
+        className="w-full py-3.5 bg-[#0D2744] text-white rounded-2xl font-medium hover:bg-black transition"
+      >
+        Ir al Login
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

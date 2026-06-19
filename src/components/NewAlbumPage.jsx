@@ -695,7 +695,7 @@ if (await handleAuthError(res)) return;
             <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-73 h-12.25 mb-8">
               <button
                 onClick={() => updateForm('type', 'free-surfers')}
-                className={`px-8  rounded-lg font-medium transition-all ${formData.type === 'free-surfers'
+                className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${formData.type === 'free-surfers'
                   ? 'bg-white text-[#1E3A5F] shadow-sm'
                   : 'bg-transparent text-[#71717A] hover:text-gray-700'
                   }`}
@@ -704,7 +704,7 @@ if (await handleAuthError(res)) return;
               </button>
               <button
                 onClick={() => updateForm('type', 'escuelas')}
-                className={`px-8  rounded-lg font-medium transition-all ${formData.type === 'escuelas'
+                className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${formData.type === 'escuelas'
                   ? 'bg-white text-[#1E3A5F] shadow-sm'
                   : 'bg-transparent text-[#71717A] hover:text-gray-700'
                   }`}

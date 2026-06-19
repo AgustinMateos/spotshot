@@ -448,7 +448,7 @@ if (loading) {
             fill
             className="object-cover"
           /> */}
-         \<div className="relative rounded-3xl overflow-hidden h-80 mb-10">
+         <div className="relative rounded-3xl overflow-hidden h-80 mb-10">
               <img src="/banner-surf.png" alt="Sesión" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-8 left-8 text-white">
