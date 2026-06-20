@@ -157,6 +157,7 @@ export default function SesionesRecientes() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          
           {sessions.map((session) => {
             const daysLeft = getDaysRemaining(session.activeUntil);
             return (
@@ -165,6 +166,10 @@ export default function SesionesRecientes() {
                 key={session.id}
                 className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 h-105"
               >
+                {/* Watermark */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className=" font-bold -rotate-12 tracking-widest"><Image src='/icons/logo.webp' width={60} height={60} alt='logo'/></div>
+                        </div>
                 <img
                   src={session.images?.[0]?.publicUrl || '/placeholder-surf.jpg'}
                   alt={session.title || 'Sesión de surf'}

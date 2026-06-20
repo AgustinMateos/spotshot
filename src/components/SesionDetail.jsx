@@ -26,6 +26,7 @@ const [scale, setScale] = useState(1);
 const [lastTap, setLastTap] = useState(0);
 const [pinchStartDistance, setPinchStartDistance] = useState(null);
 const [translate, setTranslate] = useState({ x: 0, y: 0 });
+const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -173,8 +174,14 @@ const onTouchStart = (e) => {
   }
   setLastTap(now);
 
-  // Swipe solo si no está con zoom
-  if (scale === 1) {
+  if (scale > 1) {
+    // Si está con zoom, preparamos el pan
+    setPanStart({
+      x: e.targetTouches[0].clientX - translate.x,
+      y: e.targetTouches[0].clientY - translate.y,
+    });
+  } else {
+    // Si no hay zoom, preparamos el swipe normal
     setTouchEnd(0);
     setTouchStart(e.targetTouches[0].clientX);
   }
@@ -190,7 +197,21 @@ const onTouchMove = (e) => {
     return;
   }
 
-  // Swipe solo si no está con zoom
+  if (scale > 1 && e.touches.length === 1) {
+    // Pan: mover la imagen con el dedo
+    const newX = e.targetTouches[0].clientX - panStart.x;
+    const newY = e.targetTouches[0].clientY - panStart.y;
+
+    // Límite de movimiento para que no se vaya demasiado lejos
+    const maxOffset = 150 * (scale - 1);
+    const clampedX = Math.min(Math.max(newX, -maxOffset), maxOffset);
+    const clampedY = Math.min(Math.max(newY, -maxOffset), maxOffset);
+
+    setTranslate({ x: clampedX, y: clampedY });
+    return;
+  }
+
+  // Swipe normal solo si no hay zoom
   if (scale === 1 && e.touches.length === 1) {
     setTouchEnd(e.targetTouches[0].clientX);
   }
@@ -201,7 +222,6 @@ const onTouchEnd = (e) => {
     setPinchStartDistance(null);
   }
 
-  // Snap: si quedó casi en 1, resetear bien
   if (scale < 1.1) {
     setScale(1);
     setTranslate({ x: 0, y: 0 });
@@ -537,17 +557,20 @@ const onTouchEnd = (e) => {
   onTouchMove={onTouchMove}
   onTouchEnd={onTouchEnd}
 >
-        <img
+      <img
   src={session.images[currentIndex].publicUrl}
   alt={`Foto ${currentIndex + 1}`}
-  className="rounded-3xl max-h-[75vh] object-cover md:object-contain mx-auto select-none transition-transform duration-150"
-  style={{ transform: `scale(${scale})` }}
+  className="rounded-3xl max-h-[75vh] object-cover md:object-contain mx-auto select-none"
+  style={{
+    transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
+    transition: scale === 1 ? 'transform 0.15s ease-out' : 'none',
+  }}
   draggable={false}
 />
 
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-white/30 text-5xl font-bold -rotate-12 tracking-widest">SPOTSHOT</span>
+          <div className=" font-bold -rotate-12 tracking-widest"><Image src='/icons/logo.webp' width={60} height={60} alt='logo'/></div>
         </div>
 
         {/* Flechas (solo visibles en desktop) */}
