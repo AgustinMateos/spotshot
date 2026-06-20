@@ -21,6 +21,7 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
 const [touchEnd, setTouchEnd] = useState(0);
+const [isLinkCopied, setIsLinkCopied] = useState(false);
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -234,11 +235,38 @@ const onTouchEnd = () => {
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Precio y Packs */}
         <div className="bg-[#F1F7FE] rounded-3xl p-8 mb-12">
+          
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
               <p className="text-sm text-[#0D2744]">Precio por foto</p>
               <p className="text-5xl font-bold text-[#0D2744]">€{unitPrice}</p>
             </div>
+             {/* Copiar Link - Solo mostrar si NO es borrador */}
+            {session.status !== 'DRAFT' && (
+              <button
+                onClick={() => {
+                  const shareUrl = `https://www.spotshot.app/sesiones/${id}`;
+                  navigator.clipboard.writeText(shareUrl).then(() => {
+                    setIsLinkCopied(true);
+                    setTimeout(() => setIsLinkCopied(false), 2500);
+                  });
+                }}
+                className={`flex items-center cursor-pointer gap-2 border px-5 py-2.5 rounded-xl transition-all duration-200 ${isLinkCopied
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                disabled={isLinkCopied}
+              >
+                <img
+                  src={isLinkCopied ? '/icons/check.svg' : '/icons/copiar.svg'}
+                  alt="copiar"
+                  className="w-5 h-5"
+                />
+                <span className="hidden md:inline font-medium">
+                  {isLinkCopied ? '¡Copiado!' : 'Copiar link'}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Packs */}
@@ -447,7 +475,7 @@ const onTouchEnd = () => {
     >
       {/* Contenedor de la foto */}
       <div 
-        className="bg-white rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
+        className=" rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -462,7 +490,7 @@ const onTouchEnd = () => {
         <img
           src={session.images[currentIndex].publicUrl}
           alt={`Foto ${currentIndex + 1}`}
-          className="w-full max-h-[75vh] object-cover mx-auto select-none"
+          className=" rounded-3xl max-h-[75vh] object-cover md:object-contain mx-auto select-none"
           draggable={false}
         />
 
@@ -488,7 +516,7 @@ const onTouchEnd = () => {
         {/* Botón Agregar al carrito */}
         {/* Botón Agregar al carrito - Versión optimizada para mobile */}
 {/* Botón Agregar al carrito - Versión optimizada */}
-<div className="absolute bottom-4 md:bottom-8 left-[340px] md:left-1/2 -translate-x-1/2 z-10">
+<div className="absolute bottom-4 md:bottom-1 left-[340px] md:left-1/2 -translate-x-1/2 z-10">
   {isInCart(session.images[currentIndex].id) ? (
     <button
       onClick={(e) => {

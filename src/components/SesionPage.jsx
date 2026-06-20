@@ -27,6 +27,8 @@ export default function MisSesionDetail() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
   const [selectedPacks, setSelectedPacks] = useState([]);
+  const [showLightbox, setShowLightbox] = useState(false);
+const [currentImageIndex, setCurrentImageIndex] = useState(0);
   // Form data para editar
   const [formData, setFormData] = useState({
     audience: '',
@@ -286,6 +288,18 @@ export default function MisSesionDetail() {
     setUpdating(false);
   }
 };
+useEffect(() => {
+  if (!showLightbox) return;
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowRight') goToNext();
+    if (e.key === 'ArrowLeft') goToPrev();
+    if (e.key === 'Escape') closeLightbox();
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [showLightbox, session?.images?.length]);
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -374,6 +388,26 @@ export default function MisSesionDetail() {
     const diffTime = until - now;
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   };
+   const openLightbox = (index) => {
+  setCurrentImageIndex(index);
+  setShowLightbox(true);
+};
+
+const closeLightbox = () => setShowLightbox(false);
+
+const goToPrev = () => {
+  setCurrentImageIndex((prev) =>
+    prev === 0 ? session.images.length - 1 : prev - 1
+  );
+};
+
+const goToNext = () => {
+  setCurrentImageIndex((prev) =>
+    prev === session.images.length - 1 ? 0 : prev + 1
+  );
+};
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -592,10 +626,11 @@ export default function MisSesionDetail() {
             {session.images.map((img, index) => (
               <div key={img.id} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 group">
                 <img
-                  src={img.publicUrl}
-                  alt={`Foto ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
+  src={img.publicUrl}
+  alt={`Foto ${index + 1}`}
+  onClick={() => openLightbox(index)}
+  className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+/>
 
                 <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
                   {index + 1}
@@ -814,6 +849,54 @@ export default function MisSesionDetail() {
           </div>
         </div>
       )}
+      {/* ==================== LIGHTBOX / SLIDER DE FOTOS ==================== */}
+{showLightbox && session.images.length > 0 && (
+  <div
+    className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60]"
+    onClick={closeLightbox}
+  >
+    {/* Botón cerrar */}
+    <button
+      onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+      className="absolute top-6 right-6 text-white text-3xl cursor-pointer hover:opacity-70 z-10"
+    >
+      ✕
+    </button>
+
+    {/* Contador */}
+    <div className="absolute top-6 left-6 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+      {currentImageIndex + 1} / {session.images.length}
+    </div>
+
+    {/* Flecha izquierda */}
+    <button
+      onClick={(e) => { e.stopPropagation(); goToPrev(); }}
+      className="absolute left-4 md:left-8 text-white text-4xl cursor-pointer hover:opacity-70 bg-black/40 rounded-full w-12 h-12 flex items-center justify-center"
+    >
+      ‹
+    </button>
+
+    {/* Imagen actual */}
+    <div
+      className="max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <img
+        src={session.images[currentImageIndex]?.publicUrl}
+        alt={`Foto ${currentImageIndex + 1}`}
+        className="max-w-full max-h-[85vh] object-contain rounded-lg"
+      />
+    </div>
+
+    {/* Flecha derecha */}
+    <button
+      onClick={(e) => { e.stopPropagation(); goToNext(); }}
+      className="absolute right-4 md:right-8 text-white text-4xl cursor-pointer hover:opacity-70 bg-black/40 rounded-full w-12 h-12 flex items-center justify-center"
+    >
+      ›
+    </button>
+  </div>
+)}
     </div>
   );
 }

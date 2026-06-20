@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import MisSesionesTable from './MisSesionesShotTable';
-
+import { useRouter } from 'next/navigation';
 function CardSkeleton({ delay = 0 }) {
     return (
         <div
@@ -35,7 +35,8 @@ function CardSkeleton({ delay = 0 }) {
 }
 
 export default function ShotPage() {
-    const { user, token, loading: authLoading } = useAuth();
+    const { user, token,logout, loading: authLoading } = useAuth();
+    const router = useRouter();
  
     const [stripeConnect, setStripeConnect] = useState(null);
     const [allSessions, setAllSessions] = useState([]);
@@ -88,15 +89,20 @@ const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
             params.append('page', filters.page);
 
             try {
-                const [stripeRes, sessionsRes] = await Promise.all([
-                    fetch(`${API_URL}/api/v1/photographers/me`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
-                    fetch(`${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
-                ]);
+        const [stripeRes, sessionsRes] = await Promise.all([
+    fetch(`${API_URL}/api/v1/photographers/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+    }),
+    fetch(`${API_URL}/api/v1/photographers/me/photo-sessions?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    }),
+]);
 
+if (stripeRes.status === 401 || sessionsRes.status === 401) {
+    logout();
+    router.replace('/login');
+    return;
+}
                 const [stripeData, sessionsData] = await Promise.all([
                     stripeRes.json(),
                     sessionsRes.json(),
@@ -122,7 +128,7 @@ const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
         loadAll();
     }, [token, filters.audience, filters.status, filters.location, filters.sessionDate,
-        filters.timeFrom, filters.timeTo, filters.page]);
+        filters.timeFrom, filters.timeTo,logout,router, filters.page]);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
