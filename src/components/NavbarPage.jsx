@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,7 @@ export default function NavbarComponent() {
   const { user, token, logout, loading: authLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-
+const navRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -66,7 +66,22 @@ export default function NavbarComponent() {
       router.push('/login');
     }
   };
+// Cerrar menú mobile al tocar fuera
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (isOpen && navRef.current && !navRef.current.contains(e.target)) {
+      setIsOpen(false);
+    }
+  };
 
+  document.addEventListener('mousedown', handleClickOutside);
+  document.addEventListener('touchstart', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+    document.removeEventListener('touchstart', handleClickOutside);
+  };
+}, [isOpen]);
   // Mientras carga la autenticación mostramos un navbar neutro (evita flash)
   if (authLoading) {
     return (
@@ -75,11 +90,11 @@ export default function NavbarComponent() {
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      hasBackground 
-        ? 'bg-[#103457] backdrop-blur-md shadow-md' 
-        : 'bg-transparent'
-    }`}>
+   <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+  hasBackground 
+    ? 'bg-[#103457] backdrop-blur-md shadow-md' 
+    : 'bg-transparent'
+}`}>
       <div className="max-w-full px-6 py-5 flex items-center justify-between">
         
         {/* Logo */}
@@ -189,15 +204,15 @@ export default function NavbarComponent() {
 
         {/* Hamburguesa */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white p-2 focus:outline-none"
-        >
-          <div className={`w-7 h-7 relative transition-all duration-300 ${isOpen ? 'rotate-45' : ''}`}>
-            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'rotate-45 top-3' : 'top-1'}`} />
-            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : 'top-3'}`} />
-            <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? '-rotate-45 top-3' : 'top-5'}`} />
-          </div>
-        </button>
+  onClick={() => setIsOpen(!isOpen)}
+  className="md:hidden text-white p-2 focus:outline-none"
+>
+  <div className="w-7 h-7 relative">
+    <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'opacity-0 -translate-y-2' : 'top-1'}`} />
+    <span className={`absolute h-[2.5px] w-7 bg-white top-3 transition-all duration-300`} />
+    <span className={`absolute h-[2.5px] w-7 bg-white transition-all duration-300 ${isOpen ? 'opacity-0 translate-y-2' : 'top-5'}`} />
+  </div>
+</button>
       </div>
 
       {/* Menú Mobile */}

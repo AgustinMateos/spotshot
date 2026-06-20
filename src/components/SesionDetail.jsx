@@ -306,7 +306,13 @@ const onTouchEnd = (e) => {
           <p className="text-xl opacity-90">{session.location || session.schoolName}</p>
           
           <p className="text-sm opacity-90 mt-1">{session.startTime} - {session.endTime}</p>
-       <p className="text-sm opacity-75 mt-1">by {photographerName}</p> </div>
+       <p className="text-sm opacity-90">
+                    by{' '}
+                    {session.photographer?.alias ||
+                      (session.photographer?.firstName && session.photographer?.lastName
+                        ? `${session.photographer.firstName} ${session.photographer.lastName}`
+                        : 'Fotógrafo')}
+                  </p>  </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
