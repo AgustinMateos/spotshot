@@ -22,6 +22,10 @@ const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
 const [touchEnd, setTouchEnd] = useState(0);
 const [isLinkCopied, setIsLinkCopied] = useState(false);
+const [scale, setScale] = useState(1);
+const [lastTap, setLastTap] = useState(0);
+const [pinchStartDistance, setPinchStartDistance] = useState(null);
+const [translate, setTranslate] = useState({ x: 0, y: 0 });
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -82,6 +86,14 @@ const isInCart = (imageId) => {
     setCurrentIndex(index);
     setIsLightboxOpen(true);
   };
+  useEffect(() => {
+  setScale(1);
+  setTranslate({ x: 0, y: 0 });
+}, [currentIndex, isLightboxOpen]);
+const getDistance = (touches) => {
+  const [t1, t2] = touches;
+  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+};
   // ==================== NAVEGACIÓN CON TECLADO ====================
 useEffect(() => {
   const handleKeyDown = (e) => {
@@ -141,27 +153,72 @@ const formatPrice = (price) => {
 const minSwipeDistance = 50;
 
 const onTouchStart = (e) => {
-  setTouchEnd(0);
-  setTouchStart(e.targetTouches[0].clientX);
+  if (e.touches.length === 2) {
+    // Empieza pinch
+    setPinchStartDistance(getDistance(e.touches));
+    return;
+  }
+
+  // Doble tap para zoom
+  const now = Date.now();
+  if (now - lastTap < 300) {
+    if (scale > 1) {
+      setScale(1);
+      setTranslate({ x: 0, y: 0 });
+    } else {
+      setScale(2.5);
+    }
+    setLastTap(0);
+    return;
+  }
+  setLastTap(now);
+
+  // Swipe solo si no está con zoom
+  if (scale === 1) {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  }
 };
 
 const onTouchMove = (e) => {
-  setTouchEnd(e.targetTouches[0].clientX);
-};
+  if (e.touches.length === 2 && pinchStartDistance) {
+    // Pinch to zoom
+    const newDistance = getDistance(e.touches);
+    const delta = newDistance / pinchStartDistance;
+    const newScale = Math.min(Math.max(1, scale * delta), 4);
+    setScale(newScale);
+    return;
+  }
 
-const onTouchEnd = () => {
-  if (!touchStart || !touchEnd) return;
-  
-  const distance = touchStart - touchEnd;
-  const isLeftSwipe = distance > minSwipeDistance;
-  const isRightSwipe = distance < -minSwipeDistance;
-
-  if (isLeftSwipe) {
-    goToNext();
-  } else if (isRightSwipe) {
-    goToPrevious();
+  // Swipe solo si no está con zoom
+  if (scale === 1 && e.touches.length === 1) {
+    setTouchEnd(e.targetTouches[0].clientX);
   }
 };
+
+const onTouchEnd = (e) => {
+  if (e.touches.length === 0) {
+    setPinchStartDistance(null);
+  }
+
+  // Snap: si quedó casi en 1, resetear bien
+  if (scale < 1.1) {
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+  }
+
+  // Swipe solo si no está con zoom
+  if (scale === 1) {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) goToNext();
+    else if (isRightSwipe) goToPrevious();
+  }
+};
+
+
     // ✅ Función para finalizar compra
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -475,17 +532,18 @@ const onTouchEnd = () => {
     >
       {/* Contenedor de la foto */}
      <div 
-  className="rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
+  className="rounded-3xl overflow-hidden shadow-2xl relative touch-none"
   onTouchStart={onTouchStart}
   onTouchMove={onTouchMove}
   onTouchEnd={onTouchEnd}
 >
         <img
-          src={session.images[currentIndex].publicUrl}
-          alt={`Foto ${currentIndex + 1}`}
-          className=" rounded-3xl max-h-[75vh] object-cover md:object-contain mx-auto select-none"
-          draggable={false}
-        />
+  src={session.images[currentIndex].publicUrl}
+  alt={`Foto ${currentIndex + 1}`}
+  className="rounded-3xl max-h-[75vh] object-cover md:object-contain mx-auto select-none transition-transform duration-150"
+  style={{ transform: `scale(${scale})` }}
+  draggable={false}
+/>
 
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
