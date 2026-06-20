@@ -474,19 +474,12 @@ const onTouchEnd = () => {
       onClick={(e) => e.stopPropagation()}   // ← Evita que se cierre al tocar adentro
     >
       {/* Contenedor de la foto */}
-      <div 
-        className=" rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onMouseDown={(e) => setTouchStart(e.clientX)}
-        onMouseUp={(e) => {
-          setTouchEnd(e.clientX);
-          const distance = touchStart - e.clientX;
-          if (distance > 50) goToNext();
-          if (distance < -50) goToPrevious();
-        }}
-      >
+     <div 
+  className="rounded-3xl overflow-hidden shadow-2xl relative touch-pan-y"
+  onTouchStart={onTouchStart}
+  onTouchMove={onTouchMove}
+  onTouchEnd={onTouchEnd}
+>
         <img
           src={session.images[currentIndex].publicUrl}
           alt={`Foto ${currentIndex + 1}`}
@@ -500,18 +493,24 @@ const onTouchEnd = () => {
         </div>
 
         {/* Flechas (solo visibles en desktop) */}
-        <button 
-          onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
-          className="hidden md:flex absolute cursor-pointer left-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
-        >
-          <ChevronLeft size={36} />
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); goToNext(); }}
-          className="hidden cursor-pointer md:flex absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-full hover:bg-white transition"
-        >
-          <ChevronRight size={36} />
-        </button>
+        {/* Flechas - visibles en mobile y desktop */}
+{/* Flechas - visibles en mobile y desktop */}
+<button 
+  onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
+  onTouchStart={(e) => e.stopPropagation()}
+  onTouchEnd={(e) => e.stopPropagation()}
+  className="flex items-center justify-center absolute cursor-pointer left-2 md:left-6 top-1/2 -translate-y-1/2 bg-white/90 p-2 md:p-4 rounded-full hover:bg-white transition z-30"
+>
+  <ChevronLeft className="w-6 h-6 md:w-9 md:h-9" />
+</button>
+<button 
+  onClick={(e) => { e.stopPropagation(); goToNext(); }}
+  onTouchStart={(e) => e.stopPropagation()}
+  onTouchEnd={(e) => e.stopPropagation()}
+  className="flex items-center justify-center absolute cursor-pointer right-2 md:right-6 top-1/2 -translate-y-1/2 bg-white/90 p-2 md:p-4 rounded-full hover:bg-white transition z-30"
+>
+  <ChevronRight className="w-6 h-6 md:w-9 md:h-9" />
+</button>
 
         {/* Botón Agregar al carrito */}
         {/* Botón Agregar al carrito - Versión optimizada para mobile */}
