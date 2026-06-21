@@ -48,9 +48,9 @@ const Fotografo = () => {
           {/* Columna derecha - Imagen completa del upload */}
           <div className="relative  flex justify-center">
             <img 
-              src="/inicio/upload-panel.svg"   // ← Cambia esta ruta por tu imagen real
+              src="/stepsPhotos.svg"   // ← Cambia esta ruta por tu imagen real
               alt="Panel de subida de archivos"
-              className="w-103 h-97.75 "
+              className="w-120 h-110 "
             />
           </div>
 
