@@ -9,7 +9,7 @@
 // ============================================================
 
 export const escuelas = [
-   { name: "Escuela La Wave Surf Coruña", region: "Galicia, España", label: "Escuela La Wave Surf Galicia" },
+   { name: "Escuela La Wave Surf Coruña", region: "Galicia, España", label: "Escuela La Wave Surf Coruña" },
    { name: "Escuela La Wave Surf Canarias", region: "Canarias, España", label: "Escuela La Wave Surf Canarias" },
    { name: "Escuela La Wave Surf Somo", region: "Cantabria, España", label: "Escuela La Wave Surf Somo" },
   { name: "Escuela Cantabra de Surf", region: "Cantabria, España", label: "Escuela Cantabra de Surf - Cantabria, España" },
