@@ -114,7 +114,17 @@ const CustomTimeSelect = ({ value, onChange }) => {
     sessionDate: '',
     startTime: '',
   });
+const timeDropdownRef = useRef(null);
 
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (timeDropdownRef.current && !timeDropdownRef.current.contains(e.target)) {
+      setShowTimeDropdown(false);
+    }
+  };
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
   const [title, setTitle] = useState('Sesiones');
     // FILTRADO EN CLIENTE - Igual que en MisSesionesTable
   const filteredSessions = useMemo(() => {
@@ -291,7 +301,7 @@ useEffect(() => {
             </div>
         
             {/* Filtro de Hora (el que querías replicar) */}
-            <div className="relative w-full md:w-80">
+        <div className="relative w-full md:w-80" ref={timeDropdownRef}>
               <div
                 onClick={() => setShowTimeDropdown(!showTimeDropdown)}
                 className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
@@ -349,9 +359,9 @@ useEffect(() => {
             </div>
         
             {/* Fecha */}
-            <CustomDatePicker
+     <CustomDatePicker
   value={filters.sessionDate}
-  onChange={(date) => onFilterChange('sessionDate', date)}
+  onChange={(date) => handleFilterChange('sessionDate', date)}
   placeholder="Seleccionar fecha"
   className="w-full md:w-56"
 />
@@ -400,9 +410,13 @@ useEffect(() => {
                         <p>{session.location || session.schoolName}</p>
                         <p>{session.startTime?.slice(0,5)} - {session.endTime?.slice(0,5)}</p>
                      
-                      <p className="text-sm opacity-75 mt-2">
-                        by {session.photographer?.alias || 'Fotógrafo'}
-                      </p>
+                      <p className="text-sm opacity-90">
+                    by{' '}
+                    {session.photographer?.alias ||
+                      (session.photographer?.firstName && session.photographer?.lastName
+                        ? `${session.photographer.firstName} ${session.photographer.lastName}`
+                        : 'Fotógrafo')}
+                  </p> 
                     </div>
                   </div>
                 </Link>

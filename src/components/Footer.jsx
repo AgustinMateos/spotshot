@@ -58,7 +58,11 @@ const Footer = ({ isShotSection = false }) => {
             <a href="/terminos-y-condiciones" className="hover:text-white transition-colors">
               Términos y Condiciones
             </a>
+             <a href="/politicadePrivacidad" className="hover:text-white pl-10 transition-colors">
+              Política de Privacidad 
+            </a>
           </div>
+          
           <div>
             © 2026 SpotShot. Todos los derechos reservados.
           </div>

@@ -423,10 +423,12 @@ console.log("Filtros enviados:", {
                         {session.startTime} - {session.endTime}
                       </p>
                       <p className="text-sm opacity-90">
-                        by {session.photographer?.firstName && session.photographer?.lastName
-                          ? `${session.photographer.firstName} ${session.photographer.lastName}`
-                          : session.photographer?.alias || 'Fotógrafo'}
-                      </p>
+                    by{' '}
+                    {session.photographer?.alias ||
+                      (session.photographer?.firstName && session.photographer?.lastName
+                        ? `${session.photographer.firstName} ${session.photographer.lastName}`
+                        : 'Fotógrafo')}
+                  </p> 
                     </div>
                   </div>
                 </Link>

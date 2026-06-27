@@ -414,8 +414,6 @@ const onTouchEnd = (e) => {
             {index + 1}
           </div>
 
-          {/* BOTÓN AGREGAR AL CARRITO - Superior Derecho */}
-          {/* BOTÓN CARRITO - Superior Derecho */}
 <div className="absolute top-3 right-3 z-10">
   {inCart ? (
     <button
@@ -435,7 +433,7 @@ const onTouchEnd = (e) => {
   onClick={(e) => {
     e.stopPropagation();
     
-    // Verificar si ya hay fotos de otro fotógrafo
+   
     if (cart.length > 0 && cart[0].photographerId !== session.photographer?.id) {
       setShowPhotographerModal(true);
       return;
@@ -453,7 +451,15 @@ const onTouchEnd = (e) => {
         </div>
       );
     })}
+    
   </div>
+  <div className="flex mt-40 flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div>
+             <p className="text-sm text-[#0D2744]">¿Necesitas que retiremos alguna fotografía? Ponte en contacto con nosotros: infospotshot@gmail.com”</p>
+
+            </div>
+           
+          </div>
 </div>
       </div>
 
@@ -474,7 +480,7 @@ const onTouchEnd = (e) => {
         </div>
       )}
 
-      {/* DRAWER DEL CARRITO */}
+   
       {/* DRAWER DEL CARRITO */}
 <div
   className={`fixed inset-0 z-200 flex justify-end transition-opacity duration-300 ${
@@ -550,11 +556,11 @@ const onTouchEnd = (e) => {
 {isLightboxOpen && session && (
   <div 
     className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center"
-    onClick={closeLightbox}           // ← Cierra al tocar fuera
+    onClick={closeLightbox}           
   >
     <div 
       className="relative w-full max-w-5xl px-4"
-      onClick={(e) => e.stopPropagation()}   // ← Evita que se cierre al tocar adentro
+      onClick={(e) => e.stopPropagation()}   
     >
       {/* Contenedor de la foto */}
      <div 
@@ -579,8 +585,7 @@ const onTouchEnd = (e) => {
           <div className=" font-bold -rotate-12 tracking-widest"><Image src='/icons/logo.webp' width={60} height={60} alt='logo'/></div>
         </div>
 
-        {/* Flechas (solo visibles en desktop) */}
-        {/* Flechas - visibles en mobile y desktop */}
+       
 {/* Flechas - visibles en mobile y desktop */}
 <button 
   onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
@@ -600,8 +605,7 @@ const onTouchEnd = (e) => {
 </button>
 
         {/* Botón Agregar al carrito */}
-        {/* Botón Agregar al carrito - Versión optimizada para mobile */}
-{/* Botón Agregar al carrito - Versión optimizada */}
+        
 <div className="absolute bottom-4 md:bottom-1 left-[340px] md:left-1/2 -translate-x-1/2 z-10">
   {isInCart(session.images[currentIndex].id) ? (
     <button

@@ -54,21 +54,21 @@ export default function SesionesRecientes() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchLatest = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${API_URL}/api/v1/public/photo-sessions?page=1`);
-        const data = await res.json();
-        if (res.ok) setSessions(data.items?.slice(0, 3) || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLatest();
-  }, []);
+useEffect(() => {
+  const fetchLatest = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/public/photo-sessions?audience=FREE_SURFERS&page=1`);
+      const data = await res.json();
+      if (res.ok) setSessions(data.items?.slice(0, 3) || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchLatest();
+}, []);
 
   const getDaysRemaining = (activeUntil) => {
     if (!activeUntil) return null;
