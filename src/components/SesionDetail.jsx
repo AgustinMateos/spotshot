@@ -582,8 +582,15 @@ const onTouchEnd = (e) => {
 
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className=" font-bold -rotate-12 tracking-widest"><Image src='/icons/logo.webp' width={60} height={60} alt='logo'/></div>
-        </div>
+  <Image 
+    src="/icons/logo.webp"
+    className="opacity-60" 
+    width={60} 
+    height={60} 
+    alt="logo"
+    priority={false}
+  />
+</div>
 
        
 {/* Flechas - visibles en mobile y desktop */}
