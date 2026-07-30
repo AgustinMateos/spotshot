@@ -180,7 +180,7 @@ export const playas = [
   { value: "Playa de Antuerta Cantabria España", label: "Playa de Antuerta, Cantabria, España" },
   { value: "Playa de Galizano Cantabria España", label: "Playa de Galizano, Cantabria, España" },
   { value: "Playa de Langre Cantabria España", label: "Playa de Langre, Cantabria, España" },
-  { value: "Loredo Loredo Cantabria España", label: "Loredo - Loredo, Cantabria, España" },
+  { value: "Loredo Cantabria España", label: "Loredo, Cantabria, España" },
   { value: "Isla Santa Marina Los Tranquilos Cantabria España", label: "Isla Santa Marina - Los Tranquilos, Cantabria, España" },
   { value: "Playa de Somo Cantabria España", label: "Playa de Somo, Cantabria, España" },
   { value: "Playa del Camello Cantabria España", label: "Playa del Camello, Cantabria, España" },

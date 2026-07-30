@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Flag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
 
@@ -27,6 +27,12 @@ const [lastTap, setLastTap] = useState(0);
 const [pinchStartDistance, setPinchStartDistance] = useState(null);
 const [translate, setTranslate] = useState({ x: 0, y: 0 });
 const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+const [reportImage, setReportImage] = useState(null); // imagen que se está reportando
+const [reportEmail, setReportEmail] = useState('');
+const [reportReason, setReportReason] = useState('');
+const [isReporting, setIsReporting] = useState(false);
+const [reportError, setReportError] = useState('');
+const [reportSuccess, setReportSuccess] = useState(false);
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -238,7 +244,77 @@ const onTouchEnd = (e) => {
   }
 };
 
+const handleReport = async () => {
+  if (!reportImage) return;
 
+  const email = reportEmail.trim();
+  const reason = reportReason.trim();
+
+  if (!email || !reason || reason.length < 10) {
+    setReportError('Completá el email y escribí un motivo de al menos 10 caracteres.');
+    return;
+  }
+
+  setIsReporting(true);
+  setReportError('');
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  try {
+    const res = await fetch(
+      `${API_URL}/api/v1/public/photo-session-images/${reportImage.id}/report`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (res.status === 201) {
+      setReportSuccess(true);
+
+      // Ocultamos la imagen localmente (igual que hace el backend)
+      setSession((prev) => ({
+        ...prev,
+        images: prev.images.filter((img) => img.id !== reportImage.id),
+        photoCount: Math.max(0, (prev.photoCount || 0) - 1),
+      }));
+
+      // Si estaba en el carrito, la sacamos
+      if (isInCart(reportImage.id)) {
+        removeFromCart(reportImage.id);
+      }
+
+      // Si el lightbox está abierto y era esa foto, cerramos
+      if (isLightboxOpen && session.images[currentIndex]?.id === reportImage.id) {
+        setIsLightboxOpen(false);
+      }
+
+      // Cerramos el modal después de un momento
+      setTimeout(() => {
+        setReportImage(null);
+        setReportEmail('');
+        setReportReason('');
+        setReportSuccess(false);
+      }, 1800);
+    } else if (res.status === 409) {
+      setReportError('Ya existe un reporte pendiente para esta foto.');
+    } else if (res.status === 429) {
+      setReportError('Llegaste al límite de reportes. Probá más tarde.');
+    } else if (res.status === 404) {
+      setReportError('La imagen ya no está disponible.');
+    } else {
+      setReportError(data.message || 'No se pudo enviar el reporte.');
+    }
+  } catch (err) {
+    console.error(err);
+    setReportError('Error de conexión. Intentá de nuevo.');
+  } finally {
+    setIsReporting(false);
+  }
+};
     // ✅ Función para finalizar compra
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -413,15 +489,31 @@ const onTouchEnd = (e) => {
           <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
             {index + 1}
           </div>
-
-<div className="absolute top-3 right-3 z-10">
+{/* Botón Reportar - arriba izquierda */}
+<div className="absolute top-3 left-3 z-10">
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setReportImage(img);
+      setReportEmail('');
+      setReportReason('');
+      setReportError('');
+      setReportSuccess(false);
+    }}
+    className="bg-white/95 cursor-pointer hover:bg-white text-gray-700 w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+    title="Reportar foto"
+  >
+    <Flag size={16} />
+  </button>
+</div>
+<div className="absolute top-3 right-3 z-10 cursor-pointer">
   {inCart ? (
     <button
       onClick={(e) => {
         e.stopPropagation();
         removeFromCart(img.id);
       }}
-      className="bg-emerald-600 cursor-pointer hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+      className="bg-emerald-600  cursor-pointer hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
       title="Quitar del carrito"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
@@ -441,7 +533,7 @@ const onTouchEnd = (e) => {
 
     addToCart(img, session);
   }}
-  className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+  className="bg-white/95 cursor-pointer hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
   title="Agregar al carrito"
 >
   <ShoppingCart size={18} />
@@ -555,16 +647,31 @@ const onTouchEnd = (e) => {
 {/* LIGHTBOX */}
 {isLightboxOpen && session && (
   <div 
-    className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center"
+    className="fixed inset-0 cursor-pointer bg-black/90 z-100 flex items-center justify-center"
     onClick={closeLightbox}           
   >
+    {/* Botón Reportar en Lightbox */}
+<button
+  onClick={(e) => {
+    e.stopPropagation();
+    setReportImage(session.images[currentIndex]);
+    setReportEmail('');
+    setReportReason('');
+    setReportError('');
+    setReportSuccess(false);
+  }}
+  className="absolute top-4 right-4 md:top-6 cursor-pointer md:right-6 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg z-30 transition"
+  title="Reportar esta foto"
+>
+  <Flag size={20} />
+</button>
     <div 
       className="relative w-full max-w-5xl px-4"
       onClick={(e) => e.stopPropagation()}   
     >
       {/* Contenedor de la foto */}
      <div 
-  className="rounded-3xl overflow-hidden shadow-2xl relative touch-none"
+  className="rounded-3xl overflow-hidden shadow-2xl relative touch-none "
   onTouchStart={onTouchStart}
   onTouchMove={onTouchMove}
   onTouchEnd={onTouchEnd}
@@ -726,6 +833,86 @@ const onTouchEnd = (e) => {
         >
           Entendido
         </button>
+      </div>
+    </div>
+  </div>
+)}
+{/* MODAL REPORTAR FOTO */}
+{reportImage && (
+  <div className="fixed inset-0 bg-black/70 z-[400] flex items-center justify-center p-4">
+    <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div className="flex justify-between items-center p-6 border-b">
+        <h3 className="text-xl font-semibold">Reportar foto</h3>
+        <button
+          onClick={() => {
+            if (!isReporting) setReportImage(null);
+          }}
+          className="text-gray-400 hover:text-black"
+        >
+          <X size={24} />
+        </button>
+      </div>
+
+      <div className="p-6">
+        {reportSuccess ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">✓</span>
+            </div>
+            <p className="text-lg font-medium text-gray-900">Reporte enviado</p>
+            <p className="text-sm text-gray-500 mt-2">
+              La foto fue ocultada y el equipo la revisará.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-600 mb-5">
+              Cuentanos por qué crees que esta foto no debería estar visible.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Tu email
+                </label>
+                <input
+                  type="email"
+                  value={reportEmail}
+                  onChange={(e) => setReportEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#1F2937]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Motivo (mín. 10 caracteres)
+                </label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  rows={4}
+                  placeholder="Ej: La foto muestra contenido inapropiado o no autorizado."
+                  className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#1F2937] resize-none"
+                />
+              </div>
+
+              {reportError && (
+                <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-xl">
+                  {reportError}
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={handleReport}
+              disabled={isReporting}
+              className="w-full mt-6 bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-3.5 rounded-2xl font-medium transition active:scale-95"
+            >
+              {isReporting ? 'Enviando...' : 'Enviar reporte'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   </div>
