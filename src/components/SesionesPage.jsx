@@ -257,13 +257,13 @@ console.log("Filtros enviados:", {
               >
                 Free Surfers
               </button>
-              <button
+              {/* <button
                 onClick={() => handleFilterChange('audience', 'SCHOOLS')}
                 className={`px-6 py-2.5 cursor-pointer rounded-lg text-[14px] font-medium transition-all ${filters.audience === 'SCHOOLS' ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Escuelas
-              </button>
+              </button> */}
             </div>
 
             {/* Buscador */}

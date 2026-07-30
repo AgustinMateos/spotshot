@@ -66,12 +66,12 @@ return (
           >
             Free surfers
           </button>
-          <button 
+          {/* <button 
             onClick={() => { setActiveTab('escuelas'); setSearchLocation(''); setSelectedValue(''); }}
             className={`px-6 py-2.5 cursor-pointer font-inter text-sm font-medium rounded-xl transition-all ${activeTab === 'escuelas' ? 'bg-white text-black font-semibold' : 'text-gray-400 hover:text-gray-900'}`}
           >
             Escuelas
-          </button></div>
+          </button>*/}</div> 
         </div>
       </div>
 
