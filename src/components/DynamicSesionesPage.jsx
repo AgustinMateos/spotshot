@@ -266,7 +266,7 @@ useEffect(() => {
     Free Surfers
   </button>
 
-  <button 
+  {/* <button 
     onClick={() => {
       setFilters(prev => ({
         ...prev,
@@ -280,7 +280,7 @@ useEffect(() => {
     }`}
   >
     Escuelas
-  </button>
+  </button> */}
 </div>
         
             {/* Buscador */}

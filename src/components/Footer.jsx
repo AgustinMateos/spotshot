@@ -6,7 +6,7 @@ const Footer = ({ isShotSection = false }) => {
   const logoHref = isShotSection ? '/shot' : '/';
 
   return (
-    <footer className="bg-[#103457] text-white py-12 z-10">
+    <footer className="bg-[#103457]  text-white py-12 z-10">
       <div className=" mx-auto px-6">
         
         {/* Contenido principal */}
@@ -58,8 +58,14 @@ const Footer = ({ isShotSection = false }) => {
             <a href="/terminos-y-condiciones" className="hover:text-white transition-colors">
               Términos y Condiciones
             </a>
-             <a href="/politicadePrivacidad" className="hover:text-white pl-10 transition-colors">
+             <a href="/politica-de-privacidad" className="hover:text-white pl-10 transition-colors">
               Política de Privacidad 
+            </a>
+             <a href="/avisoLegal" className="hover:text-white pl-10 transition-colors">
+              AvisoLegal
+            </a>
+             <a href="/politica-de-cookies" className="hover:text-white pl-10 transition-colors">
+              Politica de cookies
             </a>
           </div>
           
