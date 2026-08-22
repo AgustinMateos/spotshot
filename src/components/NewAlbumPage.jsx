@@ -46,6 +46,8 @@ const NewAlbumPage = () => {
   const [showBeachDropdown, setShowBeachDropdown] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+ 
+const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   // Cargar catálogo de packs
   useEffect(() => {
    const loadPacks = async () => {
@@ -314,46 +316,51 @@ if (await handleAuthError(res)) return;
 
   const handleDragLeave = () => setIsDragging(false);
 
-  const handleUploadPhotos = async () => {
-    if (!sessionId) {
-      alert("Primero crea la sesión en el Paso 1");
-      return;
+const handleUploadPhotos = async () => {
+  if (!sessionId) {
+    alert("Primero crea la sesión en el Paso 1");
+    return false;
+  }
+  if (photos.length === 0) {
+    alert("Selecciona al menos una foto");
+    return false;
+  }
+
+  const totalPhotos = photos.length;
+  setUploadProgress({ current: 0, total: totalPhotos });
+  setUploading(true);
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    // ==================== 1. PREPARE UPLOADS ====================
+    const filesMetadata = photos.map(file => ({
+      mimeType: file.type,
+      sizeBytes: file.size,
+      originalName: file.name,
+    }));
+
+    const prepareRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/prepare-uploads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ files: filesMetadata }),
+    });
+
+    const prepareData = await prepareRes.json();
+
+    if (!prepareRes.ok) {
+      throw new Error(prepareData.message || 'Error al preparar las subidas');
     }
-    if (photos.length === 0) {
-      alert("Selecciona al menos una foto");
-      return;
-    }
 
-    setUploading(true);
+    // ==================== 2. SUBIDA DIRECTA (PUT) con progreso ====================
+    let completedCount = 0;
 
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-      // ==================== 1. PREPARE UPLOADS ====================
-      const filesMetadata = photos.map(file => ({
-        mimeType: file.type,
-        sizeBytes: file.size,
-        originalName: file.name,
-      }));
-
-      const prepareRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/prepare-uploads`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ files: filesMetadata }),
-      });
-
-      const prepareData = await prepareRes.json();
-
-      if (!prepareRes.ok) {
-        throw new Error(prepareData.message || 'Error al preparar las subidas');
-      }
-
-      // ==================== 2. SUBIDA DIRECTA (PUT) ====================
-      const uploadPromises = prepareData.uploads.map(async (upload, index) => {
-        const file = photos[index];
+    const uploadPromises = prepareData.uploads.map(async (upload, index) => {
+      const file = photos[index];
+      try {
         const response = await fetch(upload.uploadUrl, {
           method: 'PUT',
           body: file,
@@ -364,63 +371,70 @@ if (await handleAuthError(res)) return;
 
         if (!response.ok) {
           console.error(`Fallo al subir ${file.name}`);
-          return null; // Falló
+          return null;
         }
 
         return upload.imageId;
-      });
-
-      const imageIdsResults = await Promise.all(uploadPromises);
-      const successfulImageIds = imageIdsResults.filter(id => id !== null);
-
-      if (successfulImageIds.length === 0) {
-        throw new Error("Ninguna foto se pudo subir correctamente");
+      } finally {
+        // Actualizar progreso aunque falle
+        completedCount += 1;
+        setUploadProgress({ current: completedCount, total: totalPhotos });
       }
+    });
 
-      // ==================== 3. CONFIRM UPLOADS ====================
-      const confirmRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/confirm-uploads`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ imageIds: successfulImageIds }),
-      });
+    const imageIdsResults = await Promise.all(uploadPromises);
+    const successfulImageIds = imageIdsResults.filter(id => id !== null);
 
-      const confirmData = await confirmRes.json();
-
-      if (!confirmRes.ok) {
-        throw new Error(confirmData.message || 'Error al confirmar las subidas');
-      }
-
-      // === NUEVA LÓGICA: Combinar preview local + datos del servidor ===
-      // === COMBINAR PREVIEW LOCAL + DATOS DEL SERVIDOR ===
-      const newUploadedImages = photos.map((file, index) => {
-        const serverImage = confirmData.images?.[index] || {};
-        return {
-          ...serverImage,
-          localPreview: URL.createObjectURL(file),   // ← Preview inmediato
-          name: file.name
-        };
-      });
-
-      setUploadedImages(prev => [...prev, ...newUploadedImages]);
-      setPhotos([]); // Limpiar fotos pendientes
-    } catch (err) {
-      console.error("❌ Error en subida directa:", err);
-
-      let message = err.message || 'Error durante la subida de fotos.';
-
-      if (message.includes('mimeType') || message.includes('image/jpeg')) {
-        setErrorMessage("Formato de imagen no permitido por el servidor.\n\nSolo JPG, PNG y WEBP son aceptados.");
-        setShowErrorModal(true);
-      } else {
-        alert(message); // Solo alert para otros errores
-      }
-    } finally {
-      setUploading(false);
+    if (successfulImageIds.length === 0) {
+      throw new Error("Ninguna foto se pudo subir correctamente");
     }
-  };
+
+    // ==================== 3. CONFIRM UPLOADS ====================
+    const confirmRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/confirm-uploads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ imageIds: successfulImageIds }),
+    });
+
+    const confirmData = await confirmRes.json();
+
+    if (!confirmRes.ok) {
+      throw new Error(confirmData.message || 'Error al confirmar las subidas');
+    }
+
+    // Combinar preview local + datos del servidor
+    const newUploadedImages = photos.map((file, index) => {
+      const serverImage = confirmData.images?.[index] || {};
+      return {
+        ...serverImage,
+        localPreview: URL.createObjectURL(file),
+        name: file.name
+      };
+    });
+
+    setUploadedImages(prev => [...prev, ...newUploadedImages]);
+    setPhotos([]);
+    return true; // ← éxito → avanza al step 3
+  } catch (err) {
+    console.error("❌ Error en subida directa:", err);
+
+    let message = err.message || 'Error durante la subida de fotos.';
+
+    if (message.includes('mimeType') || message.includes('image/jpeg')) {
+      setErrorMessage("Formato de imagen no permitido por el servidor.\n\nSolo JPG, PNG y WEBP son aceptados.");
+      setShowErrorModal(true);
+    } else {
+      alert(message);
+    }
+    return false; // ← falló → se queda en step 2
+  } finally {
+    setUploading(false);
+    setUploadProgress({ current: 0, total: 0 });
+  }
+};
   // ====================== ACTUALIZAR PRECIO + PACKS ======================
   const handleUpdatePricing = async () => {
     console.log("=== INICIANDO handleUpdatePricing ===");
@@ -559,20 +573,25 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
       await handleCreateSession();
     }
     else if (step === 2) {
-      if (uploadedImages.length === 0 && photos.length === 0) {
-        alert("Debes subir al menos una foto válida para continuar.");
-        return;
-      }
+  if (uploadedImages.length === 0 && photos.length === 0) {
+    alert("Debes subir al menos una foto válida para continuar.");
+    return;
+  }
 
-      if (photos.length > 0) {
-        await handleUploadPhotos();
-      }
-
-      // Solo avanzamos si hay fotos subidas
-      if (uploadedImages.length > 0) {
-        setStep(3);
-      }
+  // Si hay fotos pendientes, subirlas y avanzar solo si tuvo éxito
+  if (photos.length > 0) {
+    const success = await handleUploadPhotos();
+    if (success) {
+      setStep(3);   // ← avanza directo
     }
+    return;
+  }
+
+  // Si ya hay fotos subidas y no hay pendientes, avanzar directo
+  if (uploadedImages.length > 0) {
+    setStep(3);
+  }
+}
     else if (step === 3) {
       await handleUpdatePricing();
     }
@@ -1019,7 +1038,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
               )}
 
               {/* Fotos ya subidas */}
-              {uploadedImages.length > 0 && (
+              {/* {uploadedImages.length > 0 && (
                 <div className="mt-10">
                   <p className="text-sm text-green-600 font-medium mb-4">
                     ✅ Fotos ya subidas ({uploadedImages.length})
@@ -1048,7 +1067,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
                     })}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )}
@@ -1371,7 +1390,51 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
             </div>
           </div>
         )}
-        {/* ==================== MODAL CONFIRMAR VOLVER AL PASO 1 ==================== */}
+        {/* ==================== MODAL PROGRESO DE SUBIDA ==================== */}
+{uploading && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+      <div className="mx-auto w-16 h-16 mb-6 relative">
+        <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+        <div
+          className="absolute inset-0 rounded-full border-4 border-[#106BB9] border-t-transparent animate-spin"
+        ></div>
+      </div>
+
+      <h3 className="text-xl font-semibold text-[#0D2744] mb-2">
+        Subiendo fotos...
+      </h3>
+
+      <p className="text-3xl font-bold text-[#106BB9] mb-1">
+        {uploadProgress.current} <span className="text-gray-400 text-xl font-medium">/ {uploadProgress.total}</span>
+      </p>
+
+      <p className="text-sm text-gray-500 mb-6">
+        {uploadProgress.current === 0
+          ? 'Preparando subida...'
+          : uploadProgress.current === uploadProgress.total
+            ? 'Confirmando fotos...'
+            : `Foto ${uploadProgress.current} de ${uploadProgress.total}`}
+      </p>
+
+      {/* Barra de progreso */}
+      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+        <div
+          className="bg-[#106BB9] h-2.5 rounded-full transition-all duration-300 ease-out"
+          style={{
+            width: uploadProgress.total > 0
+              ? `${Math.round((uploadProgress.current / uploadProgress.total) * 100)}%`
+              : '0%',
+          }}
+        ></div>
+      </div>
+
+      <p className="text-xs text-gray-400 mt-4">
+        No cierres esta ventana
+      </p>
+    </div>
+  </div>
+)}
         {/* ==================== MODAL CONFIRMAR VOLVER AL PASO 1 ==================== */}
         {showBackConfirmModal && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
