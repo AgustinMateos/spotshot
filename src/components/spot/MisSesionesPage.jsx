@@ -8,7 +8,22 @@ import MisSesionesTable from './MisSesionesShotTable';
 import { useRouter } from 'next/navigation';
 export default function MisSesionesPage() {
   const router = useRouter();
-  const { token, logout, loading: authLoading } = useAuth();
+  const { token, logout, loading: authLoading, user } = useAuth();
+const audiences = user?.allowedAudiences;
+
+const canSelectFreeSurfers =
+  !audiences || audiences.includes('FREE_SURFERS');
+
+const canSelectSchools =
+  !audiences || audiences.includes('SCHOOLS');
+
+const getDefaultAudience = (list) => {
+  if (!list || list.length === 0) return 'FREE_SURFERS';
+  const hasFree = list.includes('FREE_SURFERS');
+  const hasSchools = list.includes('SCHOOLS');
+  if (hasSchools && !hasFree) return 'SCHOOLS';
+  return 'FREE_SURFERS';
+};
   const [stripeConnect, setStripeConnect] = useState(undefined);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -22,15 +37,15 @@ export default function MisSesionesPage() {
   });
   const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [filters, setFilters] = useState({
-    search: '',
-    audience: 'FREE_SURFERS',
-    status: '',
-    location: '',
-    sessionDate: '',
-    timeFrom: '',
-    timeTo: '',
-  });
+const [filters, setFilters] = useState({
+  search: '',
+  audience: getDefaultAudience(audiences),
+  status: '',
+  location: '',
+  sessionDate: '',
+  timeFrom: '',
+  timeTo: '',
+});
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -97,7 +112,23 @@ if (stripeRes.status === 401 || sessionsRes.status === 401) {
 
     loadAll();
   }, [token, filters,logout, pagination.page]);
+// useEffect para cuando user llega después
+useEffect(() => {
+  if (!user?.allowedAudiences) return;
 
+  const defaultAud = getDefaultAudience(user.allowedAudiences);
+
+  setFilters((prev) => {
+    const ok =
+      (prev.audience === 'FREE_SURFERS' &&
+        user.allowedAudiences.includes('FREE_SURFERS')) ||
+      (prev.audience === 'SCHOOLS' &&
+        user.allowedAudiences.includes('SCHOOLS'));
+
+    if (ok) return prev;
+    return { ...prev, audience: defaultAud };
+  });
+}, [user?.allowedAudiences]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.relative')) {
@@ -173,30 +204,32 @@ if (stripeRes.status === 401 || sessionsRes.status === 401) {
 
         {/* Tabla reutilizable */}
         <MisSesionesTable
-          sessions={sessions}
-          loading={loading}
-          pagination={pagination}
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onPageChange={goToPage}
-          onDelete={(session) => {
-            setSessionToDelete(session);
-            setShowDeleteConfirmModal(true);
-          }}
-          onCopyLink={(sessionId) => {
-            const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-              setCopiedId(sessionId);
-              setTimeout(() => {
-                setOpenMenuId(null);
-                setCopiedId(null);
-              }, 1800);
-            });
-          }}
-          openMenuId={openMenuId}
-          setOpenMenuId={setOpenMenuId}
-          copiedId={copiedId}
-        />
+  sessions={sessions}
+  loading={loading}
+  pagination={pagination}
+  filters={filters}
+  onFilterChange={handleFilterChange}
+  onPageChange={goToPage}
+  canSelectFreeSurfers={canSelectFreeSurfers}
+  canSelectSchools={canSelectSchools}
+  onDelete={(session) => {
+    setSessionToDelete(session);
+    setShowDeleteConfirmModal(true);
+  }}
+  onCopyLink={(sessionId) => {
+    const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopiedId(sessionId);
+      setTimeout(() => {
+        setOpenMenuId(null);
+        setCopiedId(null);
+      }, 1800);
+    });
+  }}
+  openMenuId={openMenuId}
+  setOpenMenuId={setOpenMenuId}
+  copiedId={copiedId}
+/>
 
       </div>
 

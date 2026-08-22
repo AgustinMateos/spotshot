@@ -35,8 +35,25 @@ function CardSkeleton({ delay = 0 }) {
 }
 
 export default function ShotPage() {
-    const { user, token,logout, loading: authLoading } = useAuth();
-    const router = useRouter();
+   const { user, token, logout, loading: authLoading } = useAuth();
+const router = useRouter();
+
+const audiences = user?.allowedAudiences;
+
+const canSelectFreeSurfers =
+  !audiences || audiences.includes('FREE_SURFERS');
+
+const canSelectSchools =
+  !audiences || audiences.includes('SCHOOLS');
+
+const getDefaultAudience = (list) => {
+  if (!list || list.length === 0) return 'FREE_SURFERS';
+  const hasFree = list.includes('FREE_SURFERS');
+  const hasSchools = list.includes('SCHOOLS');
+  if (hasSchools && !hasFree) return 'SCHOOLS';
+  return 'FREE_SURFERS';
+};
+    
  
     const [stripeConnect, setStripeConnect] = useState(null);
     const [allSessions, setAllSessions] = useState([]);
@@ -49,16 +66,16 @@ export default function ShotPage() {
 const [deleteSuccess, setDeleteSuccess] = useState(false);
 const [sessionToDelete, setSessionToDelete] = useState(null);
 const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-    const [filters, setFilters] = useState({
-        search: '',
-        audience: 'FREE_SURFERS',
-        status: '',
-        location: '',
-        sessionDate: '',
-        timeFrom: '',
-        timeTo: '',
-        page: 1,
-    });
+   const [filters, setFilters] = useState({
+  search: '',
+  audience: getDefaultAudience(audiences),
+  status: '',
+  location: '',
+  sessionDate: '',
+  timeFrom: '',
+  timeTo: '',
+  page: 1,
+});
 
     const [pagination, setPagination] = useState({
         total: 0,
@@ -130,6 +147,22 @@ if (stripeRes.status === 401 || sessionsRes.status === 401) {
     }, [token, filters.audience, filters.status, filters.location, filters.sessionDate,
         filters.timeFrom, filters.timeTo,logout,router, filters.page]);
 
+        useEffect(() => {
+  if (!user?.allowedAudiences) return;
+
+  const defaultAud = getDefaultAudience(user.allowedAudiences);
+
+  setFilters((prev) => {
+    const ok =
+      (prev.audience === 'FREE_SURFERS' &&
+        user.allowedAudiences.includes('FREE_SURFERS')) ||
+      (prev.audience === 'SCHOOLS' &&
+        user.allowedAudiences.includes('SCHOOLS'));
+
+    if (ok) return prev;
+    return { ...prev, audience: defaultAud };
+  });
+}, [user?.allowedAudiences]);
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
     };
@@ -305,30 +338,32 @@ const handleDeleteSession = async (sessionId) => {
                         </div>
 
                         <MisSesionesTable
-                            sessions={allSessions}
-                            loading={loadingFilters}
-                            pagination={{ ...pagination, page: filters.page }}
-                            filters={filters}
-                            onFilterChange={handleFilterChange}
-                            onPageChange={goToPage}
-                            openMenuId={openMenuId}        // ← esto faltaba
-                            setOpenMenuId={setOpenMenuId}
-                             onDelete={(session) => {
-            setSessionToDelete(session);
-            setShowDeleteConfirmModal(true);
-          }}
-                            onCopyLink={(sessionId) => {
-                                const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
-                                navigator.clipboard.writeText(shareUrl).then(() => {
-                                    setCopiedId(sessionId);
-                                    setTimeout(() => {
-                                        setOpenMenuId(null);
-                                        setCopiedId(null);
-                                    }, 1800);
-                                });
-                            }}
-                            copiedId={copiedId}
-                        />
+  sessions={allSessions}
+  loading={loadingFilters}
+  pagination={{ ...pagination, page: filters.page }}
+  filters={filters}
+  onFilterChange={handleFilterChange}
+  onPageChange={goToPage}
+  canSelectFreeSurfers={canSelectFreeSurfers}
+  canSelectSchools={canSelectSchools}
+  openMenuId={openMenuId}
+  setOpenMenuId={setOpenMenuId}
+  onDelete={(session) => {
+    setSessionToDelete(session);
+    setShowDeleteConfirmModal(true);
+  }}
+  onCopyLink={(sessionId) => {
+    const shareUrl = `https://www.spotshot.app/sesiones/${sessionId}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopiedId(sessionId);
+      setTimeout(() => {
+        setOpenMenuId(null);
+        setCopiedId(null);
+      }, 1800);
+    });
+  }}
+  copiedId={copiedId}
+/>
                     </>
                 ) : (
                     <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">

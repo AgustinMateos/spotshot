@@ -9,24 +9,40 @@ import { escuelas, playas } from '@/lib/constants/surfData';
 import CustomDatePicker from '@/components/CustomDatePicker';
 const NewAlbumPage = () => {
   const router = useRouter();
-  const { token, logout, loading, handleAuthError } = useAuth();   // ← Agrega handleAuthError
+
+const { token, logout, loading, handleAuthError, user } = useAuth();
+const audiences = user?.allowedAudiences;
+
+const canSelectFreeSurfers =
+  !audiences || audiences.includes('FREE_SURFERS');
+
+const canSelectSchools =
+  !audiences || audiences.includes('SCHOOLS');
+
+const getDefaultTypeFromAudiences = (list) => {
+  if (!list || list.length === 0) return 'free-surfers';
+  const hasFree = list.includes('FREE_SURFERS');
+  const hasSchools = list.includes('SCHOOLS');
+  if (hasSchools && !hasFree) return 'escuelas';
+  return 'free-surfers';
+};
   const [showDateModal, setShowDateModal] = useState(false);
   const [step, setStep] = useState(1);
   const [sessionCreated, setSessionCreated] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]); // ← se mantiene
   const [showBackConfirmModal, setShowBackConfirmModal] = useState(false);
   const [showDurationDropdown, setShowDurationDropdown] = useState(false);
-  const [formData, setFormData] = useState({
-    type: 'free-surfers',
-    school: '',
-    location: '',
-    date: '',
-    startTime: '10:30',
-    endTime: '11:00',        // ← Cambiado a 30 min por defecto
-    duration: '0.5',         // ← Nuevo campo
-    basePrice: 5,
-    selectedPacks: [],
-  });
+const [formData, setFormData] = useState({
+  type: getDefaultTypeFromAudiences(audiences),
+  school: '',
+  location: '',
+  date: '',
+  startTime: '10:30',
+  endTime: '11:00',
+  duration: '0.5',
+  basePrice: 5,
+  selectedPacks: [],
+});
 
   const [packsCatalog, setPacksCatalog] = useState([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(false);
@@ -48,7 +64,24 @@ const NewAlbumPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
  
 const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
-  // Cargar catálogo de packs
+
+useEffect(() => {
+  if (!user?.allowedAudiences) return;
+
+  const list = user.allowedAudiences;
+  const defaultType = getDefaultTypeFromAudiences(list);
+
+  setFormData((prev) => {
+    const currentOk =
+      (prev.type === 'free-surfers' && list.includes('FREE_SURFERS')) ||
+      (prev.type === 'escuelas' && list.includes('SCHOOLS'));
+
+    if (currentOk) return prev;
+    return { ...prev, type: defaultType };
+  });
+}, [user?.allowedAudiences]);
+
+// Cargar catálogo de packs
   useEffect(() => {
    const loadPacks = async () => {
   if (!token) return;
@@ -707,26 +740,34 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
             <h2 className="text-[18px]  text-[#0D2744] font-semibold mb-6">Completa los detalles de tu sesión</h2>
 
             {/* Tipo de sesión */}
-            <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-73 h-12.25 mb-8">
-              <button
-                onClick={() => updateForm('type', 'free-surfers')}
-                className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${formData.type === 'free-surfers'
-                  ? 'bg-white text-[#1E3A5F] shadow-sm'
-                  : 'bg-transparent text-[#71717A] hover:text-gray-700'
-                  }`}
-              >
-                Free surfers
-              </button>
-              <button
-                onClick={() => updateForm('type', 'escuelas')}
-                className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${formData.type === 'escuelas'
-                  ? 'bg-white text-[#1E3A5F] shadow-sm'
-                  : 'bg-transparent text-[#71717A] hover:text-gray-700'
-                  }`}
-              >
-                Escuelas
-              </button>
-            </div>
+           
+            <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-fit h-12.25 mb-8">
+  {canSelectFreeSurfers && (
+    <button
+      onClick={() => updateForm('type', 'free-surfers')}
+      className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${
+        formData.type === 'free-surfers'
+          ? 'bg-white text-[#1E3A5F] shadow-sm'
+          : 'bg-transparent text-[#71717A] hover:text-gray-700'
+      }`}
+    >
+      Free surfers
+    </button>
+  )}
+
+  {canSelectSchools && (
+    <button
+      onClick={() => updateForm('type', 'escuelas')}
+      className={`px-8 cursor-pointer rounded-lg font-medium transition-all ${
+        formData.type === 'escuelas'
+          ? 'bg-white text-[#1E3A5F] shadow-sm'
+          : 'bg-transparent text-[#71717A] hover:text-gray-700'
+      }`}
+    >
+      Escuelas
+    </button>
+  )}
+</div>
 
             {/* Escuela o Ubicación */}
             {formData.type === 'escuelas' ? (
@@ -1468,16 +1509,16 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
                     setSessionCreated(false);
 
                     setFormData({
-                      type: formData.type,
-                      school: '',
-                      location: '',
-                      date: '',
-                      startTime: '10:30',
-                      endTime: '11:00',
-                      duration: '0.5',
-                      basePrice: 5,
-                      selectedPacks: [],
-                    });
+  type: getDefaultTypeFromAudiences(audiences),
+  school: '',
+  location: '',
+  date: '',
+  startTime: '10:30',
+  endTime: '11:00',
+  duration: '0.5',
+  basePrice: 5,
+  selectedPacks: [],
+});
 
                     // Forzamos el cambio de paso
                     setTimeout(() => {

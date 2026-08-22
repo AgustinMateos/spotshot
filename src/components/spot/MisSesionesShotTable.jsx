@@ -104,6 +104,8 @@ export default function MisSesionesTable({
   setOpenMenuId,
   copiedId,
   sessionLinkBase = '/shot/sesion',
+  canSelectFreeSurfers = true,  // ← nuevo
+  canSelectSchools = true,
 }) {
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
@@ -153,18 +155,32 @@ useEffect(() => {
         <div className="flex w-full gap-6 flex-wrap flex-col md:flex-row items-start">
 
           <div className="flex bg-[#F1F7FE] p-1 rounded-lg w-auto h-12.25">
-            {['FREE_SURFERS', 'SCHOOLS'].map((aud) => (
-              <button
-                key={aud}
-                onClick={() => onFilterChange('audience', aud)}
-                className={`px-6 py-2.5 rounded-lg text-[14px] cursor-pointer font-medium transition-all ${
-                  filters.audience === aud ? 'bg-white shadow-sm text-gray-900' : 'bg-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {aud === 'FREE_SURFERS' ? 'Free Surfers' : 'Escuelas'}
-              </button>
-            ))}
-          </div>
+  {canSelectFreeSurfers && (
+    <button
+      onClick={() => onFilterChange('audience', 'FREE_SURFERS')}
+      className={`px-6 py-2.5 rounded-lg text-[14px] cursor-pointer font-medium transition-all ${
+        filters.audience === 'FREE_SURFERS'
+          ? 'bg-white shadow-sm text-gray-900'
+          : 'bg-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Free Surfers
+    </button>
+  )}
+
+  {canSelectSchools && (
+    <button
+      onClick={() => onFilterChange('audience', 'SCHOOLS')}
+      className={`px-6 py-2.5 rounded-lg text-[14px] cursor-pointer font-medium transition-all ${
+        filters.audience === 'SCHOOLS'
+          ? 'bg-white shadow-sm text-gray-900'
+          : 'bg-transparent text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      Escuelas
+    </button>
+  )}
+</div>
 
           <div className="relative w-70">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
