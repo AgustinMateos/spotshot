@@ -63,8 +63,10 @@ const [formData, setFormData] = useState({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
  
-const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
-
+const [uploadProgress, setUploadProgress] = useState(null);
+const [uploadState, setUploadState] = useState('idle'); // idle | running | paused-error | done
+const [uploadError, setUploadError] = useState(null);
+const [failedBatchIndex, setFailedBatchIndex] = useState(0);
 useEffect(() => {
   if (!user?.allowedAudiences) return;
 
@@ -80,7 +82,37 @@ useEffect(() => {
     return { ...prev, type: defaultType };
   });
 }, [user?.allowedAudiences]);
+// ====================== SUBIDA MASIVA POR LOTES ======================
+const PREPARE_CHUNK = 200;
+const PUT_CONCURRENCY = 8;
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+function chunk(items, size) {
+  const out = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
+  }
+  return out;
+}
+
+async function mapPool(items, limit, worker) {
+  if (items.length === 0) return;
+  const conc = Math.max(1, Math.min(limit, items.length));
+  let next = 0;
+
+  async function run() {
+    while (next < items.length) {
+      const i = next++;
+      await worker(items[i], i);
+    }
+  }
+
+  await Promise.all(Array.from({ length: conc }, run));
+}
+
+function filterPhotos(files) {
+  return files.filter((f) => ALLOWED_MIME.has(f.type));
+}
 // Cargar catálogo de packs
   useEffect(() => {
    const loadPacks = async () => {
@@ -349,123 +381,176 @@ if (await handleAuthError(res)) return;
 
   const handleDragLeave = () => setIsDragging(false);
 
-const handleUploadPhotos = async () => {
+const handleUploadPhotos = async (startFromBatch = 0) => {
   if (!sessionId) {
-    alert("Primero crea la sesión en el Paso 1");
+    alert('Primero crea la sesión en el Paso 1');
     return false;
   }
   if (photos.length === 0) {
-    alert("Selecciona al menos una foto");
+    alert('Selecciona al menos una foto');
     return false;
   }
 
-  const totalPhotos = photos.length;
-  setUploadProgress({ current: 0, total: totalPhotos });
-  setUploading(true);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const files = filterPhotos(photos);
+
+  if (files.length === 0) {
+    setErrorMessage('Ningún archivo válido (solo JPG, PNG, WEBP)');
+    setShowErrorModal(true);
+    return false;
+  }
+
+  const batches = chunk(files, PREPARE_CHUNK);
+  let uploaded = 0;
+  let failed = 0;
+  let currentBatch = startFromBatch;
+
+  setUploadState('running');
+  setUploadError(null);
 
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    for (let b = startFromBatch; b < batches.length; b++) {
+      currentBatch = b;
+      const batch = batches[b];
 
-    // ==================== 1. PREPARE UPLOADS ====================
-    const filesMetadata = photos.map(file => ({
-      mimeType: file.type,
-      sizeBytes: file.size,
-      originalName: file.name,
-    }));
+      // ========== 1. PREPARING ==========
+      setUploadProgress({
+        phase: 'preparing',
+        batchIndex: b + 1,
+        batchCount: batches.length,
+        uploaded,
+        failed,
+        total: files.length,
+      });
 
-    const prepareRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/prepare-uploads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ files: filesMetadata }),
-    });
-
-    const prepareData = await prepareRes.json();
-
-    if (!prepareRes.ok) {
-      throw new Error(prepareData.message || 'Error al preparar las subidas');
-    }
-
-    // ==================== 2. SUBIDA DIRECTA (PUT) con progreso ====================
-    let completedCount = 0;
-
-    const uploadPromises = prepareData.uploads.map(async (upload, index) => {
-      const file = photos[index];
-      try {
-        const response = await fetch(upload.uploadUrl, {
-          method: 'PUT',
-          body: file,
+      // Prepare
+      const prepareRes = await fetch(
+        `${API_URL}/api/v1/photo-sessions/${sessionId}/prepare-uploads`,
+        {
+          method: 'POST',
           headers: {
-            'Content-Type': file.type,
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-        });
+          body: JSON.stringify({
+            files: batch.map((f) => ({
+              mimeType: f.type,
+              sizeBytes: f.size,
+              originalName: f.name,
+            })),
+          }),
+        }
+      );
 
-        if (!response.ok) {
-          console.error(`Fallo al subir ${file.name}`);
-          return null;
+      const prepareData = await prepareRes.json();
+      if (!prepareRes.ok) {
+        throw new Error(prepareData.message || 'Error al preparar las subidas');
+      }
+
+      if (!prepareData.uploads || prepareData.uploads.length !== batch.length) {
+        throw new Error('La cantidad de URLs no coincide con los archivos del lote');
+      }
+
+      const prepared = prepareData.uploads.map((u, i) => ({
+        file: batch[i],
+        imageId: u.imageId,
+        uploadUrl: u.uploadUrl,
+      }));
+
+      // ========== 2. UPLOADING ==========
+      setUploadProgress({
+        phase: 'uploading',
+        batchIndex: b + 1,
+        batchCount: batches.length,
+        uploaded,
+        failed,
+        total: files.length,
+      });
+
+      const okIds = [];
+
+      await mapPool(prepared, PUT_CONCURRENCY, async (item) => {
+        setUploadProgress((prev) =>
+          prev ? { ...prev, currentName: item.file.name } : prev
+        );
+
+        try {
+          const res = await fetch(item.uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': item.file.type },
+            body: item.file,
+          });
+
+          if (res.ok) {
+            okIds.push(item.imageId);
+            uploaded += 1;
+          } else {
+            failed += 1;
+          }
+        } catch {
+          failed += 1;
         }
 
-        return upload.imageId;
-      } finally {
-        // Actualizar progreso aunque falle
-        completedCount += 1;
-        setUploadProgress({ current: completedCount, total: totalPhotos });
+        setUploadProgress({
+          phase: 'uploading',
+          batchIndex: b + 1,
+          batchCount: batches.length,
+          uploaded,
+          failed,
+          total: files.length,
+          currentName: item.file.name,
+        });
+      });
+
+      // ========== 3. CONFIRMING ==========
+      setUploadProgress({
+        phase: 'confirming',
+        batchIndex: b + 1,
+        batchCount: batches.length,
+        uploaded,
+        failed,
+        total: files.length,
+      });
+
+      if (okIds.length === 0) {
+        throw new Error('Ningún PUT OK en este lote');
       }
-    });
 
-    const imageIdsResults = await Promise.all(uploadPromises);
-    const successfulImageIds = imageIdsResults.filter(id => id !== null);
+      const confirmRes = await fetch(
+        `${API_URL}/api/v1/photo-sessions/${sessionId}/confirm-uploads`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ imageIds: okIds }),
+        }
+      );
 
-    if (successfulImageIds.length === 0) {
-      throw new Error("Ninguna foto se pudo subir correctamente");
+      const confirmData = await confirmRes.json();
+      if (!confirmRes.ok) {
+        throw new Error(confirmData.message || 'Error al confirmar el lote');
+      }
     }
 
-    // ==================== 3. CONFIRM UPLOADS ====================
-    const confirmRes = await fetch(`${API_URL}/api/v1/photo-sessions/${sessionId}/confirm-uploads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ imageIds: successfulImageIds }),
-    });
+    // Éxito → guardamos una muestra chica de previews (no todas)
+    const samplePreviews = files.slice(0, 12).map((file) => ({
+      localPreview: URL.createObjectURL(file),
+      name: file.name,
+    }));
 
-    const confirmData = await confirmRes.json();
-
-    if (!confirmRes.ok) {
-      throw new Error(confirmData.message || 'Error al confirmar las subidas');
-    }
-
-    // Combinar preview local + datos del servidor
-    const newUploadedImages = photos.map((file, index) => {
-      const serverImage = confirmData.images?.[index] || {};
-      return {
-        ...serverImage,
-        localPreview: URL.createObjectURL(file),
-        name: file.name
-      };
-    });
-
-    setUploadedImages(prev => [...prev, ...newUploadedImages]);
+    setUploadedImages((prev) => [...prev, ...samplePreviews]);
     setPhotos([]);
-    return true; // ← éxito → avanza al step 3
+    setUploadState('done');
+    setUploadProgress(null);
+    return true;
   } catch (err) {
-    console.error("❌ Error en subida directa:", err);
-
-    let message = err.message || 'Error durante la subida de fotos.';
-
-    if (message.includes('mimeType') || message.includes('image/jpeg')) {
-      setErrorMessage("Formato de imagen no permitido por el servidor.\n\nSolo JPG, PNG y WEBP son aceptados.");
-      setShowErrorModal(true);
-    } else {
-      alert(message);
-    }
-    return false; // ← falló → se queda en step 2
-  } finally {
-    setUploading(false);
-    setUploadProgress({ current: 0, total: 0 });
+    console.error('❌ Error en subida por lotes:', err);
+    setUploadError(err.message || 'Error durante la subida');
+    setUploadState('paused-error');
+    setFailedBatchIndex(currentBatch);
+    return false;
   }
 };
   // ====================== ACTUALIZAR PRECIO + PACKS ======================
@@ -605,11 +690,24 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
     if (step === 1) {
       await handleCreateSession();
     }
-    else if (step === 2) {
+   else if (step === 2) {
   if (uploadedImages.length === 0 && photos.length === 0) {
-    alert("Debes subir al menos una foto válida para continuar.");
+    alert('Debes subir al menos una foto válida para continuar.');
     return;
   }
+
+  if (photos.length > 0) {
+    const success = await handleUploadPhotos(0);
+    if (success) {
+      setStep(3);
+    }
+    return;
+  }
+
+  if (uploadedImages.length > 0) {
+    setStep(3);
+  }
+
 
   // Si hay fotos pendientes, subirlas y avanzar solo si tuvo éxito
   if (photos.length > 0) {
@@ -1051,7 +1149,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
                     {photos.length} foto{photos.length !== 1 ? 's' : ''} lista{photos.length !== 1 ? 's' : ''} para subir
                   </p>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {/* <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {photos.map((photo, index) => (
                       <div key={index} className="relative group rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                         <ImageWithLoader
@@ -1074,7 +1172,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
                         </button>
                       </div>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -1256,38 +1354,12 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
 
             {/* Fotos subidas */}
             <div>
-              <p className="text-sm text-gray-600 mb-4 font-medium">
-                {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''} subidas
-              </p>
-              <p className="text-xs text-gray-400 mt-1">*No hace falta esperar a que termine el proceso de carga.</p>
-
+              
+              
               {uploadedImages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-                  {uploadedImages.map((img, index) => {
-                    const displayUrl = img.localPreview || img.publicUrl || img.url;
-
-                    return (
-                      <div
-                        key={index}
-                        className="relative aspect-square rounded-2xl overflow-hidden border border-green-200 bg-gray-100"
-                      >
-                        <ImageWithLoader
-                          src={displayUrl}
-                          alt={`foto-${index}`}
-                          aspectRatio="aspect-square"
-                        />
-                        <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded font-medium">
-                          Subida
-                        </div>
-                        {img.localPreview && (
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                            Preview
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                <div><p className="text-sm text-gray-600 mb-4 font-medium">
+                {uploadedImages.length} foto{uploadedImages.length !== 1 ? 's' : ''} subidas
+              </p></div>
               ) : (
                 <p className="text-red-600 text-center py-8 bg-red-50 rounded-2xl">
                   ⚠️ Debes subir al menos una foto antes de publicar
@@ -1315,11 +1387,11 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
             <button
               onClick={handleNext}
               disabled={
-                (step === 1 && creatingSession) ||
-                (step === 2 && (uploading || showErrorModal || (uploadedImages.length === 0 && photos.length === 0))) ||
-                (step === 3 && updatingPrice) ||
-                (step === 4 && publishing)
-              }
+  (step === 1 && creatingSession) ||
+  (step === 2 && (uploadState === 'running' || showErrorModal || (uploadedImages.length === 0 && photos.length === 0))) ||
+  (step === 3 && updatingPrice) ||
+  (step === 4 && publishing)
+}
               className="px-8 py-3.5 rounded-2xl cursor-pointer  bg-gray-900 text-white hover:bg-black flex items-center gap-2 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {step === 1 && creatingSession ? 'Creando sesión...' :
@@ -1432,47 +1504,93 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
           </div>
         )}
         {/* ==================== MODAL PROGRESO DE SUBIDA ==================== */}
-{uploading && (
+{/* ==================== MODAL PROGRESO DE SUBIDA ==================== */}
+{(uploadState === 'running' || uploadState === 'paused-error') && uploadProgress && (
   <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl">
       <div className="mx-auto w-16 h-16 mb-6 relative">
-        <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-        <div
-          className="absolute inset-0 rounded-full border-4 border-[#106BB9] border-t-transparent animate-spin"
-        ></div>
+        {uploadState === 'running' ? (
+          <>
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#106BB9] border-t-transparent animate-spin"></div>
+          </>
+        ) : (
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl">
+            ⚠️
+          </div>
+        )}
       </div>
 
       <h3 className="text-xl font-semibold text-[#0D2744] mb-2">
-        Subiendo fotos...
+        {uploadState === 'paused-error'
+          ? 'Error en el lote'
+          : uploadProgress.phase === 'preparing'
+          ? 'Preparando URLs…'
+          : uploadProgress.phase === 'uploading'
+          ? 'Subiendo fotos…'
+          : 'Confirmando en el servidor…'}
       </h3>
 
-      <p className="text-3xl font-bold text-[#106BB9] mb-1">
-        {uploadProgress.current} <span className="text-gray-400 text-xl font-medium">/ {uploadProgress.total}</span>
+      <p className="text-sm text-gray-600 mb-1">
+        Lote {uploadProgress.batchIndex} / {uploadProgress.batchCount}
       </p>
 
-      <p className="text-sm text-gray-500 mb-6">
-        {uploadProgress.current === 0
-          ? 'Preparando subida...'
-          : uploadProgress.current === uploadProgress.total
-            ? 'Confirmando fotos...'
-            : `Foto ${uploadProgress.current} de ${uploadProgress.total}`}
+      <p className="text-3xl font-bold text-[#106BB9] mb-1">
+        {uploadProgress.uploaded}{' '}
+        <span className="text-gray-400 text-xl font-medium">
+          / {uploadProgress.total}
+        </span>
       </p>
+
+      {uploadProgress.failed > 0 && (
+        <p className="text-sm text-red-600 mb-2">
+          {uploadProgress.failed} fallida{uploadProgress.failed !== 1 ? 's' : ''}
+        </p>
+      )}
+
+      {uploadProgress.currentName && uploadState === 'running' && (
+        <p className="text-xs text-gray-500 mb-4 truncate px-4">
+          {uploadProgress.currentName}
+        </p>
+      )}
 
       {/* Barra de progreso */}
-      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden mb-4">
         <div
           className="bg-[#106BB9] h-2.5 rounded-full transition-all duration-300 ease-out"
           style={{
-            width: uploadProgress.total > 0
-              ? `${Math.round((uploadProgress.current / uploadProgress.total) * 100)}%`
-              : '0%',
+            width: `${Math.round(
+              ((uploadProgress.uploaded + uploadProgress.failed) / uploadProgress.total) * 100
+            )}%`,
           }}
-        ></div>
+        />
       </div>
 
-      <p className="text-xs text-gray-400 mt-4">
-        No cierres esta ventana
-      </p>
+      {uploadState === 'paused-error' && (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-red-600">{uploadError}</p>
+          <button
+            onClick={() => handleUploadPhotos(failedBatchIndex)}
+            className="w-full py-3 bg-[#106BB9] text-white rounded-2xl font-medium hover:bg-[#0d5a9e]"
+          >
+            Reintentar lote
+          </button>
+          <button
+            onClick={() => {
+              setUploadState('idle');
+              setUploadProgress(null);
+              setUploadError(null);
+            }}
+            className="w-full py-3 border border-gray-300 rounded-2xl font-medium"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {uploadState === 'running' && (
+        <p className="text-xs text-gray-400 mt-4">No cierres esta ventana</p>
+      )}
     </div>
   </div>
 )}
