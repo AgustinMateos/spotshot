@@ -471,16 +471,15 @@ export default function EscuelaCantabraDeSurfPage() {
       <header className="bg-[#B4121B] text-white">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-4">
-            <div className="w-full h-full shrink-0 flex items-center justify-center overflow-hidden">
-              <Image
-                src="/escuelaLogo.png"
-                width={220}
-                height={220}
-                alt="Escuela Cantabra de Surf"
-                className="object-contain w-full h-full p-1"
-              />
-            </div>
-           
+             <div className="w-60 h-20 flex items-center justify-center">
+                          <Image 
+                            src="/escuelaLogo.png"
+                            alt="SpotShot"
+                            width={400}
+                            height={220}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
           </Link>
 
           <button
@@ -597,28 +596,7 @@ export default function EscuelaCantabraDeSurfPage() {
         </section>
       )}
 
-      {/* ==================== BANNER ROJO ==================== */}
-      <section className="bg-[#B4121B] text-white mt-4">
-        <div className="mx-auto max-w-6xl px-6 py-8 text-center">
-          <h2 className="font-extrabold uppercase text-2xl md:text-3xl tracking-wide">
-            Vive la experiencia del surf
-          </h2>
-          <p className="text-white/70 text-sm tracking-widest mt-1">DESDE 1991</p>
-
-          <Link
-            href="https://spotshot.app"
-            target="_blank"
-            className="mt-6 inline-flex items-center gap-3 text-sm md:text-base"
-          >
-            <ScanFace size={20} className="text-white/80" />
-            <span>
-              Surfeaste fuera de la escuela? Encuentra tus fotos en{' '}
-              <strong>SpotShot.app</strong>
-            </span>
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
+   
 
       {/* Todo lo de abajo (contador, filtros, grilla, paginación) solo aparece
           después de una búsqueda por selfie */}

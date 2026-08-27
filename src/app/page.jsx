@@ -6,9 +6,12 @@ import Encontrar from '@/components/Encontrar';
 import Fotografo from '@/components/Fotografo';
 import FotosHoy from '@/components/FotosHoy';
 import Barra from '@/components/Barra';
+import Footer from '@/components/Footer';
+import NavbarComponent from '@/components/NavbarPage';
 export default function Home() {
   return (
     <PageLoader>
+      <NavbarComponent/>
       <div className="relative w-full h-screen overflow-hidden">
         <Image
           src="/inicio/somo1.webp"
@@ -36,6 +39,7 @@ export default function Home() {
       <Barra/>
       <Fotografo />
       <FotosHoy />
+      <Footer/>
     </PageLoader>
   );
 }
