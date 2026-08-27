@@ -610,7 +610,7 @@ export default function EscuelaCantabraDeSurfPage() {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm">
+        {/* <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm">
           <div className="flex flex-wrap gap-4 items-start">
             <div className="relative w-full md:w-80" ref={timeFilterRef}>
               <div
@@ -675,7 +675,7 @@ export default function EscuelaCantabraDeSurfPage() {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* ==================== RESULTADOS ==================== */}
         {faceMatches.length === 0 ? (
