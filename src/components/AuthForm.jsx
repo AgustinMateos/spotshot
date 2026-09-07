@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { ChevronDown, Download, ExternalLink, Printer } from 'lucide-react';
+import { ChevronDown, Download, ExternalLink, X } from 'lucide-react';
 
 const INITIAL_CONSENTS = {
   terms: false,
@@ -31,11 +31,16 @@ export default function AuthForm({ mode = 'login' }) {
   const [termsReviewed, setTermsReviewed] = useState(false);
   const [consents, setConsents] = useState(INITIAL_CONSENTS);
 
+  const [consentModalOpen, setConsentModalOpen] = useState(false);
+  const [consentToken, setConsentToken] = useState('');
+  const [acceptingConsents, setAcceptingConsents] = useState(false);
+
   const isLogin = mode === 'login';
   const isRegister = mode === 'register';
   const isForgot = mode === 'forgot';
 
   const requiredOk = consents.terms && consents.adult && consents.photosRights;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const openTerms = () => {
     setTermsOpen(true);
@@ -66,22 +71,81 @@ export default function AuthForm({ mode = 'login' }) {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       window.open('/terminos-y-condiciones', '_blank', 'noopener,noreferrer');
     }
   };
 
-  const printTerms = () => {
-    setTermsReviewed(true);
-    const w = window.open('/terminos-y-condiciones', '_blank', 'noopener,noreferrer');
-    if (w) {
-      w.addEventListener('load', () => {
-        try {
-          w.print();
-        } catch {
-          /* el usuario puede imprimir/guardar desde el navegador */
-        }
+  const finishLogin = (data) => {
+    if (data.access_token) {
+      login(data.access_token, data.photographer);
+    }
+    setSuccess(data.message || 'Inicio de sesión exitoso');
+    setTimeout(() => router.push('/shot'), 800);
+  };
+
+  const doLogin = async () => {
+    const response = await fetch(`${API_URL}/api/v1/photographers/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    return { response, data };
+  };
+
+  const handleAcceptConsentsAndLogin = async () => {
+    if (!requiredOk) {
+      setError('Tenés que aceptar las casillas obligatorias.');
+      return;
+    }
+    if (!consentToken) {
+      setError('El token de consentimiento expiró. Intentá iniciar sesión de nuevo.');
+      setConsentModalOpen(false);
+      return;
+    }
+
+    setAcceptingConsents(true);
+    setError('');
+
+    try {
+      const acceptRes = await fetch(`${API_URL}/api/v1/photographers/auth/accept-consents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consentToken,
+          acceptedTerms: consents.terms,
+          acceptedMajorityAge: consents.adult,
+          acceptedPhotoAuthorship: consents.photosRights,
+          subscribeNewsletter: consents.marketing,
+        }),
       });
+
+      const acceptData = await acceptRes.json();
+
+      if (!acceptRes.ok) {
+        setError(acceptData.message || 'No se pudieron guardar los consentimientos.');
+        return;
+      }
+
+      const { response, data } = await doLogin();
+
+      if (response.ok) {
+        setConsentModalOpen(false);
+        setConsentToken('');
+        finishLogin(data);
+      } else if (response.status === 403 && data.code === 'CONSENT_REQUIRED') {
+        setConsentToken(data.consent_token || '');
+        setError('Todavía faltan consentimientos. Revisá las casillas e intentá de nuevo.');
+      } else {
+        setConsentModalOpen(false);
+        setError(data.message || 'Consentimientos guardados, pero el login falló. Probá de nuevo.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Error de conexión con el servidor');
+    } finally {
+      setAcceptingConsents(false);
     }
   };
 
@@ -104,45 +168,40 @@ export default function AuthForm({ mode = 'login' }) {
       return;
     }
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
     try {
-      let endpoint = '';
-      let body = {};
-
       if (isLogin) {
-        endpoint = '/api/v1/photographers/auth/login';
-        body = { email, password };
+        const { response, data } = await doLogin();
+
+        if (response.ok) {
+          finishLogin(data);
+        } else if (response.status === 403 && data.code === 'CONSENT_REQUIRED') {
+          setConsentToken(data.consent_token || '');
+          setConsents(INITIAL_CONSENTS);
+          setConsentModalOpen(true);
+          setError('');
+        } else {
+          setError(data.message || 'Ocurrió un error');
+        }
       } else if (isRegister) {
-        endpoint = '/api/v1/photographers/auth/register';
-        body = {
-          alias,
-          email,
-          password,
-          consents: {
-            terms: consents.terms,
-            adult: consents.adult,
-            photosRights: consents.photosRights,
-            marketing: consents.marketing,
-            termsReviewed: true,
-            acceptedAt: new Date().toISOString(),
-          },
-        };
-      } else if (isForgot) {
-        endpoint = '/api/v1/photographers/auth/forgot-password';
-        body = { email };
-      }
-
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if (isRegister) {
+        const response = await fetch(`${API_URL}/api/v1/photographers/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            alias,
+            email,
+            password,
+            consents: {
+              terms: consents.terms,
+              adult: consents.adult,
+              photosRights: consents.photosRights,
+              marketing: consents.marketing,
+              termsReviewed: true,
+              acceptedAt: new Date().toISOString(),
+            },
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
           setSuccess(data.message || 'Cuenta creada. Revisa tu email para activarla.');
           setAlias('');
           setEmail('');
@@ -150,24 +209,25 @@ export default function AuthForm({ mode = 'login' }) {
           setConsents(INITIAL_CONSENTS);
           setTermsReviewed(false);
           setTermsOpen(false);
-        } else if (isLogin) {
-          if (data.access_token) {
-            login(data.access_token, data.photographer);
-          }
-          setSuccess(data.message || 'Inicio de sesión exitoso');
-
-          setTimeout(() => {
-            router.push('/shot');
-          }, 1000);
-        } else if (isForgot) {
+        } else {
+          setError(data.message || 'Ocurrió un error');
+        }
+      } else if (isForgot) {
+        const response = await fetch(`${API_URL}/api/v1/photographers/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await response.json();
+        if (response.ok) {
           setSuccess(
             data.message ||
               'Si el email está registrado, te enviamos instrucciones para restablecer tu contraseña.'
           );
           setEmail('');
+        } else {
+          setError(data.message || 'Ocurrió un error');
         }
-      } else {
-        setError(data.message || 'Ocurrió un error');
       }
     } catch (err) {
       console.error(err);
@@ -265,10 +325,7 @@ export default function AuthForm({ mode = 'login' }) {
                   <p>
                     <span className="font-semibold text-gray-800">Responsable:</span> Stefano
                     Capra Vazquez y Camila Milagros Montanari (corresponsables, art. 26 RGPD) ·{' '}
-                    <a
-                      href="mailto:privacidad@spotshot.app"
-                      className="text-[#0D2744] underline"
-                    >
+                    <a href="mailto:privacidad@spotshot.app" className="text-[#0D2744] underline">
                       privacidad@spotshot.app
                     </a>
                     .
@@ -285,10 +342,7 @@ export default function AuthForm({ mode = 'login' }) {
                   <p>
                     <span className="font-semibold text-gray-800">Destinatarios:</span> Stripe
                     (pagos) y los proveedores indicados en la{' '}
-                    <Link
-                      href="/politica-de-privacidad"
-                      className="text-[#0D2744] font-medium underline"
-                    >
+                    <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
                       Política de Privacidad
                     </Link>
                     ; no se ceden datos a terceros salvo obligación legal.
@@ -296,10 +350,7 @@ export default function AuthForm({ mode = 'login' }) {
                   <p>
                     <span className="font-semibold text-gray-800">Derechos:</span> acceso,
                     rectificación, supresión y demás derechos, como se explica en la{' '}
-                    <Link
-                      href="/politica-de-privacidad"
-                      className="text-[#0D2744] font-medium underline"
-                    >
+                    <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
                       Política de Privacidad
                     </Link>
                     .
@@ -335,8 +386,7 @@ export default function AuthForm({ mode = 'login' }) {
                 <div className="border-t border-gray-200 bg-white">
                   <p className="px-4 pt-4 text-sm text-gray-600">
                     Podés leerlos acá, abrirlos en otra pestaña, descargarlos o imprimirlos /
-                    guardarlos como PDF desde el navegador{' '}
-                    <strong>antes de aceptarlos</strong>.
+                    guardarlos como PDF desde el navegador <strong>antes de aceptarlos</strong>.
                   </p>
 
                   <div className="px-4 py-3 flex flex-wrap gap-2">
@@ -348,14 +398,6 @@ export default function AuthForm({ mode = 'login' }) {
                       <Download size={16} />
                       Descargar
                     </button>
-                    {/* <button
-                      type="button"
-                      onClick={printTerms}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
-                    >
-                      <Printer size={16} />
-                      Imprimir / guardar PDF
-                    </button> */}
                     <Link
                       href="/terminos-y-condiciones"
                       target="_blank"
@@ -368,17 +410,17 @@ export default function AuthForm({ mode = 'login' }) {
                   </div>
 
                   <div className="px-4 pb-4 text-sm text-gray-600">
-  El texto íntegro está en{' '}
-  <Link
-    href="/terminos-y-condiciones"
-    target="_blank"
-    className="text-[#0D2744] font-medium underline"
-    onClick={() => setTermsReviewed(true)}
-  >
-    /terminos-y-condiciones
-  </Link>
-  . Usá Descargar antes de aceptar.
-</div>
+                    El texto íntegro está en{' '}
+                    <Link
+                      href="/terminos-y-condiciones"
+                      target="_blank"
+                      className="text-[#0D2744] font-medium underline"
+                      onClick={() => setTermsReviewed(true)}
+                    >
+                      /terminos-y-condiciones
+                    </Link>
+                    . Usá Descargar antes de aceptar.
+                  </div>
                 </div>
               )}
             </div>
@@ -454,16 +496,13 @@ export default function AuthForm({ mode = 'login' }) {
 
         {isLogin && (
           <div>
-            <a
-              href="/forgot-password"
-              className="text-sm text-[#0D2744] hover:underline font-medium"
-            >
+            <a href="/forgot-password" className="text-sm text-[#0D2744] hover:underline font-medium">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
         )}
 
-        {error && (
+        {error && !consentModalOpen && (
           <p className="text-red-600 text-center bg-red-50 py-3 rounded-xl">{error}</p>
         )}
         {success && (
@@ -511,6 +550,111 @@ export default function AuthForm({ mode = 'login' }) {
           </>
         )}
       </p>
+
+      {isLogin && consentModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !acceptingConsents && setConsentModalOpen(false)}
+          />
+
+          <div className="relative z-10 w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setConsentModalOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
+              aria-label="Cerrar"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-2xl font-semibold text-[#0D2744] pr-10">
+              Aceptá las condiciones para entrar
+            </h3>
+            <p className="text-sm text-gray-600 mt-2 mb-5">
+              Falta registrar los consentimientos obligatorios. Después vas a entrar automáticamente.
+            </p>
+
+            <div className="space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consents.terms}
+                  onChange={() => toggleConsent('terms')}
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                />
+                <span className="text-sm text-gray-700">
+                  <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                  acepto los{' '}
+                  <Link
+                    href="/terminos-y-condiciones"
+                    className="text-[#0D2744] font-medium underline"
+                    target="_blank"
+                    onClick={() => setTermsReviewed(true)}
+                  >
+                    Términos y Condiciones
+                  </Link>
+                  , incluido su Anexo I (Corresponsabilidad y condiciones de tratamiento).
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consents.adult}
+                  onChange={() => toggleConsent('adult')}
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                />
+                <span className="text-sm text-gray-700">
+                  <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que soy
+                  mayor de 18 años y que los datos facilitados son ciertos.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consents.photosRights}
+                  onChange={() => toggleConsent('photosRights')}
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                />
+                <span className="text-sm text-gray-700">
+                  <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro la
+                  autoría / derechos de las fotos y que no subiré menores identificables.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consents.marketing}
+                  onChange={() => toggleConsent('marketing')}
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                />
+                <span className="text-sm text-gray-700">
+                  <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                  comunicaciones sobre novedades y servicios de SpotShot.
+                </span>
+              </label>
+            </div>
+
+            {error && (
+              <p className="text-red-600 text-sm text-center bg-red-50 py-3 rounded-xl mt-4">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="button"
+              disabled={acceptingConsents || !requiredOk}
+              onClick={handleAcceptConsentsAndLogin}
+              className="mt-6 w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl disabled:opacity-60"
+            >
+              {acceptingConsents ? 'Guardando y entrando...' : 'Aceptar y continuar'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
