@@ -190,14 +190,10 @@ export default function AuthForm({ mode = 'login' }) {
             alias,
             email,
             password,
-            consents: {
-              terms: consents.terms,
-              adult: consents.adult,
-              photosRights: consents.photosRights,
-              marketing: consents.marketing,
-              termsReviewed: true,
-              acceptedAt: new Date().toISOString(),
-            },
+            acceptedTerms: consents.terms,
+            acceptedMajorityAge: consents.adult,
+            acceptedPhotoAuthorship: consents.photosRights,
+            subscribeNewsletter: consents.marketing,
           }),
         });
         const data = await response.json();
