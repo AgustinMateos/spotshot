@@ -1144,37 +1144,20 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
 
               {/* Previsualización */}
               {photos.length > 0 && (
-                <div className="mt-8">
-                  <p className="text-sm text-gray-600 mb-4 font-medium">
-                    {photos.length} foto{photos.length !== 1 ? 's' : ''} lista{photos.length !== 1 ? 's' : ''} para subir
-                  </p>
+  <div className="mt-8">
+    {/* Banner de confirmación */}
+    <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 mb-6">
+      <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+        <span className="text-white text-lg">✓</span>
+      </div>
+      <p className="text-green-800 font-medium">
+        {photos.length} foto{photos.length !== 1 ? 's' : ''} lista{photos.length !== 1 ? 's' : ''} para subir
+      </p>
+    </div>
 
-                  {/* <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {photos.map((photo, index) => (
-                      <div key={index} className="relative group rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                        <ImageWithLoader
-                          src={URL.createObjectURL(photo)}
-                          alt={`preview-${index}`}
-                          aspectRatio="aspect-square"
-                        />
-
-                        {index === 0 && (
-                          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-3 py-1 rounded font-medium">
-                            Portada
-                          </div>
-                        )}
-
-                        <button
-                          onClick={(e) => { e.stopPropagation(); removePhoto(index); }}
-                          className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-md opacity-0 group-hover:opacity-100 transition-all"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div> */}
-                </div>
-              )}
+   
+  </div>
+)}
 
               {/* Fotos ya subidas */}
               {/* {uploadedImages.length > 0 && (
