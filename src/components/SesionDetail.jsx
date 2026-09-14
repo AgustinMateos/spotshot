@@ -2,37 +2,87 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Flag } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Flag, ChevronDown, Download, ExternalLink } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SesionDetail() {
   const { id } = useParams();
   const router = useRouter();
   const { cart, addToCart, removeFromCart } = useCart();
-const [showPhotographerModal, setShowPhotographerModal] = useState(false);
+  const [showPhotographerModal, setShowPhotographerModal] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
-const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [buyerEmail, setBuyerEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
-const [touchEnd, setTouchEnd] = useState(0);
-const [isLinkCopied, setIsLinkCopied] = useState(false);
-const [scale, setScale] = useState(1);
-const [lastTap, setLastTap] = useState(0);
-const [pinchStartDistance, setPinchStartDistance] = useState(null);
-const [translate, setTranslate] = useState({ x: 0, y: 0 });
-const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-const [reportImage, setReportImage] = useState(null); // imagen que se está reportando
-const [reportEmail, setReportEmail] = useState('');
-const [reportReason, setReportReason] = useState('');
-const [isReporting, setIsReporting] = useState(false);
-const [reportError, setReportError] = useState('');
-const [reportSuccess, setReportSuccess] = useState(false);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [lastTap, setLastTap] = useState(0);
+  const [pinchStartDistance, setPinchStartDistance] = useState(null);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [reportImage, setReportImage] = useState(null); // imagen que se está reportando
+  const [reportEmail, setReportEmail] = useState('');
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState('');
+  const [reportSuccess, setReportSuccess] = useState(false);
+
+  // ==================== CONSENTIMIENTOS DE CHECKOUT ====================
+  const [consents, setConsents] = useState({
+    terms: false,
+    adult: false,
+    withdrawalWaiver: false,
+    marketing: false,
+  });
+  const [termsReviewed, setTermsReviewed] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
+  const requiredOk = consents.terms && consents.adult && consents.withdrawalWaiver;
+
+  const openTerms = () => {
+    setTermsOpen(true);
+    setTermsReviewed(true);
+  };
+
+  const toggleConsent = (key) => {
+    if (key === 'terms' && !termsReviewed) {
+      setCheckoutError('Abrí los Términos y Condiciones antes de aceptarlos.');
+      openTerms();
+      return;
+    }
+    setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCheckoutError('');
+  };
+
+  const downloadTerms = async () => {
+    setTermsReviewed(true);
+    try {
+      const res = await fetch('/terminos-y-condiciones');
+      const html = await res.text();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'SpotShot-Terminos-y-Condiciones.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open('/terminos-y-condiciones', '_blank', 'noopener,noreferrer');
+    }
+  };
+
   // Cargar sesión
   useEffect(() => {
     const fetchSession = async () => {
@@ -58,26 +108,26 @@ const [reportSuccess, setReportSuccess] = useState(false);
   }, [id, router]);
 
 
-useEffect(() => {
-  if (isLightboxOpen) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'unset';
-  }
+  useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
 
-  return () => {
-    document.body.style.overflow = 'unset';
-  };
-}, [isLightboxOpen]);
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isLightboxOpen]);
 
   const unitPrice = session?.pricing?.unitPriceCustomer || 8;
 
   const totalPhotos = cart.length;
   const subtotal = totalPhotos * unitPrice;
-// Función para verificar si una foto ya está en el carrito
-const isInCart = (imageId) => {
-  return cart.some(item => item.id === imageId);
-};
+  // Función para verificar si una foto ya está en el carrito
+  const isInCart = (imageId) => {
+    return cart.some(item => item.id === imageId);
+  };
   let discount = 0;
   let packName = '';
   if (totalPhotos >= 10) {
@@ -94,51 +144,51 @@ const isInCart = (imageId) => {
     setIsLightboxOpen(true);
   };
   useEffect(() => {
-  setScale(1);
-  setTranslate({ x: 0, y: 0 });
-}, [currentIndex, isLightboxOpen]);
-const getDistance = (touches) => {
-  const [t1, t2] = touches;
-  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-};
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+  }, [currentIndex, isLightboxOpen]);
+  const getDistance = (touches) => {
+    const [t1, t2] = touches;
+    return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  };
   // ==================== NAVEGACIÓN CON TECLADO ====================
-useEffect(() => {
-  const handleKeyDown = (e) => {
-    if (!isLightboxOpen) return;
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isLightboxOpen) return;
 
-    if (e.key === 'ArrowLeft') {
-      goToPrevious();
-    } else if (e.key === 'ArrowRight') {
-      goToNext();
-    } else if (e.key === 'Escape') {
-      closeLightbox();
-    }
-  };
+      if (e.key === 'ArrowLeft') {
+        goToPrevious();
+      } else if (e.key === 'ArrowRight') {
+        goToNext();
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    };
 
-  window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
-  // Cleanup
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown);
-  };
-}, [isLightboxOpen, currentIndex, session?.images?.length]); // Dependencias importantes
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isLightboxOpen, currentIndex, session?.images?.length]); // Dependencias importantes
 
   const closeLightbox = () => setIsLightboxOpen(false);
-// Función para formatear precios 
-const formatPrice = (price) => {
-  if (price == null) return '0';
+  // Función para formatear precios 
+  const formatPrice = (price) => {
+    if (price == null) return '0';
 
-  const num = Number(price);
-  if (isNaN(num)) return '0';
+    const num = Number(price);
+    if (isNaN(num)) return '0';
 
-  // Si es número entero → sin decimales
-  if (Number.isInteger(num)) {
-    return num.toString();
-  }
+    // Si es número entero → sin decimales
+    if (Number.isInteger(num)) {
+      return num.toString();
+    }
 
-  // Si tiene decimales → mostrar hasta 2, pero quitar ceros innecesarios
-  return num.toFixed(2).replace(/\.?0+$/, '');
-};
+    // Si tiene decimales → mostrar hasta 2, pero quitar ceros innecesarios
+    return num.toFixed(2).replace(/\.?0+$/, '');
+  };
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? session.images.length - 1 : prev - 1));
   };
@@ -156,176 +206,192 @@ const formatPrice = (price) => {
 
   const firstImage = session.images?.[0]?.publicUrl || '/banner-surf.png';
 
- // Dentro del componente
-const minSwipeDistance = 50;
+  // Dentro del componente
+  const minSwipeDistance = 50;
 
-const onTouchStart = (e) => {
-  if (e.touches.length === 2) {
-    // Empieza pinch
-    setPinchStartDistance(getDistance(e.touches));
-    return;
-  }
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      // Empieza pinch
+      setPinchStartDistance(getDistance(e.touches));
+      return;
+    }
 
-  // Doble tap para zoom
-  const now = Date.now();
-  if (now - lastTap < 300) {
+    // Doble tap para zoom
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      if (scale > 1) {
+        setScale(1);
+        setTranslate({ x: 0, y: 0 });
+      } else {
+        setScale(2.5);
+      }
+      setLastTap(0);
+      return;
+    }
+    setLastTap(now);
+
     if (scale > 1) {
+      // Si está con zoom, preparamos el pan
+      setPanStart({
+        x: e.targetTouches[0].clientX - translate.x,
+        y: e.targetTouches[0].clientY - translate.y,
+      });
+    } else {
+      // Si no hay zoom, preparamos el swipe normal
+      setTouchEnd(0);
+      setTouchStart(e.targetTouches[0].clientX);
+    }
+  };
+
+  const onTouchMove = (e) => {
+    if (e.touches.length === 2 && pinchStartDistance) {
+      // Pinch to zoom
+      const newDistance = getDistance(e.touches);
+      const delta = newDistance / pinchStartDistance;
+      const newScale = Math.min(Math.max(1, scale * delta), 4);
+      setScale(newScale);
+      return;
+    }
+
+    if (scale > 1 && e.touches.length === 1) {
+      // Pan: mover la imagen con el dedo
+      const newX = e.targetTouches[0].clientX - panStart.x;
+      const newY = e.targetTouches[0].clientY - panStart.y;
+
+      // Límite de movimiento para que no se vaya demasiado lejos
+      const maxOffset = 150 * (scale - 1);
+      const clampedX = Math.min(Math.max(newX, -maxOffset), maxOffset);
+      const clampedY = Math.min(Math.max(newY, -maxOffset), maxOffset);
+
+      setTranslate({ x: clampedX, y: clampedY });
+      return;
+    }
+
+    // Swipe normal solo si no hay zoom
+    if (scale === 1 && e.touches.length === 1) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    if (e.touches.length === 0) {
+      setPinchStartDistance(null);
+    }
+
+    if (scale < 1.1) {
       setScale(1);
       setTranslate({ x: 0, y: 0 });
-    } else {
-      setScale(2.5);
     }
-    setLastTap(0);
-    return;
-  }
-  setLastTap(now);
 
-  if (scale > 1) {
-    // Si está con zoom, preparamos el pan
-    setPanStart({
-      x: e.targetTouches[0].clientX - translate.x,
-      y: e.targetTouches[0].clientY - translate.y,
-    });
-  } else {
-    // Si no hay zoom, preparamos el swipe normal
-    setTouchEnd(0);
-    setTouchStart(e.targetTouches[0].clientX);
-  }
-};
-
-const onTouchMove = (e) => {
-  if (e.touches.length === 2 && pinchStartDistance) {
-    // Pinch to zoom
-    const newDistance = getDistance(e.touches);
-    const delta = newDistance / pinchStartDistance;
-    const newScale = Math.min(Math.max(1, scale * delta), 4);
-    setScale(newScale);
-    return;
-  }
-
-  if (scale > 1 && e.touches.length === 1) {
-    // Pan: mover la imagen con el dedo
-    const newX = e.targetTouches[0].clientX - panStart.x;
-    const newY = e.targetTouches[0].clientY - panStart.y;
-
-    // Límite de movimiento para que no se vaya demasiado lejos
-    const maxOffset = 150 * (scale - 1);
-    const clampedX = Math.min(Math.max(newX, -maxOffset), maxOffset);
-    const clampedY = Math.min(Math.max(newY, -maxOffset), maxOffset);
-
-    setTranslate({ x: clampedX, y: clampedY });
-    return;
-  }
-
-  // Swipe normal solo si no hay zoom
-  if (scale === 1 && e.touches.length === 1) {
-    setTouchEnd(e.targetTouches[0].clientX);
-  }
-};
-
-const onTouchEnd = (e) => {
-  if (e.touches.length === 0) {
-    setPinchStartDistance(null);
-  }
-
-  if (scale < 1.1) {
-    setScale(1);
-    setTranslate({ x: 0, y: 0 });
-  }
-
-  // Swipe solo si no está con zoom
-  if (scale === 1) {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) goToNext();
-    else if (isRightSwipe) goToPrevious();
-  }
-};
-
-const handleReport = async () => {
-  if (!reportImage) return;
-
-  const email = reportEmail.trim();
-  const reason = reportReason.trim();
-
-  if (!email || !reason || reason.length < 10) {
-    setReportError('Completá el email y escribí un motivo de al menos 10 caracteres.');
-    return;
-  }
-
-  setIsReporting(true);
-  setReportError('');
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-  try {
-    const res = await fetch(
-      `${API_URL}/api/v1/public/photo-session-images/${reportImage.id}/report`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, reason }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (res.status === 201) {
-      setReportSuccess(true);
-
-      // Ocultamos la imagen localmente (igual que hace el backend)
-      setSession((prev) => ({
-        ...prev,
-        images: prev.images.filter((img) => img.id !== reportImage.id),
-        photoCount: Math.max(0, (prev.photoCount || 0) - 1),
-      }));
-
-      // Si estaba en el carrito, la sacamos
-      if (isInCart(reportImage.id)) {
-        removeFromCart(reportImage.id);
-      }
-
-      // Si el lightbox está abierto y era esa foto, cerramos
-      if (isLightboxOpen && session.images[currentIndex]?.id === reportImage.id) {
-        setIsLightboxOpen(false);
-      }
-
-      // Cerramos el modal después de un momento
-      setTimeout(() => {
-        setReportImage(null);
-        setReportEmail('');
-        setReportReason('');
-        setReportSuccess(false);
-      }, 1800);
-    } else if (res.status === 409) {
-      setReportError('Ya existe un reporte pendiente para esta foto.');
-    } else if (res.status === 429) {
-      setReportError('Llegaste al límite de reportes. Probá más tarde.');
-    } else if (res.status === 404) {
-      setReportError('La imagen ya no está disponible.');
-    } else {
-      setReportError(data.message || 'No se pudo enviar el reporte.');
+    // Swipe solo si no está con zoom
+    if (scale === 1) {
+      if (!touchStart || !touchEnd) return;
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+      if (isLeftSwipe) goToNext();
+      else if (isRightSwipe) goToPrevious();
     }
-  } catch (err) {
-    console.error(err);
-    setReportError('Error de conexión. Intentá de nuevo.');
-  } finally {
-    setIsReporting(false);
-  }
-};
-    // ✅ Función para finalizar compra
+  };
+
+  const handleReport = async () => {
+    if (!reportImage) return;
+
+    const email = reportEmail.trim();
+    const reason = reportReason.trim();
+
+    if (!email || !reason || reason.length < 10) {
+      setReportError('Completá el email y escribí un motivo de al menos 10 caracteres.');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportError('');
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/v1/public/photo-session-images/${reportImage.id}/report`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, reason }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.status === 201) {
+        setReportSuccess(true);
+
+        // Ocultamos la imagen localmente (igual que hace el backend)
+        setSession((prev) => ({
+          ...prev,
+          images: prev.images.filter((img) => img.id !== reportImage.id),
+          photoCount: Math.max(0, (prev.photoCount || 0) - 1),
+        }));
+
+        // Si estaba en el carrito, la sacamos
+        if (isInCart(reportImage.id)) {
+          removeFromCart(reportImage.id);
+        }
+
+        // Si el lightbox está abierto y era esa foto, cerramos
+        if (isLightboxOpen && session.images[currentIndex]?.id === reportImage.id) {
+          setIsLightboxOpen(false);
+        }
+
+        // Cerramos el modal después de un momento
+        setTimeout(() => {
+          setReportImage(null);
+          setReportEmail('');
+          setReportReason('');
+          setReportSuccess(false);
+        }, 1800);
+      } else if (res.status === 409) {
+        setReportError('Ya existe un reporte pendiente para esta foto.');
+      } else if (res.status === 429) {
+        setReportError('Llegaste al límite de reportes. Probá más tarde.');
+      } else if (res.status === 404) {
+        setReportError('La imagen ya no está disponible.');
+      } else {
+        setReportError(data.message || 'No se pudo enviar el reporte.');
+      }
+    } catch (err) {
+      console.error(err);
+      setReportError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
+  // ✅ Función para finalizar compra
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
+    const email = buyerEmail.trim();
+    if (!email) {
+      setCheckoutError('Ingresá tu correo electrónico.');
+      return;
+    }
+    if (!requiredOk) {
+      setCheckoutError('Tenés que aceptar las casillas obligatorias para continuar.');
+      return;
+    }
+
     setIsSubmitting(true);
+    setCheckoutError('');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     const payload = {
       imageIds: cart.map(item => item.id),
-      buyerEmail: buyerEmail.trim() || undefined,
+      buyerEmail: email,
+      acceptedTerms: consents.terms,
+      acceptedMajorityAge: consents.adult,
+      acceptedWithdrawalWaiver: consents.withdrawalWaiver,
+      subscribeNewsletter: consents.marketing,
     };
 
     try {
@@ -338,25 +404,25 @@ const handleReport = async () => {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || 'Error al crear el checkout');
+        setCheckoutError(data.message || 'Error al crear el checkout');
         return;
       }
 
-            if (data.checkoutUrl) {
+      if (data.checkoutUrl) {
         // Opcional: guardar temporalmente en localStorage por si Stripe no pasa los params
         localStorage.setItem('lastOrder', JSON.stringify({
           orderId: data.orderId,
-          email: buyerEmail,
+          email,
           imageCount: cart.length
         }));
 
         window.location.href = data.checkoutUrl;
-      }else {
-        alert('No se recibió la URL de pago');
+      } else {
+        setCheckoutError('No se recibió la URL de pago');
       }
     } catch (err) {
       console.error(err);
-      alert('Error de conexión con el servidor');
+      setCheckoutError('Error de conexión con el servidor');
     } finally {
       setIsSubmitting(false);
     }
@@ -759,8 +825,8 @@ const handleReport = async () => {
       {/* MODAL DE EMAIL + CHECKOUT */}
       {isCheckoutModalOpen && (
         <div className="fixed inset-0 bg-black/70 z-300 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="flex justify-between items-center p-6 border-b">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b shrink-0">
               <button 
                 onClick={() => setIsCheckoutModalOpen(false)}
                 className="text-gray-500 cursor-pointer hover:text-gray-700 text-sm flex items-center gap-1"
@@ -775,7 +841,7 @@ const handleReport = async () => {
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="p-8 overflow-y-auto">
               <h2 className="text-2xl font-semibold mb-2">Ingresa tu correo electrónico</h2>
               <p className="text-gray-600 mb-6">
                 Te enviaremos por mail las imágenes en alta calidad
@@ -786,12 +852,201 @@ const handleReport = async () => {
                 placeholder="Ejemplo@gmail.com"
                 value={buyerEmail}
                 onChange={(e) => setBuyerEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-8 text-base"
+                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-6 text-base"
               />
+
+              {/* Información básica de protección de datos */}
+              <div className="rounded-2xl border border-gray-200 overflow-hidden mb-4">
+                <button
+                  type="button"
+                  onClick={() => setLegalOpen((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-gray-50 hover:bg-gray-100 transition"
+                >
+                  <span className="text-sm font-semibold text-[#0D2744]">
+                    Información básica sobre protección de datos
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-500 transition-transform ${legalOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {legalOpen && (
+                  <div className="px-4 py-4 text-sm text-gray-600 leading-relaxed space-y-2 border-t border-gray-200 bg-white">
+                    <p>
+                      <span className="font-semibold text-gray-800">Responsable:</span> Stefano
+                      Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
+                      <a href="mailto:privacidad@spotshot.app" className="text-[#0D2744] underline">
+                        privacidad@spotshot.app
+                      </a>.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Finalidad:</span> gestionar
+                      tu compra de fotografías, el envío de las imágenes por email y el cobro a
+                      través de Stripe.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Legitimación:</span> ejecución
+                      del contrato; obligaciones legales aplicables.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Destinatarios:</span> Stripe
+                      (pagos) y los proveedores indicados en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>
+                      ; no se ceden datos a terceros salvo obligación legal.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Derechos:</span> acceso,
+                      rectificación, supresión y demás derechos, como se explica en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Términos y Condiciones */}
+              <div className="rounded-2xl border border-[#0D2744]/20 overflow-hidden mb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTermsOpen((v) => {
+                      const next = !v;
+                      if (next) setTermsReviewed(true);
+                      return next;
+                    });
+                  }}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-[#0D2744]/5 hover:bg-[#0D2744]/10 transition"
+                >
+                  <span className="text-sm font-semibold text-[#0D2744]">
+                    Términos y Condiciones (texto íntegro, incluido Anexo I)
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-500 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {termsOpen && (
+                  <div className="border-t border-gray-200 bg-white">
+                    <p className="px-4 pt-4 text-sm text-gray-600">
+                      Podés leerlos acá, abrirlos en otra pestaña, descargarlos o imprimirlos /
+                      guardarlos como PDF desde el navegador <strong>antes de aceptarlos</strong>.
+                    </p>
+
+                    <div className="px-4 py-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={downloadTerms}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                      >
+                        <Download size={16} />
+                        Descargar
+                      </button>
+                      <Link
+                        href="/terminos-y-condiciones"
+                        target="_blank"
+                        onClick={() => setTermsReviewed(true)}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                      >
+                        <ExternalLink size={16} />
+                        Abrir en otra pestaña
+                      </Link>
+                    </div>
+
+                    <div className="px-4 pb-4 text-sm text-gray-600">
+                      El texto íntegro está en{' '}
+                      <Link
+                        href="/terminos-y-condiciones"
+                        target="_blank"
+                        className="text-[#0D2744] font-medium underline"
+                        onClick={() => setTermsReviewed(true)}
+                      >
+                        /terminos-y-condiciones
+                      </Link>
+                      . Usá Descargar antes de aceptar.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Checks obligatorios y opcional */}
+              <div className="space-y-4 mb-2">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.terms}
+                    onChange={() => toggleConsent('terms')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                    acepto los{' '}
+                    <Link
+                      href="/terminos-y-condiciones"
+                      className="text-[#0D2744] font-medium underline"
+                      target="_blank"
+                      onClick={() => setTermsReviewed(true)}
+                    >
+                      Términos y Condiciones
+                    </Link>
+                    , incluido su Anexo I.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.adult}
+                    onChange={() => toggleConsent('adult')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que
+                    soy mayor de 18 años.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.withdrawalWaiver}
+                    onChange={() => toggleConsent('withdrawalWaiver')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> Solicito la
+                    ejecución/descarga inmediata y reconozco que, al iniciarse la descarga,
+                    pierdo mi derecho de desistimiento.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.marketing}
+                    onChange={() => toggleConsent('marketing')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                    comunicaciones sobre novedades y servicios de SpotShot.
+                  </span>
+                </label>
+              </div>
+
+              {checkoutError && (
+                <p className="text-red-600 text-sm text-center bg-red-50 py-3 rounded-xl mb-4">
+                  {checkoutError}
+                </p>
+              )}
 
               <button
                 onClick={handleCheckout}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !requiredOk || !buyerEmail.trim()}
                 className="w-full transition-all active:scale-95 cursor-pointer bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium transition"
               >
                 {isSubmitting ? 'Procesando...' : 'Ir a pagar'}
