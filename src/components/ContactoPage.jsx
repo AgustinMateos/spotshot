@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const SUBJECT_OPTIONS = {
   soporte: 'Soporte técnico',
@@ -17,6 +18,7 @@ export default function ContactoPage() {
     subject: '',
     message: '',
   });
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +44,11 @@ export default function ContactoPage() {
       return;
     }
 
+    if (!acceptedPrivacy) {
+      setError('Tenés que aceptar la Política de Privacidad para enviar el mensaje.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -50,7 +57,7 @@ export default function ContactoPage() {
       const res = await fetch(`${API_URL}/api/v1/public/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, motivo, mensaje }),
+        body: JSON.stringify({ email, motivo, mensaje, acceptedPrivacy }),
       });
 
       const data = await res.json();
@@ -68,6 +75,7 @@ export default function ContactoPage() {
       setTimeout(() => {
         setSubmitted(false);
         setFormData({ email: '', subject: '', message: '' });
+        setAcceptedPrivacy(false);
       }, 3000);
     } catch (err) {
       console.error(err);
@@ -175,6 +183,29 @@ export default function ContactoPage() {
                 />
               </div>
 
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedPrivacy}
+                  onChange={(e) => {
+                    setAcceptedPrivacy(e.target.checked);
+                    setError('');
+                  }}
+                  className="mt-1 h-4 w-4 shrink-0 accent-gray-900"
+                />
+                <span className="text-sm text-gray-700">
+                  He leído y acepto la{' '}
+                  <Link
+                    href="/politica-de-privacidad"
+                    target="_blank"
+                    className="text-gray-900 font-medium underline"
+                  >
+                    Política de Privacidad
+                  </Link>
+                  .
+                </span>
+              </label>
+
               {error && (
                 <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-xl text-center">
                   {error}
@@ -183,7 +214,7 @@ export default function ContactoPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !acceptedPrivacy}
                 className="w-full bg-gray-900 hover:bg-black disabled:bg-gray-400 text-white font-medium py-3.5 rounded-2xl transition"
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}

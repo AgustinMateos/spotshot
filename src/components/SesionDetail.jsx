@@ -34,6 +34,7 @@ export default function SesionDetail() {
   const [isReporting, setIsReporting] = useState(false);
   const [reportError, setReportError] = useState('');
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportLegalOpen, setReportLegalOpen] = useState(false);
 
   // ==================== CONSENTIMIENTOS DE CHECKOUT ====================
   const [consents, setConsents] = useState({
@@ -1095,8 +1096,8 @@ export default function SesionDetail() {
 {/* MODAL REPORTAR FOTO */}
 {reportImage && (
   <div className="fixed inset-0 bg-black/70 z-[400] flex items-center justify-center p-4">
-    <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div className="flex justify-between items-center p-6 border-b">
+    <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+      <div className="flex justify-between items-center p-6 border-b shrink-0">
         <h3 className="text-xl font-semibold">Reportar foto</h3>
         <button
           onClick={() => {
@@ -1108,7 +1109,7 @@ export default function SesionDetail() {
         </button>
       </div>
 
-      <div className="p-6">
+      <div className="p-6 overflow-y-auto">
         {reportSuccess ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1150,6 +1151,60 @@ export default function SesionDetail() {
                   placeholder="Ej: La foto muestra contenido inapropiado o no autorizado."
                   className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#1F2937] resize-none"
                 />
+              </div>
+
+              {/* Información básica de protección de datos */}
+              <div className="rounded-2xl border border-gray-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setReportLegalOpen((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition"
+                >
+                  <span className="text-sm font-semibold text-[#0D2744]">
+                    Información básica sobre protección de datos
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-500 transition-transform ${reportLegalOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {reportLegalOpen && (
+                  <div className="px-4 py-4 text-sm text-gray-600 leading-relaxed space-y-2 border-t border-gray-200 bg-white">
+                    <p>
+                      <span className="font-semibold text-gray-800">Responsable:</span> Stefano
+                      Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
+                      <a href="mailto:privacidad@spotshot.app" className="text-[#0D2744] underline">
+                        privacidad@spotshot.app
+                      </a>.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Finalidad:</span> gestionar
+                      tu solicitud de retiro/reporte de una fotografía publicada en la
+                      Plataforma y contactarte para dar seguimiento si es necesario.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Legitimación:</span> interés
+                      legítimo en atender solicitudes de terceros sobre contenido publicado;
+                      obligaciones legales aplicables.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Destinatarios:</span> los
+                      proveedores indicados en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>
+                      ; no se ceden datos a terceros salvo obligación legal.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Derechos:</span> acceso,
+                      rectificación, supresión y demás derechos, como se explica en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {reportError && (
