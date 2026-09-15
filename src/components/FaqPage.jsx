@@ -20,7 +20,7 @@ const faqs = [
       },
       {
         q: "¿Qué pasa si no encuentro mi foto?",
-        a: "Puede que el fotógrafo aún no haya subido la sesión o que no haya fotos tuyas ese día. Si tienes dudas, escríbenos a infospotshot@gmail.com y te ayudamos."
+        a: "Puede que el fotógrafo aún no haya subido la sesión o que no haya fotos tuyas ese día. Si tienes dudas, escríbenos a info@spotshot.app y te ayudamos."
       },
       {
         q: "¿En qué calidad se descargan las imágenes?",
@@ -116,10 +116,10 @@ export default function FaqPage() {
       <div className="text-center mt-16">
         <p className="text-gray-600">¿No encontraste tu pregunta?</p>
         <a 
-          href="mailto:infospotshot@gmail.com" 
+          href="mailto:info@spotshot.app" 
           className="inline-block mt-3 bg-gray-900 text-white px-8 py-3.5 rounded-2xl hover:bg-black transition"
         >
-          Escríbenos a infospotshot@gmail.com
+          Escríbenos a info@spotshot.app
         </a>
       </div>
     </div>

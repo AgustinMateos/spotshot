@@ -614,7 +614,7 @@ export default function SesionDetail() {
   </div>
   <div className="flex mt-40 flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
-             <p className="text-sm text-[#0D2744]">¿Necesitas que retiremos alguna fotografía? Ponte en contacto con nosotros: infospotshot@gmail.com”</p>
+             <p className="text-sm text-[#0D2744]">¿Necesitas que retiremos alguna fotografía? Ponte en contacto con nosotros: info@spotshot.app”</p>
 
             </div>
            
