@@ -630,7 +630,7 @@ export default function SesionDetail() {
         >
           <ShoppingCart size={24} />
           <div>
-            <p className="font-medium">Carrito • €{totalToPay.toFixed(0)}</p>
+            <p className="font-medium">Carrito • €{formatPrice(totalToPay)}</p>
             <p className="text-sm opacity-75">{totalPhotos} fotos</p>
           </div>
           <div className="bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
