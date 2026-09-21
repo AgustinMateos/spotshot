@@ -87,6 +87,13 @@ export default function EscuelaCantabraDeSurfPage() {
   const [faceMatches, setFaceMatches] = useState(null);
   const [isFaceSearching, setIsFaceSearching] = useState(false);
   const [faceError, setFaceError] = useState('');
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [selfieFile, setSelfieFile] = useState(null);
+  const [faceEmail, setFaceEmail] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptedMajorityAge, setAcceptedMajorityAge] = useState(false);
+  const [notifyOptIn, setNotifyOptIn] = useState(true); // opcional: marcado por defecto
+  const [alertSubscription, setAlertSubscription] = useState(null);
 
   // Lightbox
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -132,7 +139,7 @@ export default function EscuelaCantabraDeSurfPage() {
 
   // Bloquear scroll
   useEffect(() => {
-    if (isLightboxOpen || isCartOpen || isCheckoutModalOpen) {
+    if (isLightboxOpen || isCartOpen || isCheckoutModalOpen || isFaceModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -140,7 +147,7 @@ export default function EscuelaCantabraDeSurfPage() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isLightboxOpen, isCartOpen, isCheckoutModalOpen]);
+  }, [isLightboxOpen, isCartOpen, isCheckoutModalOpen, isFaceModalOpen]);
 
   // Navegación con teclado en lightbox
   useEffect(() => {
@@ -224,7 +231,7 @@ export default function EscuelaCantabraDeSurfPage() {
   };
 
   // ==================== FACE SEARCH ====================
-  const handleFaceSearch = async (e) => {
+  const handleSelfieSelected = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -233,20 +240,44 @@ export default function EscuelaCantabraDeSurfPage() {
       !validTypes.includes(file.type) &&
       !file.name.match(/\.(jpg|jpeg|png|webp|heic|heif)$/i)
     ) {
+      setSelfieFile(null);
       setFaceError('Formato no válido. Usá JPEG, PNG, WebP o HEIC.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
+
+    setFaceError('');
+    setSelfieFile(file);
+  };
+
+  const closeFaceModal = () => {
+    if (isFaceSearching) return;
+    setIsFaceModalOpen(false);
+  };
+
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+  const canSubmitFaceSearch =
+    !!selfieFile && isValidEmail(faceEmail) && acceptTerms && acceptedMajorityAge;
+
+  const handleFaceSearch = async () => {
+    if (!canSubmitFaceSearch) return;
 
     setIsFaceSearching(true);
     setFaceError('');
     setFaceMatches(null);
+    setAlertSubscription(null);
 
     const formData = new FormData();
-    formData.append('selfie', file);
+    formData.append('selfie', selfieFile);
+    formData.append('email', faceEmail.trim());
+    formData.append('acceptTerms', String(acceptTerms));
+    formData.append('acceptedMajorityAge', String(acceptedMajorityAge));
+    formData.append('notifyOptIn', String(notifyOptIn));
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${API_URL}/api/v1/public/face-search`, {
+      const res = await fetch(`${API_URL}/api/v1/public/face-search-with-alerts`, {
         method: 'POST',
         body: formData,
       });
@@ -263,19 +294,64 @@ export default function EscuelaCantabraDeSurfPage() {
       }
 
       setFaceMatches(data.sessions || []);
+      setAlertSubscription(data.alertSubscription || null);
+      setIsFaceModalOpen(false);
     } catch (err) {
       console.error(err);
       setFaceError('Error de conexión. Intentá de nuevo.');
     } finally {
       setIsFaceSearching(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const clearFaceSearch = () => {
     setFaceMatches(null);
     setFaceError('');
+    setAlertSubscription(null);
+    setSelfieFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  // Deep link del email de aviso: ?faceToken=... busca sin re-subir selfie
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get('faceToken');
+    if (!token) return;
+
+    // Quita el token de la URL para que no quede en el historial ni al compartir el enlace
+    url.searchParams.delete('faceToken');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+
+    const searchByToken = async () => {
+      setIsFaceSearching(true);
+      setFaceError('');
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(
+          `${API_URL}/api/v1/public/face-alerts/search?token=${encodeURIComponent(token)}`
+        );
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          setFaceError(
+            res.status === 404
+              ? 'El enlace del aviso no es válido o ha caducado. Vuelve a buscar con tu selfie.'
+              : data.message || 'Error al buscar. Intentá de nuevo.'
+          );
+          return;
+        }
+
+        setFaceMatches(data.sessions || []);
+      } catch (err) {
+        console.error(err);
+        setFaceError('Error de conexión. Intentá de nuevo.');
+      } finally {
+        setIsFaceSearching(false);
+      }
+    };
+
+    searchByToken();
+  }, []);
 
   // ==================== LIGHTBOX ====================
   const openLightbox = (session, matchIndex) => {
@@ -537,15 +613,8 @@ export default function EscuelaCantabraDeSurfPage() {
             </p>
           </div>
 
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-            ref={fileInputRef}
-            onChange={handleFaceSearch}
-            className="hidden"
-          />
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setIsFaceModalOpen(true)}
             disabled={isFaceSearching}
             className="w-full sm:w-auto shrink-0 bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
           >
@@ -553,9 +622,21 @@ export default function EscuelaCantabraDeSurfPage() {
           </button>
         </div>
 
-        {faceError && (
+        {faceError && !isFaceModalOpen && (
           <div className="mt-4 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
             {faceError}
+          </div>
+        )}
+
+        {faceMatches !== null && alertSubscription?.active && (
+          <div className="mt-4 text-sm text-green-700 bg-green-50 px-4 py-3 rounded-xl">
+            Listo, te avisaremos por email si aparecen nuevas fotos tuyas durante los próximos 14 días.
+          </div>
+        )}
+
+        {faceMatches !== null && alertSubscription?.error && (
+          <div className="mt-4 text-sm text-amber-700 bg-amber-50 px-4 py-3 rounded-xl">
+            No pudimos activar el aviso de nuevas fotos: {String(alertSubscription.error)}
           </div>
         )}
 
@@ -911,6 +992,114 @@ export default function EscuelaCantabraDeSurfPage() {
           </div>
         </div>
       </div>
+
+      {/* ==================== MODAL BÚSQUEDA POR SELFIE ==================== */}
+      {isFaceModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-[95vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-xl font-semibold">Búsqueda por selfie</h2>
+              <button
+                onClick={closeFaceModal}
+                className="text-gray-400 cursor-pointer hover:text-black"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                ref={fileInputRef}
+                onChange={handleSelfieSelected}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border border-dashed border-gray-300 hover:border-[#B4121B] rounded-2xl px-5 py-4 text-sm text-gray-600 flex items-center justify-center gap-2 cursor-pointer transition"
+              >
+                <ScanFace size={20} className="text-[#B4121B]" />
+                {selfieFile ? selfieFile.name : 'Elegir o sacar una selfie'}
+              </button>
+
+              <input
+                type="email"
+                placeholder="Tu email"
+                value={faceEmail}
+                onChange={(e) => setFaceEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] text-base"
+              />
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>
+                  Acepto los{' '}
+                  <Link
+                    href="/terminos-y-condiciones"
+                    target="_blank"
+                    className="underline font-medium"
+                  >
+                    términos y condiciones
+                  </Link>{' '}
+                  y la{' '}
+                  <Link
+                    href="/politica-de-privacidad"
+                    target="_blank"
+                    className="underline font-medium"
+                  >
+                    política de privacidad
+                  </Link>
+                  , incluido el tratamiento de mi imagen facial para la búsqueda.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedMajorityAge}
+                  onChange={(e) => setAcceptedMajorityAge(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>Declaro que soy mayor de 18 años.</span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifyOptIn}
+                  onChange={(e) => setNotifyOptIn(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>
+                  Quiero recibir un aviso por email si aparecen nuevas fotos mías durante los
+                  próximos 14 días (opcional).
+                </span>
+              </label>
+
+              {faceError && (
+                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                  {faceError}
+                </div>
+              )}
+
+              <button
+                onClick={handleFaceSearch}
+                disabled={!canSubmitFaceSearch || isFaceSearching}
+                className="w-full transition-all active:scale-95 cursor-pointer bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-semibold"
+              >
+                {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR MIS FOTOS'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ==================== MODAL EMAIL + CHECKOUT ==================== */}
       {isCheckoutModalOpen && (
