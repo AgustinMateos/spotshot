@@ -12,14 +12,48 @@ export function AuthProvider({ children }) {
     const [sessionExpired, setSessionExpired] = useState(false); // ← nuevo
     const router = useRouter();
 
+    // Al cargar la app, no basta con que haya un token guardado: hay que
+    // confirmar contra el backend que sigue siendo válido antes de dar por
+    // logueado al usuario. Si no, el navbar muestra "logueado" con un token
+    // vencido y recién se descubre al entrar a una sección protegida.
     useEffect(() => {
-        const savedToken = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('photographer');
+        const validateSession = async () => {
+            const savedToken = localStorage.getItem('token');
+            const savedUser = localStorage.getItem('photographer');
 
-        if (savedToken) setToken(savedToken);
-        if (savedUser) setUser(JSON.parse(savedUser));
+            if (!savedToken) {
+                setLoading(false);
+                return;
+            }
 
-        setLoading(false);
+            try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                const res = await fetch(`${API_URL}/api/v1/photographers/me`, {
+                    headers: { Authorization: `Bearer ${savedToken}` },
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('photographer');
+                    setToken(null);
+                    setUser(null);
+                    return;
+                }
+
+                setToken(savedToken);
+                if (savedUser) setUser(JSON.parse(savedUser));
+            } catch (err) {
+                // Sin conexión con el backend: no podemos confirmar el token,
+                // pero tampoco lo invalidamos por un error de red.
+                console.error('No se pudo validar la sesión:', err);
+                setToken(savedToken);
+                if (savedUser) setUser(JSON.parse(savedUser));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        validateSession();
     }, []);
 
     const login = (access_token, photographer) => {
