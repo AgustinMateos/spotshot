@@ -4,21 +4,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
-export function CartProvider({ children }) {
+export function CartProvider({ children, storageKey = 'spotshot-cart' }) {
   const [cart, setCart] = useState([]);
 
   // Cargar carrito al iniciar
   useEffect(() => {
-    const savedCart = localStorage.getItem('spotshot-cart');
+    const savedCart = localStorage.getItem(storageKey);
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
-  }, []);
+  }, [storageKey]);
 
   // Guardar en localStorage
   useEffect(() => {
-    localStorage.setItem('spotshot-cart', JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(storageKey, JSON.stringify(cart));
+  }, [cart, storageKey]);
 
   const addToCart = (image, session) => {
     if (cart.some(item => item.id === image.id)) return;
