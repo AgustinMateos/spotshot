@@ -8,6 +8,9 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Download,
+  ExternalLink,
   Trash2,
   QrCode,
   Search,
@@ -17,6 +20,7 @@ import {
 } from 'lucide-react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import { useCart } from '@/contexts/CartContext';
+import { calculateCartTotals } from '@/lib/cartPricing';
 
 function CardSkeleton({ delay = 0 }) {
   return (
@@ -48,6 +52,12 @@ function CardSkeleton({ delay = 0 }) {
     </div>
   );
 }
+
+// Precio por foto y tope de fotos facturables por sesión para las escuelas
+// (el backend todavía no manda esto en la búsqueda por selfie, así que se
+// fija acá en el front).
+const ESCUELA_UNIT_PRICE = 5;
+const ESCUELA_BILLABLE_PHOTO_CAP = 4;
 
 const STEPS = [
   {
@@ -109,6 +119,54 @@ export default function EscuelaCantabraDeSurfPage() {
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [buyerEmail, setBuyerEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ==================== CONSENTIMIENTOS DE CHECKOUT ====================
+  const [consents, setConsents] = useState({
+    terms: false,
+    adult: false,
+    withdrawalWaiver: false,
+    marketing: false,
+  });
+  const [termsReviewed, setTermsReviewed] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
+  const requiredOk = consents.terms && consents.adult && consents.withdrawalWaiver;
+
+  const openTerms = () => {
+    setTermsOpen(true);
+    setTermsReviewed(true);
+  };
+
+  const toggleConsent = (key) => {
+    if (key === 'terms' && !termsReviewed) {
+      setCheckoutError('Abrí los Términos y Condiciones antes de aceptarlos.');
+      openTerms();
+      return;
+    }
+    setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCheckoutError('');
+  };
+
+  const downloadTerms = async () => {
+    setTermsReviewed(true);
+    try {
+      const res = await fetch('/terminos-y-condiciones');
+      const html = await res.text();
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'SpotShot-Terminos-y-Condiciones.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open('/terminos-y-condiciones', '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -401,6 +459,14 @@ export default function EscuelaCantabraDeSurfPage() {
         ...session.photographer,
         id: session.photographer?.id || session.photographer?.alias,
       },
+      // Escuelas: €5 por foto, máximo 4 fotos facturables por sesión (el
+      // resto de esa misma sesión no suma al total). Si el backend ya manda
+      // su propio pricing para la sesión, se respeta ese valor.
+      pricing: {
+        ...session.pricing,
+        unitPriceCustomer: session.pricing?.unitPriceCustomer ?? ESCUELA_UNIT_PRICE,
+        billablePhotoCap: session.pricing?.billablePhotoCap ?? ESCUELA_BILLABLE_PHOTO_CAP,
+      },
     };
 
     if (
@@ -420,13 +486,28 @@ export default function EscuelaCantabraDeSurfPage() {
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
+    const email = buyerEmail.trim();
+    if (!email) {
+      setCheckoutError('Ingresá tu correo electrónico.');
+      return;
+    }
+    if (!requiredOk) {
+      setCheckoutError('Tenés que aceptar las casillas obligatorias para continuar.');
+      return;
+    }
+
     setIsSubmitting(true);
+    setCheckoutError('');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     const payload = {
       imageIds: cart.map((item) => item.id),
-      buyerEmail: buyerEmail.trim() || undefined,
+      buyerEmail: email,
+      acceptedTerms: consents.terms,
+      acceptedMajorityAge: consents.adult,
+      acceptedWithdrawalWaiver: consents.withdrawalWaiver,
+      subscribeNewsletter: consents.marketing,
     };
 
     try {
@@ -439,7 +520,7 @@ export default function EscuelaCantabraDeSurfPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || 'Error al crear el checkout');
+        setCheckoutError(data.message || 'Error al crear el checkout');
         return;
       }
 
@@ -448,36 +529,24 @@ export default function EscuelaCantabraDeSurfPage() {
           'lastOrder',
           JSON.stringify({
             orderId: data.orderId,
-            email: buyerEmail,
+            email,
             imageCount: cart.length,
           })
         );
         window.location.href = data.checkoutUrl;
       } else {
-        alert('No se recibió la URL de pago');
+        setCheckoutError('No se recibió la URL de pago');
       }
     } catch (err) {
       console.error(err);
-      alert('Error de conexión con el servidor');
+      setCheckoutError('Error de conexión con el servidor');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const unitPrice = cart[0]?.unitPrice || cart[0]?.price || 8;
-  const totalPhotos = cart.length;
-  const subtotal = totalPhotos * unitPrice;
-
-  let discount = 0;
-  let packName = '';
-  if (totalPhotos >= 10) {
-    discount = subtotal * 0.4;
-    packName = 'Pack 10 fotos (-40%)';
-  } else if (totalPhotos >= 5) {
-    discount = subtotal * 0.2;
-    packName = 'Pack 5 fotos (-20%)';
-  }
-  const totalToPay = subtotal - discount;
+  const { totalPhotos, subtotal, discount, totalToPay, packName } =
+    calculateCartTotals(cart);
 
   const formatPrice = (price) => {
     if (price == null) return '0';
@@ -573,54 +642,58 @@ export default function EscuelaCantabraDeSurfPage() {
         </div>
       </header>
 
-      {/* ==================== HERO IMAGEN ==================== */}
-      <section className="relative">
-        <div className="relative h-[340px] md:h-[420px] w-full">
-          <Image
-            src="/escuela.jpg"
-            alt="Surfista en Playa de Somo"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-white/90 via-white/40 to-transparent md:from-white/95 md:via-white/10" />
+      {/* ==================== HERO IMAGEN (solo si no hay búsqueda activa) ==================== */}
+      {faceMatches === null && (
+        <section className="relative">
+          <div className="relative h-[340px] md:h-[420px] w-full">
+            <Image
+              src="/escuela.jpg"
+              alt="Surfista en Playa de Somo"
+              fill
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-r from-white/90 via-white/40 to-transparent md:from-white/95 md:via-white/10" />
 
-          <div className="relative z-10 h-full mx-auto max-w-7xl px-6 flex flex-col justify-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold uppercase leading-[1.05] text-[#0D0D0D]">
-              Encuentra
-              <br />
-              tus fotos
-              <br />
-              <span className="text-[#B4121B]">de surf</span>
-            </h1>
-            <p className="mt-4 text-gray-700 text-lg max-w-xs">
-              Revive tu experiencia y comparte los mejores momentos.
-            </p>
+            <div className="relative z-10 h-full mx-auto max-w-7xl px-6 flex flex-col justify-center">
+              <h1 className="text-4xl md:text-5xl font-extrabold uppercase leading-[1.05] text-[#0D0D0D]">
+                Encuentra
+                <br />
+                tus fotos
+                <br />
+                <span className="text-[#B4121B]">de surf</span>
+              </h1>
+              <p className="mt-4 text-gray-700 text-lg max-w-xs">
+                Revive tu experiencia y comparte los mejores momentos.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ==================== CARD BÚSQUEDA POR SELFIE ==================== */}
-      <section className="mx-auto max-w-3xl px-6 -mt-10 relative z-20">
-        <div className="bg-white rounded-3xl shadow-xl p-6 flex flex-col sm:flex-row items-center gap-5">
-          <div className="w-16 h-16 shrink-0 rounded-full bg-[#B4121B] flex items-center justify-center">
-            <ScanFace className="text-white" size={30} />
-          </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="font-bold text-lg text-gray-900">Búsqueda por selfie</h3>
-            <p className="text-gray-500 text-sm">
-              Escanéate y encuentra todas tus fotos al instante con IA.
-            </p>
-          </div>
+      <section className={`mx-auto max-w-3xl px-6 relative z-20 ${faceMatches === null ? '-mt-10' : 'pt-8'}`}>
+        {faceMatches === null && (
+          <div className="bg-white rounded-3xl shadow-xl p-6 flex flex-col sm:flex-row items-center gap-5">
+            <div className="w-16 h-16 shrink-0 rounded-full bg-[#B4121B] flex items-center justify-center">
+              <ScanFace className="text-white" size={30} />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="font-bold text-lg text-gray-900">Búsqueda por selfie</h3>
+              <p className="text-gray-500 text-sm">
+                Escanéate y encuentra todas tus fotos al instante con IA.
+              </p>
+            </div>
 
-          <button
-            onClick={() => setIsFaceModalOpen(true)}
-            disabled={isFaceSearching}
-            className="w-full sm:w-auto shrink-0 bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
-          >
-            {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
-          </button>
-        </div>
+            <button
+              onClick={() => setIsFaceModalOpen(true)}
+              disabled={isFaceSearching}
+              className="w-full sm:w-auto shrink-0 bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
+            >
+              {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
+            </button>
+          </div>
+        )}
 
         {faceError && !isFaceModalOpen && (
           <div className="mt-4 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
@@ -1104,8 +1177,8 @@ export default function EscuelaCantabraDeSurfPage() {
       {/* ==================== MODAL EMAIL + CHECKOUT ==================== */}
       {isCheckoutModalOpen && (
         <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="flex justify-between items-center p-6 border-b">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b shrink-0">
               <button
                 onClick={() => {
                   setIsCheckoutModalOpen(false);
@@ -1123,7 +1196,7 @@ export default function EscuelaCantabraDeSurfPage() {
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="p-8 overflow-y-auto">
               <h2 className="text-2xl font-semibold mb-2">
                 Ingresa tu correo electrónico
               </h2>
@@ -1136,12 +1209,201 @@ export default function EscuelaCantabraDeSurfPage() {
                 placeholder="Ejemplo@gmail.com"
                 value={buyerEmail}
                 onChange={(e) => setBuyerEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-8 text-base"
+                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-6 text-base"
               />
+
+              {/* Información básica de protección de datos */}
+              <div className="rounded-2xl border border-gray-200 overflow-hidden mb-4">
+                <button
+                  type="button"
+                  onClick={() => setLegalOpen((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-gray-50 hover:bg-gray-100 transition"
+                >
+                  <span className="text-sm font-semibold text-[#0D2744]">
+                    Información básica sobre protección de datos
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-500 transition-transform ${legalOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {legalOpen && (
+                  <div className="px-4 py-4 text-sm text-gray-600 leading-relaxed space-y-2 border-t border-gray-200 bg-white">
+                    <p>
+                      <span className="font-semibold text-gray-800">Responsable:</span> Stefano
+                      Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
+                      <a href="mailto:privacidad@spotshot.app" className="text-[#0D2744] underline">
+                        privacidad@spotshot.app
+                      </a>.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Finalidad:</span> gestionar
+                      tu compra de fotografías, el envío de las imágenes por email y el cobro a
+                      través de Stripe.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Legitimación:</span> ejecución
+                      del contrato; obligaciones legales aplicables.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Destinatarios:</span> Stripe
+                      (pagos) y los proveedores indicados en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>
+                      ; no se ceden datos a terceros salvo obligación legal.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Derechos:</span> acceso,
+                      rectificación, supresión y demás derechos, como se explica en la{' '}
+                      <Link href="/politica-de-privacidad" className="text-[#0D2744] font-medium underline">
+                        Política de Privacidad
+                      </Link>.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Términos y Condiciones */}
+              <div className="rounded-2xl border border-[#0D2744]/20 overflow-hidden mb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTermsOpen((v) => {
+                      const next = !v;
+                      if (next) setTermsReviewed(true);
+                      return next;
+                    });
+                  }}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-[#0D2744]/5 hover:bg-[#0D2744]/10 transition"
+                >
+                  <span className="text-sm font-semibold text-[#0D2744]">
+                    Términos y Condiciones (texto íntegro, incluido Anexo I)
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-500 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {termsOpen && (
+                  <div className="border-t border-gray-200 bg-white">
+                    <p className="px-4 pt-4 text-sm text-gray-600">
+                      Podés leerlos acá, abrirlos en otra pestaña, descargarlos o imprimirlos /
+                      guardarlos como PDF desde el navegador <strong>antes de aceptarlos</strong>.
+                    </p>
+
+                    <div className="px-4 py-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={downloadTerms}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                      >
+                        <Download size={16} />
+                        Descargar
+                      </button>
+                      <Link
+                        href="/terminos-y-condiciones"
+                        target="_blank"
+                        onClick={() => setTermsReviewed(true)}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                      >
+                        <ExternalLink size={16} />
+                        Abrir en otra pestaña
+                      </Link>
+                    </div>
+
+                    <div className="px-4 pb-4 text-sm text-gray-600">
+                      El texto íntegro está en{' '}
+                      <Link
+                        href="/terminos-y-condiciones"
+                        target="_blank"
+                        className="text-[#0D2744] font-medium underline"
+                        onClick={() => setTermsReviewed(true)}
+                      >
+                        /terminos-y-condiciones
+                      </Link>
+                      . Usá Descargar antes de aceptar.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Checks obligatorios y opcional */}
+              <div className="space-y-4 mb-2">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.terms}
+                    onChange={() => toggleConsent('terms')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                    acepto los{' '}
+                    <Link
+                      href="/terminos-y-condiciones"
+                      className="text-[#0D2744] font-medium underline"
+                      target="_blank"
+                      onClick={() => setTermsReviewed(true)}
+                    >
+                      Términos y Condiciones
+                    </Link>
+                    , incluido su Anexo I.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.adult}
+                    onChange={() => toggleConsent('adult')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que
+                    soy mayor de 18 años.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.withdrawalWaiver}
+                    onChange={() => toggleConsent('withdrawalWaiver')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-red-600 font-medium">(Obligatoria)</span> Solicito la
+                    ejecución/descarga inmediata y reconozco que, al iniciarse la descarga,
+                    pierdo mi derecho de desistimiento.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consents.marketing}
+                    onChange={() => toggleConsent('marketing')}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                    comunicaciones sobre novedades y servicios de SpotShot.
+                  </span>
+                </label>
+              </div>
+
+              {checkoutError && (
+                <p className="text-red-600 text-sm text-center bg-red-50 py-3 rounded-xl mb-4">
+                  {checkoutError}
+                </p>
+              )}
 
               <button
                 onClick={handleCheckout}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !requiredOk || !buyerEmail.trim()}
                 className="w-full transition-all active:scale-95 cursor-pointer bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium"
               >
                 {isSubmitting ? 'Procesando...' : 'Ir a pagar'}

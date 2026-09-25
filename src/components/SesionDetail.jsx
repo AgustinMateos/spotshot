@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Flag, ChevronDown, Download, ExternalLink } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { calculateCartTotals } from '@/lib/cartPricing';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -123,22 +124,12 @@ export default function SesionDetail() {
 
   const unitPrice = session?.pricing?.unitPriceCustomer || 8;
 
-  const totalPhotos = cart.length;
-  const subtotal = totalPhotos * unitPrice;
   // Función para verificar si una foto ya está en el carrito
   const isInCart = (imageId) => {
     return cart.some(item => item.id === imageId);
   };
-  let discount = 0;
-  let packName = '';
-  if (totalPhotos >= 10) {
-    discount = subtotal * 0.40;
-    packName = 'Pack 10 fotos (-40%)';
-  } else if (totalPhotos >= 5) {
-    discount = subtotal * 0.20;
-    packName = 'Pack 5 fotos (-20%)';
-  }
-  const totalToPay = subtotal - discount;
+  const { totalPhotos, subtotal, discount, totalToPay, packName } =
+    calculateCartTotals(cart);
 
   const openLightbox = (index) => {
     setCurrentIndex(index);

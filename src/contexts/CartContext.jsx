@@ -28,6 +28,8 @@ export function CartProvider({ children }) {
       sessionId: session.id,
       sessionTitle: session.title,
       location: session.location || session.schoolName || 'Sesión',
+      unitPrice: session.pricing?.unitPriceCustomer,
+      billablePhotoCap: session.pricing?.billablePhotoCap ?? null,
     };
 
     setCart(prev => [...prev, itemWithSession]);
