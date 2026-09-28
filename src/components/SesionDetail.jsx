@@ -44,30 +44,18 @@ export default function SesionDetail() {
     withdrawalWaiver: false,
     marketing: false,
   });
-  const [termsReviewed, setTermsReviewed] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
   const requiredOk = consents.terms && consents.adult && consents.withdrawalWaiver;
 
-  const openTerms = () => {
-    setTermsOpen(true);
-    setTermsReviewed(true);
-  };
-
   const toggleConsent = (key) => {
-    if (key === 'terms' && !termsReviewed) {
-      setCheckoutError('Abrí los Términos y Condiciones antes de aceptarlos.');
-      openTerms();
-      return;
-    }
     setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
     setCheckoutError('');
   };
 
   const downloadTerms = async () => {
-    setTermsReviewed(true);
     try {
       const res = await fetch('/terminos-y-condiciones');
       const html = await res.text();
@@ -905,11 +893,7 @@ export default function SesionDetail() {
                 <button
                   type="button"
                   onClick={() => {
-                    setTermsOpen((v) => {
-                      const next = !v;
-                      if (next) setTermsReviewed(true);
-                      return next;
-                    });
+                    setTermsOpen((v) => !v);
                   }}
                   className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-[#0D2744]/5 hover:bg-[#0D2744]/10 transition"
                 >
@@ -941,7 +925,6 @@ export default function SesionDetail() {
                       <Link
                         href="/terminos-y-condiciones"
                         target="_blank"
-                        onClick={() => setTermsReviewed(true)}
                         className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
                       >
                         <ExternalLink size={16} />
@@ -955,7 +938,6 @@ export default function SesionDetail() {
                         href="/terminos-y-condiciones"
                         target="_blank"
                         className="text-[#0D2744] font-medium underline"
-                        onClick={() => setTermsReviewed(true)}
                       >
                         /terminos-y-condiciones
                       </Link>
@@ -981,7 +963,6 @@ export default function SesionDetail() {
                       href="/terminos-y-condiciones"
                       className="text-[#0D2744] font-medium underline"
                       target="_blank"
-                      onClick={() => setTermsReviewed(true)}
                     >
                       Términos y Condiciones
                     </Link>

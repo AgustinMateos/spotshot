@@ -28,7 +28,6 @@ export default function AuthForm({ mode = 'login' }) {
 
   const [legalOpen, setLegalOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
-  const [termsReviewed, setTermsReviewed] = useState(false);
   const [consents, setConsents] = useState(INITIAL_CONSENTS);
 
   const [consentModalOpen, setConsentModalOpen] = useState(false);
@@ -42,23 +41,12 @@ export default function AuthForm({ mode = 'login' }) {
   const requiredOk = consents.terms && consents.adult && consents.photosRights;
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  const openTerms = () => {
-    setTermsOpen(true);
-    setTermsReviewed(true);
-  };
-
   const toggleConsent = (key) => {
-    if (key === 'terms' && !termsReviewed) {
-      setError('Abrí los Términos y Condiciones y guardalos o descargalos antes de aceptarlos.');
-      openTerms();
-      return;
-    }
     setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
     setError('');
   };
 
   const downloadTerms = async () => {
-    setTermsReviewed(true);
     try {
       const res = await fetch('/terminos-y-condiciones');
       const html = await res.text();
@@ -155,13 +143,6 @@ export default function AuthForm({ mode = 'login' }) {
     setError('');
     setSuccess('');
 
-    if (isRegister && !termsReviewed) {
-      setError('Tenés que abrir y poder guardar los Términos y Condiciones antes de crear la cuenta.');
-      openTerms();
-      setLoading(false);
-      return;
-    }
-
     if (isRegister && !requiredOk) {
       setError('Tenés que aceptar las casillas obligatorias para crear la cuenta.');
       setLoading(false);
@@ -203,7 +184,6 @@ export default function AuthForm({ mode = 'login' }) {
           setEmail('');
           setPassword('');
           setConsents(INITIAL_CONSENTS);
-          setTermsReviewed(false);
           setTermsOpen(false);
         } else {
           setError(data.message || 'Ocurrió un error');
@@ -359,11 +339,7 @@ export default function AuthForm({ mode = 'login' }) {
               <button
                 type="button"
                 onClick={() => {
-                  setTermsOpen((v) => {
-                    const next = !v;
-                    if (next) setTermsReviewed(true);
-                    return next;
-                  });
+                  setTermsOpen((v) => !v);
                 }}
                 className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-[#0D2744]/5 hover:bg-[#0D2744]/10 transition"
               >
@@ -397,7 +373,6 @@ export default function AuthForm({ mode = 'login' }) {
                     <Link
                       href="/terminos-y-condiciones"
                       target="_blank"
-                      onClick={() => setTermsReviewed(true)}
                       className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
                     >
                       <ExternalLink size={16} />
@@ -411,7 +386,6 @@ export default function AuthForm({ mode = 'login' }) {
                       href="/terminos-y-condiciones"
                       target="_blank"
                       className="text-[#0D2744] font-medium underline"
-                      onClick={() => setTermsReviewed(true)}
                     >
                       /terminos-y-condiciones
                     </Link>
@@ -435,7 +409,6 @@ export default function AuthForm({ mode = 'login' }) {
                   href="/terminos-y-condiciones"
                   className="text-[#0D2744] font-medium underline"
                   target="_blank"
-                  onClick={() => setTermsReviewed(true)}
                 >
                   Términos y Condiciones
                 </Link>
@@ -507,7 +480,7 @@ export default function AuthForm({ mode = 'login' }) {
 
         <button
           type="submit"
-          disabled={loading || (isRegister && (!requiredOk || !termsReviewed))}
+          disabled={loading || (isRegister && !requiredOk)}
           className="w-full cursor-pointer transition-all active:scale-95 bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-2xl text-lg disabled:opacity-70"
         >
           {loading
@@ -586,7 +559,6 @@ export default function AuthForm({ mode = 'login' }) {
                     href="/terminos-y-condiciones"
                     className="text-[#0D2744] font-medium underline"
                     target="_blank"
-                    onClick={() => setTermsReviewed(true)}
                   >
                     Términos y Condiciones
                   </Link>
