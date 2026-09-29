@@ -957,7 +957,7 @@ export default function SesionDetail() {
                     className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                   />
                   <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                    <span className="text-red-600 font-medium">*</span> He leído y
                     acepto los{' '}
                     <Link
                       href="/terminos-y-condiciones"
@@ -978,7 +978,7 @@ export default function SesionDetail() {
                     className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                   />
                   <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que
+                    <span className="text-red-600 font-medium">*</span> Declaro que
                     soy mayor de 18 años.
                   </span>
                 </label>
@@ -991,7 +991,7 @@ export default function SesionDetail() {
                     className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                   />
                   <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">(Obligatoria)</span> Solicito la
+                    <span className="text-red-600 font-medium">*</span> Solicito la
                     ejecución/descarga inmediata y reconozco que, al iniciarse la descarga,
                     pierdo mi derecho de desistimiento.
                   </span>
@@ -1005,7 +1005,7 @@ export default function SesionDetail() {
                     className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                   />
                   <span className="text-sm text-gray-700">
-                    <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                    Quiero recibir
                     comunicaciones sobre novedades y servicios de SpotShot.
                   </span>
                 </label>
@@ -1027,6 +1027,10 @@ export default function SesionDetail() {
 
               <p className="text-center text-xs text-gray-500 mt-4">
                 Checkout rápido con Stripe
+              </p>
+
+              <p className="text-xs text-gray-500 mt-4">
+                <span className="text-red-600 font-medium">*</span> Casilla obligatoria
               </p>
             </div>
           </div>

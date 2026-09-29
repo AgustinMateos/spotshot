@@ -403,7 +403,7 @@ export default function AuthForm({ mode = 'login' }) {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
               />
               <span className="text-sm text-gray-700">
-                <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                <span className="text-red-600 font-medium">*</span> He leído y
                 acepto los{' '}
                 <Link
                   href="/terminos-y-condiciones"
@@ -424,7 +424,7 @@ export default function AuthForm({ mode = 'login' }) {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
               />
               <span className="text-sm text-gray-700">
-                <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que soy
+                <span className="text-red-600 font-medium">*</span> Declaro que soy
                 mayor de 18 años y que los datos facilitados son ciertos. Soy consciente de que
                 facilitar una edad falsa puede conllevar la suspensión o cancelación de mi
                 cuenta.
@@ -439,7 +439,7 @@ export default function AuthForm({ mode = 'login' }) {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
               />
               <span className="text-sm text-gray-700">
-                <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que
+                <span className="text-red-600 font-medium">*</span> Declaro que
                 sobre las fotografías que suba: soy autor o titular de los derechos necesarios;
                 que informaré y recabaré los consentimientos de las personas identificables que
                 aparezcan en ellas conforme a las condiciones de la Plataforma; y que no subiré
@@ -456,7 +456,7 @@ export default function AuthForm({ mode = 'login' }) {
                 className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
               />
               <span className="text-sm text-gray-700">
-                <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                Quiero recibir
                 comunicaciones sobre novedades y servicios de SpotShot.
               </span>
             </label>
@@ -491,6 +491,12 @@ export default function AuthForm({ mode = 'login' }) {
                 ? 'Enviar enlace'
                 : 'Iniciar sesión'}
         </button>
+
+        {isRegister && (
+          <p className="text-xs text-gray-500">
+            <span className="text-red-600 font-medium">*</span> Casilla obligatoria
+          </p>
+        )}
       </form>
 
       <p className="text-center mt-8 text-gray-600">
@@ -553,7 +559,7 @@ export default function AuthForm({ mode = 'login' }) {
                   className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                 />
                 <span className="text-sm text-gray-700">
-                  <span className="text-red-600 font-medium">(Obligatoria)</span> He leído y
+                  <span className="text-red-600 font-medium">*</span> He leído y
                   acepto los{' '}
                   <Link
                     href="/terminos-y-condiciones"
@@ -574,7 +580,7 @@ export default function AuthForm({ mode = 'login' }) {
                   className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                 />
                 <span className="text-sm text-gray-700">
-                  <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro que soy
+                  <span className="text-red-600 font-medium">*</span> Declaro que soy
                   mayor de 18 años y que los datos facilitados son ciertos.
                 </span>
               </label>
@@ -587,7 +593,7 @@ export default function AuthForm({ mode = 'login' }) {
                   className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                 />
                 <span className="text-sm text-gray-700">
-                  <span className="text-red-600 font-medium">(Obligatoria)</span> Declaro la
+                  <span className="text-red-600 font-medium">*</span> Declaro la
                   autoría / derechos de las fotos y que no subiré menores identificables.
                 </span>
               </label>
@@ -600,7 +606,7 @@ export default function AuthForm({ mode = 'login' }) {
                   className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
                 />
                 <span className="text-sm text-gray-700">
-                  <span className="text-gray-500 font-medium">(Opcional)</span> Quiero recibir
+                  Quiero recibir
                   comunicaciones sobre novedades y servicios de SpotShot.
                 </span>
               </label>
@@ -620,6 +626,10 @@ export default function AuthForm({ mode = 'login' }) {
             >
               {acceptingConsents ? 'Guardando y entrando...' : 'Aceptar y continuar'}
             </button>
+
+            <p className="text-xs text-gray-500 mt-4">
+              <span className="text-red-600 font-medium">*</span> Casilla obligatoria
+            </p>
           </div>
         </div>
       )}
