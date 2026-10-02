@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   ShoppingCart,
+  ShoppingBag,
   X,
   ChevronLeft,
   ChevronRight,
@@ -618,18 +619,15 @@ export default function EscuelaCantabraDeSurfPage() {
                         </div>
           </Link>
 
-          <button
-            onClick={() => setIsCartOpen(true)}
+          <a
+            href="https://www.escuelacantabradesurf.com/shop/es/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/40 rounded-full px-5 py-2.5 transition cursor-pointer"
           >
-            <ShoppingCart size={20} />
+            <ShoppingBag size={20} />
             <span className="font-semibold tracking-wide">SURFSHOP</span>
-            {totalPhotos > 0 && (
-              <span className="bg-white text-[#B4121B] text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                {totalPhotos}
-              </span>
-            )}
-          </button>
+          </a>
         </div>
       </header>
 
