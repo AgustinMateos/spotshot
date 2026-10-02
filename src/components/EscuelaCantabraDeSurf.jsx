@@ -17,6 +17,9 @@ import {
   Images,
   ScanFace,
   ArrowRight,
+  Mail,
+  ShieldCheck,
+  FileText,
 } from 'lucide-react';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import { useCart } from '@/contexts/CartContext';
@@ -1085,139 +1088,45 @@ export default function EscuelaCantabraDeSurfPage() {
                 {selfieFile ? selfieFile.name : 'Elegir o sacar una selfie'}
               </button>
 
-              <input
-                type="email"
-                placeholder="Tu email"
-                value={faceEmail}
-                onChange={(e) => setFaceEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] text-base"
-              />
-
-              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                 />
-                <span>
-                  Acepto los{' '}
-                  <Link
-                    href="/terminos-y-condiciones"
-                    target="_blank"
-                    className="underline font-medium"
-                  >
-                    términos y condiciones
-                  </Link>{' '}
-                  y la{' '}
-                  <Link
-                    href="/politica-de-privacidad"
-                    target="_blank"
-                    className="underline font-medium"
-                  >
-                    política de privacidad
-                  </Link>
-                  , incluido el tratamiento de mi imagen facial para la búsqueda.
-                </span>
-              </label>
-
-              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
                 <input
-                  type="checkbox"
-                  checked={acceptedMajorityAge}
-                  onChange={(e) => setAcceptedMajorityAge(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                  type="email"
+                  placeholder="Tu correo electrónico"
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:border-[#0D2744] focus:ring-2 focus:ring-[#0D2744]/10 transition"
                 />
-                <span>Declaro que soy mayor de 18 años.</span>
-              </label>
+              </div>
 
-              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={notifyOptIn}
-                  onChange={(e) => setNotifyOptIn(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
-                />
-                <span>
-                  Quiero recibir un aviso por email si aparecen nuevas fotos mías durante los
-                  próximos 14 días (opcional).
-                </span>
-              </label>
+              <div className="border-t border-gray-100 my-6" />
 
-              {faceError && (
-                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
-                  {faceError}
-                </div>
-              )}
-
-              <button
-                onClick={handleFaceSearch}
-                disabled={!canSubmitFaceSearch || isFaceSearching}
-                className="w-full transition-all active:scale-95 cursor-pointer bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-semibold"
-              >
-                {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR MIS FOTOS'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==================== MODAL EMAIL + CHECKOUT ==================== */}
-      {isCheckoutModalOpen && (
-        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center p-6 border-b shrink-0">
-              <button
-                onClick={() => {
-                  setIsCheckoutModalOpen(false);
-                  setIsCartOpen(true);
-                }}
-                className="text-gray-500 cursor-pointer hover:text-gray-700 text-sm flex items-center gap-1"
-              >
-                ← Volver a la selección de fotos
-              </button>
-              <button
-                onClick={() => setIsCheckoutModalOpen(false)}
-                className="text-gray-400 cursor-pointer hover:text-black"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="p-8 overflow-y-auto">
-              <h2 className="text-2xl font-semibold mb-2">
-                Ingresa tu correo electrónico
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Te enviaremos por mail las imágenes en alta calidad
+              <p className="text-[11px] font-semibold tracking-wider uppercase text-gray-500 mb-3">
+                Información y condiciones
               </p>
 
-              <input
-                type="email"
-                placeholder="Ejemplo@gmail.com"
-                value={buyerEmail}
-                onChange={(e) => setBuyerEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] mb-6 text-base"
-              />
-
               {/* Información básica de protección de datos */}
-              <div className="rounded-2xl border border-gray-200 overflow-hidden mb-4">
+              <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden mb-3">
                 <button
                   type="button"
                   onClick={() => setLegalOpen((v) => !v)}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-gray-50 hover:bg-gray-100 transition"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition cursor-pointer"
                 >
-                  <span className="text-sm font-semibold text-[#0D2744]">
+                  <ShieldCheck size={18} className="shrink-0 text-[#0D2744]" />
+                  <span className="flex-1 text-sm font-medium text-gray-800 leading-snug">
                     Información básica sobre protección de datos
                   </span>
                   <ChevronDown
                     size={18}
-                    className={`shrink-0 text-gray-500 transition-transform ${legalOpen ? 'rotate-180' : ''}`}
+                    className={`shrink-0 text-gray-400 transition-transform ${legalOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
                 {legalOpen && (
-                  <div className="px-4 py-4 text-sm text-gray-600 leading-relaxed space-y-2 border-t border-gray-200 bg-white">
+                  <div className="px-4 py-4 text-[13px] text-gray-600 leading-relaxed space-y-2 border-t border-gray-100 bg-white">
                     <p>
                       <span className="font-semibold text-gray-800">Responsable:</span> Stefano
                       Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
@@ -1254,26 +1163,30 @@ export default function EscuelaCantabraDeSurfPage() {
               </div>
 
               {/* Términos y Condiciones */}
-              <div className="rounded-2xl border border-[#0D2744]/20 overflow-hidden mb-4">
+              <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden mb-5">
                 <button
                   type="button"
-                  onClick={() => {
-                    setTermsOpen((v) => !v);
-                  }}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-[#0D2744]/5 hover:bg-[#0D2744]/10 transition"
+                  onClick={() => setTermsOpen((v) => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition cursor-pointer"
                 >
-                  <span className="text-sm font-semibold text-[#0D2744]">
-                    Términos y Condiciones (texto íntegro, incluido Anexo I)
+                  <FileText size={18} className="shrink-0 text-[#0D2744]" />
+                  <span className="flex-1 leading-snug">
+                    <span className="block text-sm font-medium text-gray-800">
+                      Términos y Condiciones
+                    </span>
+                    <span className="block text-xs text-gray-400">
+                      (texto íntegro, incluido Anexo I)
+                    </span>
                   </span>
                   <ChevronDown
                     size={18}
-                    className={`shrink-0 text-gray-500 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
+                    className={`shrink-0 text-gray-400 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
 
                 {termsOpen && (
-                  <div className="border-t border-gray-200 bg-white">
-                    <p className="px-4 pt-4 text-sm text-gray-600">
+                  <div className="border-t border-gray-100 bg-white">
+                    <p className="px-4 pt-4 text-[13px] text-gray-600 leading-relaxed">
                       Podés leerlos acá, abrirlos en otra pestaña, descargarlos o imprimirlos /
                       guardarlos como PDF desde el navegador <strong>antes de aceptarlos</strong>.
                     </p>
@@ -1282,22 +1195,22 @@ export default function EscuelaCantabraDeSurfPage() {
                       <button
                         type="button"
                         onClick={downloadTerms}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-[#0D2744] hover:bg-gray-50 cursor-pointer"
                       >
-                        <Download size={16} />
+                        <Download size={14} />
                         Descargar
                       </button>
                       <Link
                         href="/terminos-y-condiciones"
                         target="_blank"
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-300 text-sm font-medium text-[#0D2744] hover:bg-gray-50"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-[#0D2744] hover:bg-gray-50"
                       >
-                        <ExternalLink size={16} />
+                        <ExternalLink size={14} />
                         Abrir en otra pestaña
                       </Link>
                     </div>
 
-                    <div className="px-4 pb-4 text-sm text-gray-600">
+                    <div className="px-4 pb-4 text-[13px] text-gray-600">
                       El texto íntegro está en{' '}
                       <Link
                         href="/terminos-y-condiciones"
@@ -1313,16 +1226,16 @@ export default function EscuelaCantabraDeSurfPage() {
               </div>
 
               {/* Checks obligatorios y opcional */}
-              <div className="space-y-4 mb-2">
+              <div className="space-y-3 mb-4">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={consents.terms}
                     onChange={() => toggleConsent('terms')}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#0D2744] cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">*</span> He leído y
+                  <span className="text-[13px] leading-snug text-gray-600">
+                    <span className="text-red-500 font-semibold mr-0.5">*</span>He leído y
                     acepto los{' '}
                     <Link
                       href="/terminos-y-condiciones"
@@ -1340,10 +1253,10 @@ export default function EscuelaCantabraDeSurfPage() {
                     type="checkbox"
                     checked={consents.adult}
                     onChange={() => toggleConsent('adult')}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#0D2744] cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">*</span> Declaro que
+                  <span className="text-[13px] leading-snug text-gray-600">
+                    <span className="text-red-500 font-semibold mr-0.5">*</span>Declaro que
                     soy mayor de 18 años.
                   </span>
                 </label>
@@ -1353,10 +1266,10 @@ export default function EscuelaCantabraDeSurfPage() {
                     type="checkbox"
                     checked={consents.withdrawalWaiver}
                     onChange={() => toggleConsent('withdrawalWaiver')}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#0D2744] cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700">
-                    <span className="text-red-600 font-medium">*</span> Solicito la
+                  <span className="text-[13px] leading-snug text-gray-600">
+                    <span className="text-red-500 font-semibold mr-0.5">*</span>Solicito la
                     ejecución/descarga inmediata y reconozco que, al iniciarse la descarga,
                     pierdo mi derecho de desistimiento.
                   </span>
@@ -1367,14 +1280,17 @@ export default function EscuelaCantabraDeSurfPage() {
                     type="checkbox"
                     checked={consents.marketing}
                     onChange={() => toggleConsent('marketing')}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[#0D2744]"
+                    className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#0D2744] cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700">
-                    Quiero recibir
-                    comunicaciones sobre novedades y servicios de SpotShot.
+                  <span className="text-[13px] leading-snug text-gray-600">
+                    Quiero recibir comunicaciones sobre novedades y servicios de SpotShot.
                   </span>
                 </label>
               </div>
+
+              <p className="text-[11px] text-gray-400 mb-4">
+                <span className="text-red-500 font-semibold mr-0.5">*</span>Campo obligatorio para continuar
+              </p>
 
               {checkoutError && (
                 <p className="text-red-600 text-sm text-center bg-red-50 py-3 rounded-xl mb-4">
@@ -1385,17 +1301,13 @@ export default function EscuelaCantabraDeSurfPage() {
               <button
                 onClick={handleCheckout}
                 disabled={isSubmitting || !requiredOk || !buyerEmail.trim()}
-                className="w-full transition-all active:scale-95 cursor-pointer bg-[#1F2937] hover:bg-black disabled:bg-gray-400 text-white py-4 rounded-2xl text-lg font-medium"
+                className="w-full transition-all active:scale-[0.98] cursor-pointer bg-[#F9D46B] hover:bg-[#F5C842] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-900 py-3.5 rounded-full text-base font-semibold shadow-sm"
               >
-                {isSubmitting ? 'Procesando...' : 'Ir a pagar'}
+                {isSubmitting ? 'Procesando...' : 'Continuar'}
               </button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
                 Checkout rápido con Stripe
-              </p>
-
-              <p className="text-xs text-gray-500 mt-4">
-                <span className="text-red-600 font-medium">*</span> Casilla obligatoria
               </p>
             </div>
           </div>
