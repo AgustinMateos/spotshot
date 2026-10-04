@@ -74,7 +74,7 @@ const STEPS = [
     number: 2,
     icon: Search,
     title: 'Busca',
-    text: 'Busca tus fotos por reconocimiento facial.',
+    text: 'Elige búsqueda manual o por reconocimiento facial.',
   },
   {
     number: 3,
@@ -110,6 +110,14 @@ export default function EscuelaCantabraDeSurfPage() {
   const [faceLegalOpen, setFaceLegalOpen] = useState(false);
   const [faceTermsOpen, setFaceTermsOpen] = useState(false);
   const [alertSubscription, setAlertSubscription] = useState(null);
+
+  // Búsqueda manual (sesiones de la escuela)
+  const [isManualSearch, setIsManualSearch] = useState(false);
+  const [manualSearchText, setManualSearchText] = useState('');
+  const [openedSession, setOpenedSession] = useState(null);
+  const [isOpeningSession, setIsOpeningSession] = useState(false);
+  const [manualError, setManualError] = useState('');
+  const manualSectionRef = useRef(null);
 
   // Lightbox
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -216,6 +224,15 @@ export default function EscuelaCantabraDeSurfPage() {
   // Filtrado en cliente (horario)
   const filteredSessions = useMemo(() => {
     let result = sessions;
+    if (manualSearchText.trim()) {
+      const term = manualSearchText.toLowerCase().trim();
+      result = result.filter((s) => {
+        const photographerName = `${s.photographer?.firstName || ''} ${s.photographer?.lastName || ''}`;
+        return [s.title, s.titleShort, s.photographer?.alias, photographerName].some((v) =>
+          v?.toLowerCase().includes(term)
+        );
+      });
+    }
     if (filters.timeFrom && filters.timeTo) {
       result = result.filter((s) => {
         const start = s.startTime?.slice(0, 5);
@@ -223,7 +240,7 @@ export default function EscuelaCantabraDeSurfPage() {
       });
     }
     return result;
-  }, [sessions, filters.timeFrom, filters.timeTo]);
+  }, [sessions, filters.timeFrom, filters.timeTo, manualSearchText]);
 
   const getDaysRemaining = (activeUntil) => {
     if (!activeUntil) return null;
@@ -362,6 +379,62 @@ export default function EscuelaCantabraDeSurfPage() {
     setAlertSubscription(null);
     setSelfieFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // ==================== BÚSQUEDA MANUAL ====================
+  const scrollToManualSection = () => {
+    setTimeout(() => {
+      manualSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
+  const startManualSearch = () => {
+    setIsManualSearch(true);
+    scrollToManualSection();
+  };
+
+  // Abre una sesión dentro de la página de la escuela (mismo carrito y precios
+  // de escuela) en lugar de ir a /sesiones/[id].
+  const openSession = async (sessionId) => {
+    setIsOpeningSession(true);
+    setManualError('');
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_URL}/api/v1/public/photo-sessions/${sessionId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setManualError(data.message || 'No se pudo abrir la sesión. Intenta de nuevo.');
+        return;
+      }
+
+      setOpenedSession({
+        sessionId: data.id,
+        title: data.title,
+        titleShort: data.titleShort,
+        location: data.location,
+        schoolName: data.schoolName,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        photographer: data.photographer,
+        pricing: data.pricing,
+        matches: (data.images || []).map((img) => ({
+          imageId: img.id,
+          publicUrl: img.publicUrl,
+        })),
+      });
+      scrollToManualSection();
+    } catch (err) {
+      console.error(err);
+      setManualError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setIsOpeningSession(false);
+    }
+  };
+
+  const closeOpenedSession = () => {
+    setOpenedSession(null);
+    scrollToManualSection();
   };
 
   // Deep link del email de aviso: ?faceToken=... busca sin re-subir selfie
@@ -662,28 +735,53 @@ export default function EscuelaCantabraDeSurfPage() {
         </section>
       )}
 
-      {/* ==================== CARD BÚSQUEDA POR SELFIE ==================== */}
-      <section className={`mx-auto max-w-3xl px-6 relative z-20 ${faceMatches === null ? '-mt-10' : 'pt-8'}`}>
-        {faceMatches === null && (
-          <div className="bg-white rounded-3xl shadow-xl p-6 flex flex-col sm:flex-row items-center gap-5">
-            <div className="w-16 h-16 shrink-0 rounded-full bg-[#B4121B] flex items-center justify-center">
-              <ScanFace className="text-white" size={30} />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-bold text-lg text-gray-900">Búsqueda por selfie</h3>
-              <p className="text-gray-500 text-sm">
-                Escanéate y encuentra todas tus fotos al instante con IA.
-              </p>
+      {/* ==================== ¿CÓMO QUIERES ENCONTRAR TUS FOTOS? ==================== */}
+      <section className={`mx-auto max-w-4xl px-6 relative z-20 ${faceMatches === null ? 'pt-12' : 'pt-8'}`}>
+        {faceMatches === null && !isManualSearch && (
+          <>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-[#B4121B] font-bold tracking-widest text-sm text-center uppercase">
+                ¿Cómo quieres encontrar tus fotos?
+              </span>
+              <div className="flex-1 h-px bg-gray-200" />
             </div>
 
-            <button
-              onClick={() => setIsFaceModalOpen(true)}
-              disabled={isFaceSearching}
-              className="w-full sm:w-auto shrink-0 bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
-            >
-              {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
-            </button>
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-white rounded-3xl shadow-xl p-8 flex flex-col items-center text-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-[#B4121B] flex items-center justify-center">
+                  <Search className="text-white" size={34} />
+                </div>
+                <h3 className="font-bold text-lg uppercase text-gray-900">Búsqueda manual</h3>
+                <p className="text-gray-600 text-sm max-w-[240px]">
+                  Busca tu sesión por fecha, hora o fotógrafo.
+                </p>
+                <button
+                  onClick={startManualSearch}
+                  className="mt-auto w-full bg-[#B4121B] hover:bg-[#8f0e15] text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
+                >
+                  BUSCAR SESIONES
+                </button>
+              </div>
+
+              <div className="bg-white rounded-3xl shadow-xl p-8 flex flex-col items-center text-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-[#B4121B] flex items-center justify-center">
+                  <ScanFace className="text-white" size={34} />
+                </div>
+                <h3 className="font-bold text-lg uppercase text-gray-900">Búsqueda por selfie</h3>
+                <p className="text-gray-600 text-sm max-w-[240px]">
+                  Escanéate y encuentra todas tus fotos al <strong>instante</strong> con IA.
+                </p>
+                <button
+                  onClick={() => setIsFaceModalOpen(true)}
+                  disabled={isFaceSearching}
+                  className="mt-auto w-full bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
+                >
+                  {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
+                </button>
+              </div>
+            </div>
+          </>
         )}
 
         {faceError && !isFaceModalOpen && (
@@ -715,6 +813,332 @@ export default function EscuelaCantabraDeSurfPage() {
           </div>
         )}
       </section>
+
+      {/* ==================== BÚSQUEDA MANUAL (sesiones de la escuela) ==================== */}
+      {faceMatches === null && isManualSearch && (
+        <section ref={manualSectionRef} className="mx-auto max-w-7xl px-6 pt-4 scroll-mt-6">
+          {openedSession ? (
+            <div>
+              <button
+                onClick={closeOpenedSession}
+                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
+              >
+                ← Volver a las sesiones
+              </button>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#0D2744]">
+                    {openedSession.titleShort || openedSession.title}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {openedSession.schoolName || openedSession.location}
+                    {openedSession.startTime && (
+                      <>
+                        {' '}
+                        · {openedSession.startTime.slice(0, 5)} -{' '}
+                        {openedSession.endTime?.slice(0, 5)}
+                      </>
+                    )}
+                    {openedSession.photographer?.alias && (
+                      <> · by {openedSession.photographer.alias}</>
+                    )}
+                  </p>
+                </div>
+                <span className="self-start text-sm font-medium text-[#B4121B] bg-red-50 px-3 py-1.5 rounded-full">
+                  {openedSession.matches.length} foto{openedSession.matches.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {openedSession.matches.length === 0 ? (
+                <p className="text-center text-gray-500 py-20">Esta sesión todavía no tiene fotos.</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {openedSession.matches.map((photo, photoIndex) => {
+                    const inCart = isInCart(photo.imageId);
+
+                    return (
+                      <div
+                        key={photo.imageId}
+                        className="group relative aspect-square rounded-3xl overflow-hidden shadow-sm cursor-pointer"
+                      >
+                        <div
+                          onClick={() => openLightbox(openedSession, photoIndex)}
+                          className="w-full h-full"
+                        >
+                          <img
+                            src={photo.publicUrl}
+                            alt={`Foto ${photoIndex + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onContextMenu={(e) => e.preventDefault()}
+                            onDragStart={(e) => e.preventDefault()}
+                          />
+                        </div>
+
+                        <div className="absolute top-3 right-3 z-10">
+                          {inCart ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFromCart(photo.imageId);
+                              }}
+                              className="bg-emerald-600 hover:bg-red-600 text-white w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+                              title="Quitar del carrito"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={4}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddFromFaceSearch(photo, openedSession);
+                              }}
+                              className="bg-white/95 hover:bg-white text-[#1F2937] w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+                              title="Agregar al carrito"
+                            >
+                              <ShoppingCart size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <button
+                onClick={() => {
+                  setIsManualSearch(false);
+                  setManualError('');
+                }}
+                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
+              >
+                ← Volver a las opciones de búsqueda
+              </button>
+
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-[#0D2744]">
+                  Sesiones de la Escuela Cántabra de Surf
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  {pagination.total} álbum{pagination.total !== 1 ? 'es' : ''} encontrado
+                  {pagination.total !== 1 ? 's' : ''}
+                </p>
+              </div>
+
+              {/* Filtros */}
+              <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm">
+                <div className="flex flex-wrap gap-4 items-start">
+                  <div className="relative flex-1 min-w-[260px]">
+                    <Search
+                      size={16}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Fotógrafo o sesión..."
+                      value={manualSearchText}
+                      onChange={(e) => setManualSearchText(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
+                    />
+                  </div>
+
+                  <div className="relative w-full md:w-80" ref={timeFilterRef}>
+                    <div
+                      onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                      className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
+                    >
+                      <span className="text-gray-700">
+                        {filters.timeFrom && filters.timeTo
+                          ? `${filters.timeFrom} - ${filters.timeTo}`
+                          : 'Seleccionar hora'}
+                      </span>
+                      <Image src="/icons/flechaAbajo.svg" width={20} height={20} alt="flecha" />
+                    </div>
+
+                    {showTimeDropdown && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-2xl shadow-xl p-5"
+                      >
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+                            <CustomTimeSelect
+                              value={filters.timeFrom}
+                              onChange={(v) => handleFilterChange('timeFrom', v)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+                            <CustomTimeSelect
+                              value={filters.timeTo}
+                              onChange={(v) => handleFilterChange('timeTo', v)}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-3 mt-6">
+                          <button
+                            onClick={() => {
+                              handleFilterChange('timeFrom', '');
+                              handleFilterChange('timeTo', '');
+                              setShowTimeDropdown(false);
+                            }}
+                            className="flex-1 py-2.5 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 cursor-pointer"
+                          >
+                            Limpiar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative w-full md:w-auto">
+                    <CustomDatePicker
+                      value={filters.sessionDate}
+                      onChange={(date) => handleFilterChange('sessionDate', date)}
+                      placeholder="Seleccionar fecha"
+                      className="w-full md:w-56"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {manualError && (
+                <div className="mb-6 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                  {manualError}
+                </div>
+              )}
+
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <CardSkeleton key={i} delay={i * 100} />
+                  ))}
+                </div>
+              ) : filteredSessions.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                    <img src="/icons/logo.webp" width={40} height={40} alt="logo" />
+                  </div>
+                  <h3 className="text-xl font-medium text-gray-800 mb-2">No se encontraron sesiones</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
+                    Prueba con otros filtros o fechas diferentes.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredSessions.map((session) => {
+                    const daysLeft = getDaysRemaining(session.activeUntil);
+                    return (
+                      <button
+                        type="button"
+                        key={session.id}
+                        onClick={() => openSession(session.id)}
+                        disabled={isOpeningSession}
+                        className="group text-left cursor-pointer disabled:cursor-wait"
+                      >
+                        <div className="relative rounded-3xl overflow-hidden bg-black shadow-md hover:shadow-xl transition-all">
+                          {session.images?.[0]?.publicUrl ? (
+                            <img
+                              onContextMenu={(e) => e.preventDefault()}
+                              onDragStart={(e) => e.preventDefault()}
+                              src={session.images[0].publicUrl}
+                              alt={session.title}
+                              className="w-full aspect-16/10 object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="w-full aspect-16/10 bg-gray-200 flex items-center justify-center">
+                              <img src="/icons/logo.webp" width={20} height={20} alt="logo" />
+                            </div>
+                          )}
+                          <div className="absolute top-4 right-4 flex gap-2 z-10">
+                            {daysLeft && (
+                              <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                                <Image src="/icons/hour.svg" width={16} height={16} alt="hora" />
+                                {daysLeft}
+                              </div>
+                            )}
+                            <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                              <Image src="/icons/camara.svg" width={16} height={16} alt="camara" />
+                              {session.photoCount} fotos
+                            </div>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-5 text-white">
+                            <p className="font-semibold text-lg">{session.titleShort}</p>
+                            <p className="text-sm opacity-90">{session.location || session.schoolName}</p>
+                            <p className="text-sm opacity-90">
+                              {session.startTime} - {session.endTime}
+                            </p>
+                            <p className="text-sm opacity-90">
+                              by{' '}
+                              {session.photographer?.alias ||
+                                (session.photographer?.firstName && session.photographer?.lastName
+                                  ? `${session.photographer.firstName} ${session.photographer.lastName}`
+                                  : 'Fotógrafo')}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {pagination.totalPages > 1 && (
+                <div className="bg-white rounded-3xl shadow-sm mt-12">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-8 py-6">
+                    <p className="text-lg font-medium text-[#10487C]">
+                      Página {pagination.page} de {pagination.totalPages}
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => goToPage(1)}
+                        disabled={!pagination.hasPreviousPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      >
+                        «
+                      </button>
+                      <button
+                        onClick={() => goToPage(pagination.page - 1)}
+                        disabled={!pagination.hasPreviousPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        onClick={() => goToPage(pagination.page + 1)}
+                        disabled={!pagination.hasNextPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      >
+                        ›
+                      </button>
+                      <button
+                        onClick={() => goToPage(pagination.totalPages)}
+                        disabled={!pagination.hasNextPage}
+                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                      >
+                        »
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ==================== ASÍ FUNCIONA (solo si no hay búsqueda activa) ==================== */}
       {faceMatches === null && (
