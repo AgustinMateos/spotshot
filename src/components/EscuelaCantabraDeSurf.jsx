@@ -107,6 +107,8 @@ export default function EscuelaCantabraDeSurfPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptedMajorityAge, setAcceptedMajorityAge] = useState(false);
   const [notifyOptIn, setNotifyOptIn] = useState(true); // opcional: marcado por defecto
+  const [faceLegalOpen, setFaceLegalOpen] = useState(false);
+  const [faceTermsOpen, setFaceTermsOpen] = useState(false);
   const [alertSubscription, setAlertSubscription] = useState(null);
 
   // Lightbox
@@ -1093,6 +1095,128 @@ export default function EscuelaCantabraDeSurfPage() {
                 onChange={(e) => setFaceEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] text-base"
               />
+
+              {/* Información básica de protección de datos */}
+              <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setFaceLegalOpen((v) => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition cursor-pointer"
+                >
+                  <ShieldCheck size={18} className="shrink-0 text-[#B4121B]" />
+                  <span className="flex-1 text-sm font-medium text-gray-800 leading-snug">
+                    Información básica sobre protección de datos
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-400 transition-transform ${faceLegalOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {faceLegalOpen && (
+                  <div className="px-4 py-4 text-[13px] text-gray-600 leading-relaxed space-y-2 border-t border-gray-100 bg-white">
+                    <p>
+                      Para encontrarte en las fotos de esta sesión, compararemos un selfie que tú
+                      nos facilites con las fotografías del álbum. Este proceso utiliza
+                      reconocimiento facial mediante un sistema de inteligencia artificial.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Responsable:</span> Escuela
+                      Cántabra de Surf SRL. SpotShot presta este servicio como encargado del
+                      tratamiento por cuenta de la Escuela.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Finalidad:</span> localizar las
+                      fotografías de esta sesión en las que apareces.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Base jurídica:</span> tu
+                      consentimiento explícito (arts. 6.1.a y 9.2.a RGPD). Puedes retirarlo en
+                      cualquier momento, aunque una vez completada la búsqueda, tu selfie y tu
+                      patrón facial ya habrán sido eliminados.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Conservación:</span> tu selfie
+                      y su patrón facial se eliminan automáticamente al terminar la búsqueda; no
+                      los guardamos ni los reutilizamos. Los patrones faciales de las fotografías
+                      del álbum se conservan solo mientras la sesión está activa y se destruyen
+                      por completo cuando caduca.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Destinatarios:</span> el cotejo
+                      se realiza mediante Amazon Web Services (Amazon Rekognition), como proveedor
+                      tecnológico. No se ceden tus datos a terceros distintos.
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-800">Derechos:</span> acceso,
+                      rectificación, supresión, limitación, oposición y portabilidad ante la
+                      Escuela Cántabra de Surf o a través de{' '}
+                      <a href="mailto:privacidad@spotshot.app" className="text-[#B4121B] underline">
+                        privacidad@spotshot.app
+                      </a>
+                      , que los trasladará a la Escuela. Reclamación ante la AEPD (
+                      <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" className="text-[#B4121B] underline">
+                        www.aepd.es
+                      </a>
+                      ). Más información en la{' '}
+                      <Link href="/politica-de-privacidad" target="_blank" className="text-[#B4121B] font-medium underline">
+                        Política de Privacidad
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Términos y Condiciones */}
+              <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setFaceTermsOpen((v) => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition cursor-pointer"
+                >
+                  <FileText size={18} className="shrink-0 text-[#B4121B]" />
+                  <span className="flex-1 leading-snug">
+                    <span className="block text-sm font-medium text-gray-800">
+                      Términos y Condiciones
+                    </span>
+                    <span className="block text-xs text-gray-400">
+                      (texto íntegro, incluido Anexo I)
+                    </span>
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-gray-400 transition-transform ${faceTermsOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {faceTermsOpen && (
+                  <div className="border-t border-gray-100 bg-white">
+                    <p className="px-4 pt-4 text-[13px] text-gray-600 leading-relaxed">
+                      Puedes leerlos, abrirlos en otra pestaña o descargarlos aquí mismo.
+                    </p>
+
+                    <div className="px-4 py-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={downloadTerms}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-[#B4121B] hover:bg-gray-50 cursor-pointer"
+                      >
+                        <Download size={14} />
+                        Descargar
+                      </button>
+                      <Link
+                        href="/terminos-y-condiciones"
+                        target="_blank"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-[#B4121B] hover:bg-gray-50"
+                      >
+                        <ExternalLink size={14} />
+                        Abrir en otra pestaña
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
                 <input
