@@ -1224,7 +1224,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
               <div className="flex justify-between items-center">
                 <p className="font-medium">Comisión Spotshot (20%)</p>
                 <div className="text-right">
-                  <p className="font-medium">Precio final por foto</p>
+                  <p className="font-medium">Precio final por foto para el fotógrafo</p>
                   <p className="text-2xl font-semibold text-emerald-600">€{finalPrice}</p>
                 </div>
               </div>
@@ -1308,8 +1308,16 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
 
             {/* Precio y Packs */}
             <div className="bg-white border border-gray-100 rounded-3xl p-8">
-              <h3 className="text-2xl font-semibold mb-2">Precio final para el fotógrafo por foto</h3>
-              <p className="text-5xl font-bold text-gray-900">€{formData.basePrice}</p>
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                <div>
+                  <h3 className="text-2xl font-semibold mb-2">Precio final publicado</h3>
+                  <p className="text-5xl font-bold text-gray-900">€{formData.basePrice}</p>
+                </div>
+                <div className="md:text-right">
+                  <p className="font-medium">Precio final por foto para el fotógrafo</p>
+                  <p className="text-2xl font-semibold text-emerald-600">€{finalPrice}</p>
+                </div>
+              </div>
 
               <div className="mt-8">
                 <p className="font-medium mb-4">Packs activos</p>

@@ -46,6 +46,21 @@ const FooterEscuelas = () => {
             className="w-[18px] h-[18px] object-contain"
           />
         </div>
+
+        <div className="mx-auto max-w-6xl px-6 py-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs md:text-sm text-white/60">
+          <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+            Términos y Condiciones
+          </Link>
+          <Link href="/politica-de-privacidad" className="hover:text-white transition-colors">
+            Política de Privacidad
+          </Link>
+          <Link href="/avisoLegal" className="hover:text-white transition-colors">
+            Aviso Legal
+          </Link>
+          <Link href="/politica-de-cookies" className="hover:text-white transition-colors">
+            Política de cookies
+          </Link>
+        </div>
       </div>
     </footer>
   );

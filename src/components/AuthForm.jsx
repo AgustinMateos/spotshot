@@ -357,8 +357,7 @@ export default function AuthForm({ mode = 'login' }) {
               {termsOpen && (
                 <div className="border-t border-gray-200 bg-white">
                   <p className="px-4 pt-4 text-sm text-gray-600">
-                    Podés leerlos acá, abrirlos en otra pestaña, descargarlos o imprimirlos /
-                    guardarlos como PDF desde el navegador <strong>antes de aceptarlos</strong>.
+                    Puedes leerlos, abrirlos en otra pestaña o descargarlos aquí mismo.
                   </p>
 
                   <div className="px-4 py-3 flex flex-wrap gap-2">
