@@ -95,8 +95,7 @@ export default function ContactoPage() {
             Estamos aquí para ayudarte
           </h1>
           <p className="mt-6 w-[85%] text-xl text-gray-600">
-            ¿Tenés alguna duda sobre SpotShot? ¿Querés ser fotógrafo? 
-            Contactanos y te responderemos lo antes posible.
+            ¿Tienes alguna duda sobre SpotShot? ¿Quieres utilizar la plataforma para generar ventas automáticas? Contactanos y te responderemos lo antes posible. También podes escribirnos a infospotshot@gmail.com
           </p>
 
           <ul className="mt-10 space-y-5">

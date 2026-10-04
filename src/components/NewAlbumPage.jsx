@@ -1284,8 +1284,6 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
           </div>
         )}
         {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
-        {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
-        {/* ====================== PASO 4: CONFIRMACIÓN ====================== */}
         {step === 4 && (
           <div className="space-y-8">
 
@@ -1336,7 +1334,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
             </div>
 
             {/* Fotos subidas */}
-            <div>
+            {/* <div>
               
               
               {uploadedImages.length > 0 ? (
@@ -1348,7 +1346,7 @@ if (serverCustomerPrice && serverCustomerPrice > 0) {
                   ⚠️ Debes subir al menos una foto antes de publicar
                 </p>
               )}
-            </div>
+            </div> */}
           </div>
         )}
 
