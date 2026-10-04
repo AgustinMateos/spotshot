@@ -7,10 +7,12 @@
 
 /* Theme de fondo: azul SpotShot por defecto, rojo en las páginas de la
    Escuela Cántabra de Surf (su layout envuelve todo en .theme-escuela) */
-html {
+html,
+body {
   background-color: #103457;
 }
-html:has(.theme-escuela) {
+html:has(.theme-escuela),
+html:has(.theme-escuela) body {
   background-color: #B4121B;
 }
 
