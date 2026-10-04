@@ -357,8 +357,14 @@ useEffect(() => {
           })}
         </div>
       ) : (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-          <p className="text-gray-500 text-lg">No se encontraron sesiones con los filtros aplicados.</p>
+        <div className="text-center py-20">
+          <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <img src="/icons/logo.webp" width={40} height={40} alt="logo" />
+          </div>
+          <h3 className="text-xl font-medium text-gray-800 mb-2">No se encontraron sesiones</h3>
+          <p className="text-gray-500 max-w-md mx-auto">
+            Prueba con otros filtros o fechas diferentes.
+          </p>
         </div>
       )}
 

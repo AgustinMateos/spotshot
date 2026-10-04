@@ -1086,6 +1086,119 @@ export default function EscuelaCantabraDeSurfPage() {
                 {selfieFile ? selfieFile.name : 'Elegir o sacar una selfie'}
               </button>
 
+              <input
+                type="email"
+                placeholder="Tu email"
+                value={faceEmail}
+                onChange={(e) => setFaceEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#1F2937] text-base"
+              />
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>
+                  <span className="text-red-500 font-semibold mr-0.5">*</span>Acepto los{' '}
+                  <Link
+                    href="/terminos-y-condiciones"
+                    target="_blank"
+                    className="underline font-medium"
+                  >
+                    términos y condiciones
+                  </Link>{' '}
+                  y la{' '}
+                  <Link
+                    href="/politica-de-privacidad"
+                    target="_blank"
+                    className="underline font-medium"
+                  >
+                    política de privacidad
+                  </Link>
+                  , incluido el tratamiento de mi imagen facial para la búsqueda.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedMajorityAge}
+                  onChange={(e) => setAcceptedMajorityAge(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>
+                  <span className="text-red-500 font-semibold mr-0.5">*</span>Declaro que soy mayor de 18 años.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifyOptIn}
+                  onChange={(e) => setNotifyOptIn(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#B4121B] shrink-0"
+                />
+                <span>
+                  Quiero recibir un aviso por email si aparecen nuevas fotos mías durante los
+                  próximos 14 días (opcional).
+                </span>
+              </label>
+
+              <p className="text-[11px] text-gray-400">
+                <span className="text-red-500 font-semibold mr-0.5">*</span>Campo obligatorio para continuar
+              </p>
+
+              {faceError && (
+                <div className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                  {faceError}
+                </div>
+              )}
+
+              <button
+                onClick={handleFaceSearch}
+                disabled={!canSubmitFaceSearch || isFaceSearching}
+                className="w-full transition-all active:scale-95 cursor-pointer bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-semibold"
+              >
+                {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR MIS FOTOS'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== MODAL EMAIL + CHECKOUT ==================== */}
+      {isCheckoutModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b shrink-0">
+              <button
+                onClick={() => {
+                  setIsCheckoutModalOpen(false);
+                  setIsCartOpen(true);
+                }}
+                className="text-gray-500 cursor-pointer hover:text-gray-700 text-sm flex items-center gap-1"
+              >
+                ← Volver a la selección de fotos
+              </button>
+              <button
+                onClick={() => setIsCheckoutModalOpen(false)}
+                className="text-gray-400 cursor-pointer hover:text-black"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-8 overflow-y-auto">
+              <h2 className="text-2xl font-semibold mb-2">
+                Ingresa tu correo electrónico
+              </h2>
+              <p className="text-gray-500 text-sm mb-5">
+                Te enviaremos por mail las imágenes en alta calidad
+              </p>
+
               <div className="relative">
                 <Mail
                   size={18}
