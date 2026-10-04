@@ -904,23 +904,23 @@ export default function EscuelaCantabraDeSurfPage() {
 
       {/* ==================== BÚSQUEDA MANUAL (sesiones de la escuela) ==================== */}
       {faceMatches === null && isManualSearch && (
-        <section ref={manualSectionRef} className="bg-[#B4121B] py-12 scroll-mt-0">
+        <section ref={manualSectionRef} className="bg-white py-12 scroll-mt-0">
           <div className="mx-auto max-w-7xl px-6">
           {openedSession ? (
             <div>
               <button
                 onClick={closeOpenedSession}
-                className="text-white/80 hover:text-white text-sm mb-6 cursor-pointer"
+                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
               >
                 ← Volver a las sesiones
               </button>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
-                  <h2 className="text-2xl font-semibold text-white">
+                  <h2 className="text-2xl font-semibold text-[#B4121B]">
                     {openedSession.titleShort || openedSession.title}
                   </h2>
-                  <p className="text-sm text-white/80 mt-1">
+                  <p className="text-sm text-gray-500 mt-1">
                     {openedSession.schoolName || openedSession.location}
                     {openedSession.startTime && (
                       <>
@@ -934,13 +934,13 @@ export default function EscuelaCantabraDeSurfPage() {
                     )}
                   </p>
                 </div>
-                <span className="self-start text-sm font-medium text-[#B4121B] bg-white px-3 py-1.5 rounded-full">
+                <span className="self-start text-sm font-medium text-[#B4121B] bg-red-50 px-3 py-1.5 rounded-full">
                   {openedSession.matches.length} foto{openedSession.matches.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
               {openedSession.matches.length === 0 ? (
-                <p className="text-center text-white/80 py-20">Esta sesión todavía no tiene fotos.</p>
+                <p className="text-center text-gray-500 py-20">Esta sesión todavía no tiene fotos.</p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {openedSession.matches.map((photo, photoIndex) => {
@@ -1024,23 +1024,23 @@ export default function EscuelaCantabraDeSurfPage() {
                   setIsManualSearch(false);
                   setManualError('');
                 }}
-                className="text-white/80 hover:text-white text-sm mb-6 cursor-pointer"
+                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
               >
                 ← Volver a las opciones de búsqueda
               </button>
 
               <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-white">
+                <h2 className="text-2xl font-semibold text-[#B4121B]">
                   Sesiones de la Escuela Cántabra de Surf
                 </h2>
-                <p className="text-white/80 mt-1">
+                <p className="text-gray-600 mt-1">
                   {pagination.total} álbum{pagination.total !== 1 ? 'es' : ''} encontrado
                   {pagination.total !== 1 ? 's' : ''}
                 </p>
               </div>
 
               {/* Filtros */}
-              <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm">
+              <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm border border-gray-100">
                 <div className="flex flex-wrap gap-4 items-start">
                   <div className="relative flex-1 min-w-[260px]">
                     <Search
@@ -1118,7 +1118,7 @@ export default function EscuelaCantabraDeSurfPage() {
               </div>
 
               {manualError && (
-                <div className="mb-6 text-sm text-red-700 bg-white px-4 py-3 rounded-xl">
+                <div className="mb-6 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
                   {manualError}
                 </div>
               )}
@@ -1131,11 +1131,11 @@ export default function EscuelaCantabraDeSurfPage() {
                 </div>
               ) : filteredSessions.length === 0 ? (
                 <div className="text-center py-20">
-                  <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6">
+                  <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                     <img src="/icons/logo.webp" width={40} height={40} alt="logo" />
                   </div>
-                  <h3 className="text-xl font-medium text-white mb-2">No se encontraron sesiones</h3>
-                  <p className="text-white/80 max-w-md mx-auto">
+                  <h3 className="text-xl font-medium text-gray-800 mb-2">No se encontraron sesiones</h3>
+                  <p className="text-gray-500 max-w-md mx-auto">
                     Prueba con otros filtros o fechas diferentes.
                   </p>
                 </div>
@@ -1167,12 +1167,12 @@ export default function EscuelaCantabraDeSurfPage() {
                           )}
                           <div className="absolute top-4 right-4 flex gap-2 z-10">
                             {daysLeft && (
-                              <div className="bg-black/60 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                              <div className="bg-[#B4121B] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
                                 <Image src="/icons/hour.svg" width={16} height={16} alt="hora" />
                                 {daysLeft}
                               </div>
                             )}
-                            <div className="bg-black/60 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <div className="bg-[#B4121B] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
                               <Image src="/icons/camara.svg" width={16} height={16} alt="camara" />
                               {session.photoCount} fotos
                             </div>
@@ -2153,36 +2153,45 @@ export default function EscuelaCantabraDeSurfPage() {
                       {reportLegalOpen && (
                         <div className="px-4 py-4 text-[13px] text-gray-600 leading-relaxed space-y-2 border-t border-gray-100 bg-white">
                           <p>
-                            <span className="font-semibold text-gray-800">Responsable:</span> Stefano
-                            Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
-                            <a href="mailto:privacidad@spotshot.app" className="text-[#B4121B] underline">
-                              privacidad@spotshot.app
-                            </a>.
+                            <span className="font-semibold text-gray-800">Responsable:</span> Escuela
+                            Cántabra de Surf SRL. SpotShot presta este servicio como encargado del
+                            tratamiento por cuenta de la Escuela.
                           </p>
                           <p>
-                            <span className="font-semibold text-gray-800">Finalidad:</span> gestionar
-                            tu solicitud de retiro/reporte de una fotografía publicada en la
-                            Plataforma y contactarte para dar seguimiento si es necesario.
+                            <span className="font-semibold text-gray-800">Finalidad:</span> gestionar tu
+                            solicitud de retiro de una fotografía publicada y contactarte para darle
+                            seguimiento si es necesario.
                           </p>
                           <p>
-                            <span className="font-semibold text-gray-800">Legitimación:</span> interés
-                            legítimo en atender solicitudes de terceros sobre contenido publicado;
-                            obligaciones legales aplicables.
+                            <span className="font-semibold text-gray-800">Base jurídica:</span> interés
+                            legítimo en atender las solicitudes sobre el contenido publicado (art. 6.1.f
+                            RGPD).
                           </p>
                           <p>
-                            <span className="font-semibold text-gray-800">Destinatarios:</span> los
-                            proveedores indicados en la{' '}
-                            <Link href="/politica-de-privacidad" target="_blank" className="text-[#B4121B] font-medium underline">
-                              Política de Privacidad
-                            </Link>
-                            ; no se ceden datos a terceros salvo obligación legal.
+                            <span className="font-semibold text-gray-800">Conservación:</span> tu email y
+                            el motivo del reporte se conservan el tiempo necesario para resolver la
+                            solicitud.
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-800">Destinatarios:</span> no se ceden
+                            tus datos a terceros distintos de la Escuela y SpotShot, salvo obligación legal.
                           </p>
                           <p>
                             <span className="font-semibold text-gray-800">Derechos:</span> acceso,
-                            rectificación, supresión y demás derechos, como se explica en la{' '}
+                            rectificación, supresión, limitación, oposición y portabilidad ante la
+                            Escuela Cántabra de Surf o a través de{' '}
+                            <a href="mailto:privacidad@spotshot.app" className="text-[#B4121B] underline">
+                              privacidad@spotshot.app
+                            </a>
+                            , que los trasladará a la Escuela. Reclamación ante la AEPD (
+                            <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer" className="text-[#B4121B] underline">
+                              www.aepd.es
+                            </a>
+                            ). Más información en la{' '}
                             <Link href="/politica-de-privacidad" target="_blank" className="text-[#B4121B] font-medium underline">
                               Política de Privacidad
-                            </Link>.
+                            </Link>
+                            .
                           </p>
                         </div>
                       )}
