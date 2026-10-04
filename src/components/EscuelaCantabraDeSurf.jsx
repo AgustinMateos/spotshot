@@ -18,6 +18,7 @@ import {
   Images,
   ScanFace,
   ArrowRight,
+  Flag,
   Mail,
   ShieldCheck,
   FileText,
@@ -118,6 +119,15 @@ export default function EscuelaCantabraDeSurfPage() {
   const [isOpeningSession, setIsOpeningSession] = useState(false);
   const [manualError, setManualError] = useState('');
   const manualSectionRef = useRef(null);
+
+  // Reportar foto
+  const [reportImage, setReportImage] = useState(null); // { id, publicUrl }
+  const [reportEmail, setReportEmail] = useState('');
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState('');
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportLegalOpen, setReportLegalOpen] = useState(false);
 
   // Lightbox
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -478,6 +488,83 @@ export default function EscuelaCantabraDeSurfPage() {
     searchByToken();
   }, []);
 
+  // ==================== REPORTAR FOTO ====================
+  const openReport = (photo) => {
+    setReportImage({ id: photo.imageId, publicUrl: photo.publicUrl });
+    setReportEmail('');
+    setReportReason('');
+    setReportError('');
+    setReportSuccess(false);
+  };
+
+  const handleReport = async () => {
+    if (!reportImage) return;
+
+    const email = reportEmail.trim();
+    const reason = reportReason.trim();
+
+    if (!email || !reason || reason.length < 10) {
+      setReportError('Completa el email y escribe un motivo de al menos 10 caracteres.');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportError('');
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(
+        `${API_URL}/api/v1/public/photo-session-images/${reportImage.id}/report`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, reason }),
+        }
+      );
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201) {
+        setReportSuccess(true);
+        const reportedId = reportImage.id;
+        const withoutReported = (session) =>
+          session && {
+            ...session,
+            matches: session.matches.filter((m) => m.imageId !== reportedId),
+          };
+
+        // Ocultamos la foto localmente (igual que hace el backend)
+        setOpenedSession((prev) => withoutReported(prev));
+        setFaceMatches((prev) => (prev ? prev.map(withoutReported) : prev));
+
+        if (isInCart(reportedId)) removeFromCart(reportedId);
+
+        if (isLightboxOpen && lightboxImages[currentIndex]?.imageId === reportedId) {
+          closeLightbox();
+        }
+
+        setTimeout(() => {
+          setReportImage(null);
+          setReportEmail('');
+          setReportReason('');
+          setReportSuccess(false);
+        }, 1800);
+      } else if (res.status === 409) {
+        setReportError('Ya existe un reporte pendiente para esta foto.');
+      } else if (res.status === 429) {
+        setReportError('Llegaste al límite de reportes. Prueba más tarde.');
+      } else if (res.status === 404) {
+        setReportError('La imagen ya no está disponible.');
+      } else {
+        setReportError(data.message || 'No se pudo enviar el reporte.');
+      }
+    } catch (err) {
+      console.error(err);
+      setReportError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   // ==================== LIGHTBOX ====================
   const openLightbox = (session, matchIndex) => {
     setLightboxSession(session);
@@ -698,10 +785,11 @@ export default function EscuelaCantabraDeSurfPage() {
             href="https://www.escuelacantabradesurf.com/shop/es/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/40 rounded-full px-5 py-2.5 transition cursor-pointer"
+            aria-label="Surfshop"
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/40 rounded-full p-2.5 sm:px-5 transition cursor-pointer"
           >
             <ShoppingBag size={20} />
-            <span className="font-semibold tracking-wide">SURFSHOP</span>
+            <span className="hidden sm:inline font-semibold tracking-wide">SURFSHOP</span>
           </a>
         </div>
       </header>
@@ -736,7 +824,7 @@ export default function EscuelaCantabraDeSurfPage() {
       )}
 
       {/* ==================== ¿CÓMO QUIERES ENCONTRAR TUS FOTOS? ==================== */}
-      <section className={`mx-auto max-w-4xl px-6 relative z-20 ${faceMatches === null ? 'pt-12' : 'pt-8'}`}>
+      <section className={`mx-auto max-w-4xl px-6 relative z-20 ${faceMatches !== null ? 'pt-8' : isManualSearch ? '' : 'pt-12'}`}>
         {faceMatches === null && !isManualSearch && (
           <>
             <div className="flex items-center gap-4 mb-8">
@@ -816,22 +904,23 @@ export default function EscuelaCantabraDeSurfPage() {
 
       {/* ==================== BÚSQUEDA MANUAL (sesiones de la escuela) ==================== */}
       {faceMatches === null && isManualSearch && (
-        <section ref={manualSectionRef} className="mx-auto max-w-7xl px-6 pt-4 scroll-mt-6">
+        <section ref={manualSectionRef} className="bg-[#B4121B] py-12 scroll-mt-0">
+          <div className="mx-auto max-w-7xl px-6">
           {openedSession ? (
             <div>
               <button
                 onClick={closeOpenedSession}
-                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
+                className="text-white/80 hover:text-white text-sm mb-6 cursor-pointer"
               >
                 ← Volver a las sesiones
               </button>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
-                  <h2 className="text-2xl font-semibold text-[#0D2744]">
+                  <h2 className="text-2xl font-semibold text-white">
                     {openedSession.titleShort || openedSession.title}
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-white/80 mt-1">
                     {openedSession.schoolName || openedSession.location}
                     {openedSession.startTime && (
                       <>
@@ -845,13 +934,13 @@ export default function EscuelaCantabraDeSurfPage() {
                     )}
                   </p>
                 </div>
-                <span className="self-start text-sm font-medium text-[#B4121B] bg-red-50 px-3 py-1.5 rounded-full">
+                <span className="self-start text-sm font-medium text-[#B4121B] bg-white px-3 py-1.5 rounded-full">
                   {openedSession.matches.length} foto{openedSession.matches.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
               {openedSession.matches.length === 0 ? (
-                <p className="text-center text-gray-500 py-20">Esta sesión todavía no tiene fotos.</p>
+                <p className="text-center text-white/80 py-20">Esta sesión todavía no tiene fotos.</p>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {openedSession.matches.map((photo, photoIndex) => {
@@ -873,6 +962,19 @@ export default function EscuelaCantabraDeSurfPage() {
                             onContextMenu={(e) => e.preventDefault()}
                             onDragStart={(e) => e.preventDefault()}
                           />
+                        </div>
+
+                        <div className="absolute top-3 left-3 z-10">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openReport(photo);
+                            }}
+                            className="bg-white/95 cursor-pointer hover:bg-white text-gray-700 w-9 h-9 flex items-center justify-center rounded-2xl shadow-lg transition hover:scale-110 active:scale-95"
+                            title="Reportar foto"
+                          >
+                            <Flag size={16} />
+                          </button>
                         </div>
 
                         <div className="absolute top-3 right-3 z-10">
@@ -922,16 +1024,16 @@ export default function EscuelaCantabraDeSurfPage() {
                   setIsManualSearch(false);
                   setManualError('');
                 }}
-                className="text-gray-500 hover:text-gray-800 text-sm mb-6 cursor-pointer"
+                className="text-white/80 hover:text-white text-sm mb-6 cursor-pointer"
               >
                 ← Volver a las opciones de búsqueda
               </button>
 
               <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-[#0D2744]">
+                <h2 className="text-2xl font-semibold text-white">
                   Sesiones de la Escuela Cántabra de Surf
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-white/80 mt-1">
                   {pagination.total} álbum{pagination.total !== 1 ? 'es' : ''} encontrado
                   {pagination.total !== 1 ? 's' : ''}
                 </p>
@@ -950,14 +1052,14 @@ export default function EscuelaCantabraDeSurfPage() {
                       placeholder="Fotógrafo o sesión..."
                       value={manualSearchText}
                       onChange={(e) => setManualSearchText(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-gray-900 bg-white"
+                      className="w-full border border-gray-300 rounded-lg pl-11 pr-5 py-3 focus:outline-none focus:border-[#B4121B] bg-white"
                     />
                   </div>
 
                   <div className="relative w-full md:w-80" ref={timeFilterRef}>
                     <div
                       onClick={() => setShowTimeDropdown(!showTimeDropdown)}
-                      className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-gray-400 transition"
+                      className="w-full px-5 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer flex justify-between items-center hover:border-[#B4121B] transition"
                     >
                       <span className="text-gray-700">
                         {filters.timeFrom && filters.timeTo
@@ -1016,7 +1118,7 @@ export default function EscuelaCantabraDeSurfPage() {
               </div>
 
               {manualError && (
-                <div className="mb-6 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                <div className="mb-6 text-sm text-red-700 bg-white px-4 py-3 rounded-xl">
                   {manualError}
                 </div>
               )}
@@ -1029,11 +1131,11 @@ export default function EscuelaCantabraDeSurfPage() {
                 </div>
               ) : filteredSessions.length === 0 ? (
                 <div className="text-center py-20">
-                  <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                  <div className="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6">
                     <img src="/icons/logo.webp" width={40} height={40} alt="logo" />
                   </div>
-                  <h3 className="text-xl font-medium text-gray-800 mb-2">No se encontraron sesiones</h3>
-                  <p className="text-gray-500 max-w-md mx-auto">
+                  <h3 className="text-xl font-medium text-white mb-2">No se encontraron sesiones</h3>
+                  <p className="text-white/80 max-w-md mx-auto">
                     Prueba con otros filtros o fechas diferentes.
                   </p>
                 </div>
@@ -1065,12 +1167,12 @@ export default function EscuelaCantabraDeSurfPage() {
                           )}
                           <div className="absolute top-4 right-4 flex gap-2 z-10">
                             {daysLeft && (
-                              <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                              <div className="bg-black/60 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
                                 <Image src="/icons/hour.svg" width={16} height={16} alt="hora" />
                                 {daysLeft}
                               </div>
                             )}
-                            <div className="bg-[#0D2744] text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <div className="bg-black/60 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
                               <Image src="/icons/camara.svg" width={16} height={16} alt="camara" />
                               {session.photoCount} fotos
                             </div>
@@ -1099,35 +1201,35 @@ export default function EscuelaCantabraDeSurfPage() {
               {pagination.totalPages > 1 && (
                 <div className="bg-white rounded-3xl shadow-sm mt-12">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-8 py-6">
-                    <p className="text-lg font-medium text-[#10487C]">
+                    <p className="text-lg font-medium text-[#B4121B]">
                       Página {pagination.page} de {pagination.totalPages}
                     </p>
                     <div className="flex gap-3">
                       <button
                         onClick={() => goToPage(1)}
                         disabled={!pagination.hasPreviousPage}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                        className="w-10 h-10 flex items-center justify-center border border-[#B4121B]/30 text-[#B4121B] rounded-2xl hover:bg-red-50 disabled:opacity-40 transition cursor-pointer"
                       >
                         «
                       </button>
                       <button
                         onClick={() => goToPage(pagination.page - 1)}
                         disabled={!pagination.hasPreviousPage}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                        className="w-10 h-10 flex items-center justify-center border border-[#B4121B]/30 text-[#B4121B] rounded-2xl hover:bg-red-50 disabled:opacity-40 transition cursor-pointer"
                       >
                         ‹
                       </button>
                       <button
                         onClick={() => goToPage(pagination.page + 1)}
                         disabled={!pagination.hasNextPage}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                        className="w-10 h-10 flex items-center justify-center border border-[#B4121B]/30 text-[#B4121B] rounded-2xl hover:bg-red-50 disabled:opacity-40 transition cursor-pointer"
                       >
                         ›
                       </button>
                       <button
                         onClick={() => goToPage(pagination.totalPages)}
                         disabled={!pagination.hasNextPage}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-40 transition cursor-pointer"
+                        className="w-10 h-10 flex items-center justify-center border border-[#B4121B]/30 text-[#B4121B] rounded-2xl hover:bg-red-50 disabled:opacity-40 transition cursor-pointer"
                       >
                         »
                       </button>
@@ -1137,6 +1239,7 @@ export default function EscuelaCantabraDeSurfPage() {
               )}
             </div>
           )}
+          </div>
         </section>
       )}
 
@@ -1972,6 +2075,138 @@ export default function EscuelaCantabraDeSurfPage() {
         </div>
       )}
 
+      {/* ==================== MODAL REPORTAR FOTO ==================== */}
+      {reportImage && (
+        <div className="fixed inset-0 bg-black/70 z-[400] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b shrink-0">
+              <h3 className="text-xl font-semibold">Reportar foto</h3>
+              <button
+                onClick={() => {
+                  if (!isReporting) setReportImage(null);
+                }}
+                className="text-gray-400 hover:text-black cursor-pointer"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto">
+              {reportSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">✓</span>
+                  </div>
+                  <p className="text-lg font-medium text-gray-900">Reporte enviado</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    La foto fue ocultada y el equipo la revisará.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-5">
+                    Cuéntanos por qué crees que esta foto no debería estar visible.
+                  </p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Tu email</label>
+                      <input
+                        type="email"
+                        value={reportEmail}
+                        onChange={(e) => setReportEmail(e.target.value)}
+                        placeholder="tu@email.com"
+                        className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#B4121B]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Motivo (mín. 10 caracteres)
+                      </label>
+                      <textarea
+                        value={reportReason}
+                        onChange={(e) => setReportReason(e.target.value)}
+                        rows={4}
+                        placeholder="Ej: La foto muestra contenido inapropiado o no autorizado."
+                        className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:border-[#B4121B] resize-none"
+                      />
+                    </div>
+
+                    {/* Información básica de protección de datos */}
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setReportLegalOpen((v) => !v)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition cursor-pointer"
+                      >
+                        <ShieldCheck size={18} className="shrink-0 text-[#B4121B]" />
+                        <span className="flex-1 text-sm font-medium text-gray-800 leading-snug">
+                          Información básica sobre protección de datos
+                        </span>
+                        <ChevronDown
+                          size={18}
+                          className={`shrink-0 text-gray-400 transition-transform ${reportLegalOpen ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+
+                      {reportLegalOpen && (
+                        <div className="px-4 py-4 text-[13px] text-gray-600 leading-relaxed space-y-2 border-t border-gray-100 bg-white">
+                          <p>
+                            <span className="font-semibold text-gray-800">Responsable:</span> Stefano
+                            Capra Vazquez y Camila Milagros Montanari (corresponsables) ·{' '}
+                            <a href="mailto:privacidad@spotshot.app" className="text-[#B4121B] underline">
+                              privacidad@spotshot.app
+                            </a>.
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-800">Finalidad:</span> gestionar
+                            tu solicitud de retiro/reporte de una fotografía publicada en la
+                            Plataforma y contactarte para dar seguimiento si es necesario.
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-800">Legitimación:</span> interés
+                            legítimo en atender solicitudes de terceros sobre contenido publicado;
+                            obligaciones legales aplicables.
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-800">Destinatarios:</span> los
+                            proveedores indicados en la{' '}
+                            <Link href="/politica-de-privacidad" target="_blank" className="text-[#B4121B] font-medium underline">
+                              Política de Privacidad
+                            </Link>
+                            ; no se ceden datos a terceros salvo obligación legal.
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-800">Derechos:</span> acceso,
+                            rectificación, supresión y demás derechos, como se explica en la{' '}
+                            <Link href="/politica-de-privacidad" target="_blank" className="text-[#B4121B] font-medium underline">
+                              Política de Privacidad
+                            </Link>.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {reportError && (
+                      <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-xl">{reportError}</p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleReport}
+                    disabled={isReporting}
+                    className="w-full mt-6 bg-[#B4121B] hover:bg-[#8f0e15] disabled:bg-gray-400 text-white py-3.5 rounded-2xl font-medium transition active:scale-95 cursor-pointer"
+                  >
+                    {isReporting ? 'Enviando...' : 'Enviar reporte'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ==================== LIGHTBOX ==================== */}
       {isLightboxOpen && lightboxImages.length > 0 && lightboxSession && (
         <div
@@ -1983,6 +2218,17 @@ export default function EscuelaCantabraDeSurfPage() {
             className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg z-30 transition"
           >
             <X size={22} />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              openReport(lightboxImages[currentIndex]);
+            }}
+            className="absolute top-4 left-4 md:top-6 md:left-6 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg z-30 transition cursor-pointer"
+            title="Reportar esta foto"
+          >
+            <Flag size={20} />
           </button>
 
           <div

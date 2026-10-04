@@ -27,7 +27,8 @@ export default function PageLoader({ children }) {
   return (
     <div className="relative min-h-screen">
       {/* Contenido real - siempre renderizado */}
-      <div className={loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}>
+      {/* Aparece mientras el loader se desvanece, para que no se vea el fondo del body */}
+      <div className={exiting ? 'opacity-100 transition-opacity duration-500' : 'opacity-0'}>
         {children}
       </div>
 
