@@ -100,7 +100,7 @@ const OrderErrorContent = () => {
         </div>
 
         <div className="mt-10 text-sm text-gray-500">
-          ¿Necesitas ayuda? Escríbenos a <strong>support@tudominio.com</strong>
+          ¿Necesitas ayuda? Escríbenos a <strong>info@spotshot.app</strong>
         </div>
       </div>
     </div>
