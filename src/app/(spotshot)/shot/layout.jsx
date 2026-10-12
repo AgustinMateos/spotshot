@@ -1,3 +1,9 @@
+import { NOINDEX } from '@/lib/seo';
+
+export const metadata = {
+  title: 'Panel del fotógrafo',
+  robots: NOINDEX,
+};
 
 
 

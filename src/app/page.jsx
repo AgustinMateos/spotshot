@@ -8,6 +8,14 @@ import FotosHoy from '@/components/FotosHoy';
 import Barra from '@/components/Barra';
 import Footer from '@/components/Footer';
 import NavbarComponent from '@/components/NavbarPage';
+import { pageMeta } from '@/lib/seo';
+
+export const metadata = pageMeta({
+  title: { absolute: 'SpotShot | Encuentra tus fotos de surf en segundos' },
+  description: 'Encuentra y descarga tus fotos de surf en segundos. Fotógrafos y escuelas suben sus sesiones y tú compras las tuyas.',
+  path: '/',
+});
+
 export default function Home() {
   return (
     <PageLoader>

@@ -2,6 +2,7 @@
 import "./globals.css";
 
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SITE_URL } from '@/lib/seo';
 
 
 import { Oxygen, Manrope, Inter, Open_Sans, Roboto } from 'next/font/google';
@@ -41,9 +42,31 @@ const roboto = Roboto({
   variable: '--font-roboto',
   display: 'swap',
 });
+const DEFAULT_DESCRIPTION =
+  "Encuentra y descarga tus fotos de surf en segundos. Fotógrafos y escuelas suben sus sesiones y tú compras las tuyas.";
+
 export const metadata = {
-  title: "SpotShot",
-  description: "Convierte tus fotos de surf en ingresos reales",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "SpotShot | Encuentra tus fotos de surf en segundos",
+    template: "%s | SpotShot",
+  },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: "SpotShot",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    siteName: "SpotShot",
+    title: "SpotShot | Encuentra tus fotos de surf en segundos",
+    description: DEFAULT_DESCRIPTION,
+    images: [{ url: "/inicio/somo1.webp", alt: "Surf en la playa" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SpotShot | Encuentra tus fotos de surf en segundos",
+    description: DEFAULT_DESCRIPTION,
+    images: ["/inicio/somo1.webp"],
+  },
   icons: {
     icon: "/favicon.ico",
   },
