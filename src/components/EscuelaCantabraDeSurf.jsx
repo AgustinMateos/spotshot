@@ -339,6 +339,23 @@ export default function EscuelaCantabraDeSurfPage() {
   const canSubmitFaceSearch =
     !!selfieFile && isValidEmail(faceEmail) && acceptTerms && acceptedMajorityAge;
 
+  // La API devuelve los resultados agrupados por día ({ days: [{ date, sessions }] }).
+  // Si llega el formato viejo ({ sessions }), lo agrupamos por sessionDate.
+  const normalizeFaceDays = (data) => {
+    if (Array.isArray(data?.days)) {
+      return data.days.map((day) => ({ ...day, sessions: day.sessions || [] }));
+    }
+    const byDate = new Map();
+    (data?.sessions || []).forEach((session) => {
+      const date = session.sessionDate || '';
+      if (!byDate.has(date)) byDate.set(date, []);
+      byDate.get(date).push(session);
+    });
+    return [...byDate.entries()]
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, sessions]) => ({ date, sessions }));
+  };
+
   const handleFaceSearch = async () => {
     if (!canSubmitFaceSearch) return;
 
@@ -372,7 +389,7 @@ export default function EscuelaCantabraDeSurfPage() {
         return;
       }
 
-      setFaceMatches(data.sessions || []);
+      setFaceMatches(normalizeFaceDays(data));
       setAlertSubscription(data.alertSubscription || null);
       setIsFaceModalOpen(false);
     } catch (err) {
@@ -476,7 +493,7 @@ export default function EscuelaCantabraDeSurfPage() {
           return;
         }
 
-        setFaceMatches(data.sessions || []);
+        setFaceMatches(normalizeFaceDays(data));
       } catch (err) {
         console.error(err);
         setFaceError('Error de conexión. Intentá de nuevo.');
@@ -534,7 +551,11 @@ export default function EscuelaCantabraDeSurfPage() {
 
         // Ocultamos la foto localmente (igual que hace el backend)
         setOpenedSession((prev) => withoutReported(prev));
-        setFaceMatches((prev) => (prev ? prev.map(withoutReported) : prev));
+        setFaceMatches((prev) =>
+          prev
+            ? prev.map((day) => ({ ...day, sessions: day.sessions.map(withoutReported) }))
+            : prev
+        );
 
         if (isInCart(reportedId)) removeFromCart(reportedId);
 
@@ -710,9 +731,15 @@ export default function EscuelaCantabraDeSurfPage() {
     return num.toFixed(2).replace(/\.?0+$/, '');
   };
 
-  const totalFacePhotos = faceMatches
-    ? faceMatches.reduce((acc, s) => acc + (s.matchCount || 0), 0)
-    : 0;
+  const formatFaceDay = (date) => {
+    if (!date) return '';
+    const d = new Date(`${date}T00:00:00`);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const faceSessions = faceMatches ? faceMatches.flatMap((day) => day.sessions) : [];
+  const totalFacePhotos = faceSessions.reduce((acc, s) => acc + (s.matches?.length || 0), 0);
 
   const CustomTimeSelect = ({ value, onChange }) => {
     const [open, setOpen] = useState(false);
@@ -1277,7 +1304,7 @@ export default function EscuelaCantabraDeSurfPage() {
         {/* Contador de resultados */}
         <div className="mb-8">
           <p className="text-gray-600 text-[16px] mt-1">
-            {`${totalFacePhotos} foto${totalFacePhotos !== 1 ? 's' : ''} encontrada${totalFacePhotos !== 1 ? 's' : ''} en ${faceMatches.length} sesión${faceMatches.length !== 1 ? 'es' : ''}`}
+            {`${totalFacePhotos} foto${totalFacePhotos !== 1 ? 's' : ''} encontrada${totalFacePhotos !== 1 ? 's' : ''} en ${faceSessions.length} sesión${faceSessions.length !== 1 ? 'es' : ''}${faceMatches.length > 0 ? ` · ${faceMatches.length} día${faceMatches.length !== 1 ? 's' : ''}` : ''}`}
           </p>
         </div>
 
@@ -1369,31 +1396,42 @@ export default function EscuelaCantabraDeSurfPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-12">
-              {faceMatches.map((session) => (
+            <div className="space-y-14">
+              {faceMatches.map((day) => {
+                const dayPhotos = day.sessions.reduce((acc, s) => acc + (s.matches?.length || 0), 0);
+                if (dayPhotos === 0) return null;
+
+                return (
+                <div key={day.date}>
+                  <div className="flex items-center justify-between gap-3 mb-6 pb-3 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold text-[#0D2744] first-letter:uppercase">
+                      {formatFaceDay(day.date) || day.sessions[0]?.title}
+                    </h2>
+                    <span className="text-sm font-medium text-[#106BB9] bg-blue-50 px-3 py-1.5 rounded-full whitespace-nowrap">
+                      {dayPhotos} foto{dayPhotos !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <div className="space-y-8">
+              {day.sessions.filter((session) => session.matches?.length > 0).map((session) => (
                 <div key={session.sessionId}>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-[#0D2744]">
-                        {session.titleShort || session.title}
+                      <h3 className="text-base font-semibold text-[#0D2744]">
+                        {session.startTime
+                          ? `${session.startTime.slice(0, 5)} - ${session.endTime?.slice(0, 5) || ''}`
+                          : session.titleShort || session.title}
                       </h3>
                       <p className="text-sm text-gray-500 mt-0.5">
                         {session.schoolName || session.location}
-                        {session.startTime && (
-                          <>
-                            {' '}
-                            · {session.startTime.slice(0, 5)} -{' '}
-                            {session.endTime?.slice(0, 5)}
-                          </>
-                        )}
                         {session.photographer?.alias && (
                           <> · by {session.photographer.alias}</>
                         )}
                       </p>
                     </div>
-                    <span className="self-start text-sm font-medium text-[#106BB9] bg-blue-50 px-3 py-1.5 rounded-full">
-                      {session.matchCount} coincidencia
-                      {session.matchCount !== 1 ? 's' : ''}
+                    <span className="text-sm text-gray-500">
+                      {session.matches.length} coincidencia
+                      {session.matches.length !== 1 ? 's' : ''}
                     </span>
                   </div>
 
@@ -1481,6 +1519,10 @@ export default function EscuelaCantabraDeSurfPage() {
                   </div>
                 </div>
               ))}
+                  </div>
+                </div>
+                );
+              })}
             </div>
           )}
       </div>
