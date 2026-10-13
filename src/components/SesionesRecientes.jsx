@@ -60,7 +60,15 @@ useEffect(() => {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const res = await fetch(`${API_URL}/api/v1/public/photo-sessions?audience=FREE_SURFERS&page=1`);
       const data = await res.json();
-      if (res.ok) setSessions(data.items?.slice(0, 3) || []);
+      if (res.ok) {
+        // Más recientes primero: por día y, dentro del día, la de horario más tardío primero
+        const sorted = [...(data.items || [])].sort(
+          (a, b) =>
+            (b.sessionDate || '').localeCompare(a.sessionDate || '') ||
+            (b.startTime || '').localeCompare(a.startTime || '')
+        );
+        setSessions(sorted.slice(0, 3));
+      }
     } catch (err) {
       console.error(err);
     } finally {
