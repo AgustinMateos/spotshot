@@ -851,49 +851,27 @@ export default function EscuelaCantabraDeSurfPage() {
       )}
 
       {/* ==================== ¿CÓMO QUIERES ENCONTRAR TUS FOTOS? ==================== */}
-      <section className={`mx-auto max-w-4xl px-6 relative z-20 ${faceMatches !== null ? 'pt-8' : isManualSearch ? '' : 'pt-12'}`}>
+      <section className={`mx-auto max-w-4xl px-6 relative z-20 ${faceMatches !== null ? 'pt-8' : isManualSearch ? '' : '-mt-16 sm:-mt-14'}`}>
         {faceMatches === null && !isManualSearch && (
           <>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-[#B4121B] font-bold tracking-widest text-sm text-center uppercase">
-                ¿Cómo quieres encontrar tus fotos?
-              </span>
-              <div className="flex-1 h-px bg-gray-200" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white rounded-3xl shadow-xl p-8 flex flex-col items-center text-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-[#B4121B] flex items-center justify-center">
-                  <Search className="text-white" size={34} />
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white rounded-3xl shadow-xl p-6 sm:px-10 flex flex-col sm:flex-row items-center gap-5 sm:gap-8 text-center sm:text-left">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#B4121B] flex items-center justify-center shrink-0">
+                  <ScanFace className="text-white" size={40} />
                 </div>
-                <h3 className="font-bold text-lg uppercase text-gray-900">Búsqueda manual</h3>
-                <p className="text-gray-600 text-sm max-w-[240px]">
-                  Busca tu sesión por fecha, hora o fotógrafo.
-                </p>
-                <button
-                  onClick={startManualSearch}
-                  className="mt-auto w-full bg-[#B4121B] hover:bg-[#8f0e15] text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
-                >
-                  BUSCAR SESIONES
-                </button>
-              </div>
-
-              <div className="bg-white rounded-3xl shadow-xl p-8 flex flex-col items-center text-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-[#B4121B] flex items-center justify-center">
-                  <ScanFace className="text-white" size={34} />
+                <div className="flex-1 w-full flex flex-col gap-3">
+                  <h3 className="font-bold text-lg uppercase text-gray-900">Búsqueda por selfie</h3>
+                  <p className="text-gray-600 text-sm">
+                    Escanéate y encuentra todas tus fotos al <strong>instante</strong> con IA.
+                  </p>
+                  <button
+                    onClick={() => setIsFaceModalOpen(true)}
+                    disabled={isFaceSearching}
+                    className="w-full bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3 rounded-xl transition cursor-pointer"
+                  >
+                    {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
+                  </button>
                 </div>
-                <h3 className="font-bold text-lg uppercase text-gray-900">Búsqueda por selfie</h3>
-                <p className="text-gray-600 text-sm max-w-[240px]">
-                  Escanéate y encuentra todas tus fotos al <strong>instante</strong> con IA.
-                </p>
-                <button
-                  onClick={() => setIsFaceModalOpen(true)}
-                  disabled={isFaceSearching}
-                  className="mt-auto w-full bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition cursor-pointer"
-                >
-                  {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR POR SELFIE'}
-                </button>
               </div>
             </div>
           </>
@@ -1856,6 +1834,24 @@ export default function EscuelaCantabraDeSurfPage() {
                 className="w-full transition-all active:scale-95 cursor-pointer bg-[#B4121B] hover:bg-[#8f0e15] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-base font-semibold"
               >
                 {isFaceSearching ? 'BUSCANDO...' : 'BUSCAR MIS FOTOS'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeFaceModal();
+                  startManualSearch();
+                }}
+                disabled={isFaceSearching}
+                className="w-full flex items-center gap-3 text-left border border-gray-200 hover:border-[#B4121B] disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl px-4 py-3 cursor-pointer transition"
+              >
+                <div className="w-9 h-9 rounded-full bg-[#B4121B] flex items-center justify-center shrink-0">
+                  <Search className="text-white" size={16} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold uppercase text-gray-900">Búsqueda manual</p>
+                  <p className="text-xs text-gray-600">Busca tu sesión por fecha, hora o fotógrafo.</p>
+                </div>
               </button>
             </div>
           </div>
