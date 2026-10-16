@@ -27,6 +27,20 @@ const OrderSuccessContent = () => {
   // Obtener datos de la orden
   useEffect(() => {
     const fetchOrder = async () => {
+      // TEMPORAL: vista previa con datos de ejemplo (solo en desarrollo)
+      if (process.env.NODE_ENV === 'development' && searchParams.get('preview')) {
+        setOrderData({
+          orderId: 'preview-0000-0000-0000',
+          images: [
+            { id: 'p1', previewUrl: '/escuela.jpg' },
+            { id: 'p2', previewUrl: '/banner-surf.png' },
+            { id: 'p3', previewUrl: '/escuela.jpg' },
+          ],
+        });
+        setLoading(false);
+        return;
+      }
+
       if (!checkoutSessionId) {
         setError("No se encontró el ID de sesión de Stripe");
         setLoading(false);
@@ -152,8 +166,11 @@ const OrderSuccessContent = () => {
           ¡Felicitaciones! Tu compra fue exitosa
         </h1>
 
+        <p className="text-gray-600 mb-2 text-lg">
+          Te hemos enviado un correo con tus fotos.
+        </p>
         <p className="text-gray-600 mb-8 text-lg">
-          Tus imágenes están listas para descargar.
+          Si lo prefieres, puedes descargarlas aquí mismo como archivo ZIP.
         </p>
 
         <div className="space-y-4">

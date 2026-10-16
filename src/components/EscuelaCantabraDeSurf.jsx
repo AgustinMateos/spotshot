@@ -797,7 +797,7 @@ export default function EscuelaCantabraDeSurfPage() {
       <header className="bg-[#B4121B] text-white">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-4">
-             <div className="w-60 h-20 flex items-center justify-center">
+             <div className="w-48 h-16 sm:w-60 sm:h-20 flex items-center justify-center">
                           <Image 
                             src="/escuelaLogo.png"
                             alt="SpotShot"
@@ -813,10 +813,10 @@ export default function EscuelaCantabraDeSurfPage() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Surfshop"
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/40 rounded-full p-2.5 sm:px-5 transition cursor-pointer"
+            className="shrink-0 flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/40 rounded-full px-4 py-2 sm:px-5 sm:py-2.5 transition cursor-pointer"
           >
-            <ShoppingBag size={20} />
-            <span className="hidden sm:inline font-semibold tracking-wide">SURFSHOP</span>
+            <ShoppingBag size={20} className="hidden sm:block" />
+            <span className="text-sm sm:text-base font-semibold tracking-wide">SURFSHOP</span>
           </a>
         </div>
       </header>
