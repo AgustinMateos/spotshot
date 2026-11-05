@@ -1,4 +1,5 @@
-// Calcula el total del carrito agrupando por sesión.
+// Calcula el total del carrito agrupando por sesión (o por `billingGroupKey`
+// si el item lo trae, ej. escuelas en búsqueda por selfie agrupan por día).
 //
 // Cada item del carrito debe traer `sessionId`, `unitPrice` y
 // `billablePhotoCap` (seteados en CartContext al agregarlo).
@@ -11,7 +12,7 @@ export function calculateCartTotals(cart) {
   const sessionGroups = new Map();
 
   for (const item of cart) {
-    const key = item.sessionId || item.id;
+    const key = item.billingGroupKey || item.sessionId || item.id;
     if (!sessionGroups.has(key)) sessionGroups.set(key, []);
     sessionGroups.get(key).push(item);
   }
